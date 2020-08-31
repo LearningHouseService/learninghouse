@@ -1,3 +1,7 @@
+**/models/*/*.json
+**/models/*/*.csv
+**/models/*/*.pkl
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

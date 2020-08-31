@@ -1,3 +1,5 @@
+#coding: utf-8
+
 from flask import request, jsonify
 from flask_restful import Resource
 from werkzeug.exceptions import BadRequest
@@ -14,10 +16,11 @@ import time
 import pandas as pd
 import numpy as np
 
+from .estimator import EstimatorFactory
+
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score
 
 class ModelConfiguration():
@@ -26,7 +29,7 @@ class ModelConfiguration():
 
         self.__jsonConfig = self.__loadInitialConfig(name)
 
-        self.estimatorClass = self.__requiredConfig('estimator_class')
+        self.estimatorcfg = self.__requiredConfig('estimator')
         self.testsize = self.__requiredConfig('test_size')
         self.features = self.__requiredConfig('features')
         self.dependent = self.__requiredConfig('dependent')
@@ -117,7 +120,8 @@ class ModelTraining(Resource):
 
             modelcfg, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepareTraining(modelcfg, df)
 
-            estimator = RandomForestClassifier(n_estimators = 100, random_state = 0)
+            estimator = EstimatorFactory.getEstimator(modelcfg.estimatorcfg)
+            
             columns = x_train.columns
             
             start = time.time()
@@ -132,11 +136,13 @@ class ModelTraining(Resource):
             modelcfg.dump(estimator, columns, score)
 
             result = {
-                'estimator_class': modelcfg.estimatorClass,
+                'estimator_class': modelcfg.estimatorcfg['class'],
                 'time': duration,
                 'score': score,
                 'confusion': str(cm)
             }
+
+            ModelPrediction.refreshModel(modelcfg)
 
             return ModelAPI.makeJSONResponse(result)
         except FileNotFoundError:
@@ -164,7 +170,7 @@ class ModelPrediction(Resource):
             result = {
                 'model': {
                     'name': modelcfg.name,
-                    'estimator': modelcfg.estimatorClass,
+                    'estimator': modelcfg.estimatorcfg['class'],
                     'score': modelcfg.score
                 },
                 'prediction': prediction[0]
@@ -176,9 +182,9 @@ class ModelPrediction(Resource):
             return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
         except KeyError as e:
             return ModelAPI.makeJSONResponse({'message': e.args[0]}, 400, 'MISSING_KEY')
-        except:
-            print("Unexpected error:", sys.exc_info()[0])
-            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
+ #       except:
+ #           print("Unexpected error:", sys.exc_info()[0])
+ #           return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
 
     @staticmethod
     def refreshModel(modelcfg):

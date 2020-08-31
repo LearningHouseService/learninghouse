@@ -30,7 +30,7 @@ RUN wget -O /tmp/learninghouse.zip https://github.com/LearningHouseService/learn
     chmod +x /entrypoint.sh /uwsgi.sh
 
 EXPOSE 5000
-
+WORKDIR ${LHS_HOME}
 VOLUME ["${LHS_HOME}/models"]
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gosu", "learninghouse", "tini", "-s", "/uwsgi.sh"]

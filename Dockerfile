@@ -1,5 +1,7 @@
 FROM python:3.8 
 
+MAINTAINER Johannes Ott <info@johannes-ott.net>
+
 ENV LHS_HOME=/learninghouse \
     USER_ID=9002 \
     GROUP_ID=9002 

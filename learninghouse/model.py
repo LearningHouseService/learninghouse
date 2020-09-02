@@ -8,7 +8,7 @@ from joblib import load, dump
 
 import json
 
-from os import path
+from os import path, stat
 import sys
 
 import time
@@ -45,6 +45,7 @@ class ModelConfiguration():
         self.estimator = None
         self.columns = None
         self.score = 0.0
+        self.confusion = None
 
     def __loadInitialConfig(self, name):
         with open('models/config/%s.json' % name, 'r') as configFile:
@@ -71,13 +72,25 @@ class ModelConfiguration():
     def hasColumns(self):
         return self.columns is not None
 
-    def dump(self, estimator, columns, score):
+    def configObject(self):
+        return {
+            'name': self.name,
+            'estimator_config': self.estimatorcfg,
+            'features': self.features,
+            'categoricals': self.categoricals,
+            'standard_scaled': self.standard_scaled,
+            'dependent': self.dependent,
+            'score': self.score,
+            'confusion': self.confusion
+        }
+
+    def dump(self, estimator, columns, score, confusion):
         self.estimator = estimator
         self.columns = columns
         self.score = score
+        self.confusion = confusion
 
         dump(self, 'models/compiled/%s.pkl' % self.name)
-        ModelPrediction.refreshModel(self)
 
 class ModelAPI(Resource):
     @staticmethod
@@ -124,29 +137,18 @@ class ModelTraining(Resource):
             
             columns = x_train.columns
             
-            start = time.time()
             estimator.fit(x_train, y_train)
-            duration = time.time() - start
             
             y_pred = estimator.predict(x_test)
 
             cm = confusion_matrix(y_test, y_pred)
             score = accuracy_score(y_test, y_pred)
 
-            modelcfg.dump(estimator, columns, score)
+            modelcfg.dump(estimator, columns, score, cm.tolist())
 
-            result = {
-                'estimator_class': modelcfg.estimatorcfg['class'],
-                'time': duration,
-                'score': score,
-                'confusion': str(cm)
-            }
-
-            ModelPrediction.refreshModel(modelcfg)
-
-            return ModelAPI.makeJSONResponse(result)
+            return ModelAPI.makeJSONResponse(modelcfg.configObject())
         except FileNotFoundError:
-            return ModelAPI.makeJSONResponse({}, 404, 'No configuration')
+            return ModelAPI.makeJSONResponse({}, 404, 'NO_CONFIGURATION')
 
 class ModelPrediction(Resource):
     modelcfgs = {}
@@ -154,25 +156,17 @@ class ModelPrediction(Resource):
     @staticmethod
     def post(model):
         try: 
-            if model in ModelPrediction.modelcfgs:
-                modelcfg = ModelPrediction.modelcfgs[model]
-            else:
-                modelcfg = load('models/compiled/%s.pkl' % model)
-                ModelPrediction.modelcfgs[model] = modelcfg
+            modelcfg = ModelPrediction._loadModelcfg(model)
 
             json_data = request.get_json(force = True)
             query = pd.DataFrame([json_data])
 
-            modelcfg, x = DatasetPreprocessing.preparePrediction(modelcfg, query)
+            x = DatasetPreprocessing.preparePrediction(modelcfg, query)
 
             prediction = list(map(float, modelcfg.estimator.predict(x)))
 
             result = {
-                'model': {
-                    'name': modelcfg.name,
-                    'estimator': modelcfg.estimatorcfg['class'],
-                    'score': modelcfg.score
-                },
+                'model': modelcfg.configObject(),
                 'prediction': prediction[0]
             }
 
@@ -182,17 +176,35 @@ class ModelPrediction(Resource):
             return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
         except KeyError as e:
             return ModelAPI.makeJSONResponse({'message': e.args[0]}, 400, 'MISSING_KEY')
- #       except:
- #           print("Unexpected error:", sys.exc_info()[0])
- #           return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
+        except FileNotFoundError:
+            return ModelAPI.makeJSONResponse({}, 404, 'NOT_TRAINED')
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
 
     @staticmethod
-    def refreshModel(modelcfg):
-        ModelPrediction.modelcfgs[modelcfg.name] = modelcfg
+    def _loadModelcfg(model):
+        filename = 'models/compiled/%s.pkl' % model
+        stamp = stat(filename).st_mtime
+        
+        if model in ModelPrediction.modelcfgs:
+            if ModelPrediction.modelcfgs[model]['stamp'] == stamp:
+                modelcfg = ModelPrediction.modelcfgs[model]['model']
+            else:
+                modelcfg = load(filename)
+                ModelPrediction.modelcfgs[model] = {
+                    'stamp': stamp,
+                    'model': modelcfg
+                }
+        else:
+            modelcfg = load('models/compiled/%s.pkl' % model)
+            ModelPrediction.modelcfgs[model] = {
+                'stamp': stamp,
+                'model': modelcfg
+            }
 
-    @staticmethod
-    def clear_model(model):
-        ModelPrediction.modelcfgs.pop(model, None)
+        return modelcfg
+
 
 class DatasetPreprocessing():
     @staticmethod
@@ -240,4 +252,4 @@ class DatasetPreprocessing():
         if modelcfg.hasStandardScaled():
             x[modelcfg.standard_scaled] = modelcfg.standard_scaler.transform(x[modelcfg.standard_scaled].values)
 
-        return modelcfg, x
+        return x

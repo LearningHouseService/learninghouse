@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='learninghouse',
-      version='0.2',
+      version='0.3',
       description='learningHouse - Teach your smart home everything',
       url='https://github.com/LearningHouseService/learninghouse-core',
       author='Johannes Ott',

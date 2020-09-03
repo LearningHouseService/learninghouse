@@ -16,14 +16,17 @@ import time
 import pandas as pd
 import numpy as np
 
+from .preprocessing import DatasetPreprocessing
 from .estimator import EstimatorFactory
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix, accuracy_score
 
 class ModelConfiguration():
+    CONFIG_FILE = 'models/config/%s.json'
+    COMPILED_FILE = 'models/compiled/%s.pkl'
+
     def __init__(self, name):
         self.name = name
 
@@ -35,6 +38,13 @@ class ModelConfiguration():
         self.dependent = self.__requiredConfig('dependent')
 
         self.categoricals = self.__optionalConfig('categoricals')
+        if self.categoricals is None:
+            self.nonCategoricals = self.features
+        else:
+            self.nonCategoricals = [item for item in self.features if item not in set(self.categoricals)]
+
+        self.imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
+
         self.standard_scaled = self.__optionalConfig('standard_scaled')
         if self.standard_scaled is not None:
             self.standard_scaler = StandardScaler()
@@ -48,7 +58,7 @@ class ModelConfiguration():
         self.confusion = None
 
     def __loadInitialConfig(self, name):
-        with open('models/config/%s.json' % name, 'r') as configFile:
+        with open(ModelConfiguration.CONFIG_FILE % name, 'r') as configFile:
             return json.load(configFile)
 
     def __requiredConfig(self, param):
@@ -90,7 +100,7 @@ class ModelConfiguration():
         self.score = score
         self.confusion = confusion
 
-        dump(self, 'models/compiled/%s.pkl' % self.name)
+        dump(self, ModelConfiguration.COMPILED_FILE % self.name)
 
 class ModelAPI(Resource):
     @staticmethod
@@ -102,31 +112,54 @@ class ModelAPI(Resource):
         resp.status_code = statusCode
         return resp
 
+    @staticmethod 
+    def get(model):
+        try:
+            modelcfg = load(ModelConfiguration.COMPILED_FILE % model)
+            return ModelAPI.makeJSONResponse(modelcfg.configObject())
+        except FileNotFoundError:
+            return ModelAPI.makeJSONResponse({}, 404, 'NOT_TRAINED')
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
+
 class ModelTraining(Resource):
+    TRAINING_FILE = 'models/training/%s.csv'
+
+    @staticmethod
+    def put(model):
+        if request.content_length > 0 and request.is_json:
+            filename = ModelTraining.TRAINING_FILE % model
+            jsonData = request.get_json()
+            if path.exists(filename):
+                df_temp = pd.read_csv(filename)
+                df = df_temp.append([jsonData], ignore_index = True)
+            else:
+                df = pd.DataFrame([jsonData])
+
+            df.to_csv(filename, sep = ',', index = False)
+                
+            return ModelTraining.train(model, df)
+        else:
+            return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
+
     @staticmethod
     def post(model):
+        filename = ModelTraining.TRAINING_FILE % model
+        
+        if request.content_length == 0:
+            if path.exists(filename):
+                df = pd.read_csv(filename)
+                return ModelTraining.train(model, df)
+            else:
+                return ModelAPI.makeJSONResponse({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
+        else:
+            return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
+
+    @staticmethod
+    def train(model, df):
         try:
             modelcfg = ModelConfiguration(model)
-
-            filename = 'models/training/%s.csv' % modelcfg.name
-            isNew = not path.exists(filename)
-
-            if request.content_length > 0:
-                if request.is_json:
-                    jsonData = request.get_json()
-                    if isNew:
-                        df = pd.DataFrame([jsonData])
-                    else:
-                        df_temp = pd.read_csv(filename)
-                        df = df_temp.append([jsonData], ignore_index = True)
-
-                    df.to_csv(filename, sep = ',', index = False)
-                else:
-                    return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
-            else:
-                if isNew:
-                    return ModelAPI.makeJSONResponse({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
-                df = pd.read_csv(filename)
 
             if len(df.index) < 10:
                 return ModelAPI.makeJSONResponse({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
@@ -136,7 +169,7 @@ class ModelTraining(Resource):
             estimator = EstimatorFactory.getEstimator(modelcfg.estimatorcfg)
             
             columns = x_train.columns
-            
+
             estimator.fit(x_train, y_train)
             
             y_pred = estimator.predict(x_test)
@@ -149,6 +182,9 @@ class ModelTraining(Resource):
             return ModelAPI.makeJSONResponse(modelcfg.configObject())
         except FileNotFoundError:
             return ModelAPI.makeJSONResponse({}, 404, 'NO_CONFIGURATION')
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
 
 class ModelPrediction(Resource):
     modelcfgs = {}
@@ -171,7 +207,6 @@ class ModelPrediction(Resource):
             }
 
             return ModelAPI.makeJSONResponse(result)
-
         except BadRequest as e:
             return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
         except KeyError as e:
@@ -184,7 +219,7 @@ class ModelPrediction(Resource):
 
     @staticmethod
     def _loadModelcfg(model):
-        filename = 'models/compiled/%s.pkl' % model
+        filename = ModelConfiguration.COMPILED_FILE % model
         stamp = stat(filename).st_mtime
         
         if model in ModelPrediction.modelcfgs:
@@ -197,7 +232,7 @@ class ModelPrediction(Resource):
                     'model': modelcfg
                 }
         else:
-            modelcfg = load('models/compiled/%s.pkl' % model)
+            modelcfg = load(filename)
             ModelPrediction.modelcfgs[model] = {
                 'stamp': stamp,
                 'model': modelcfg
@@ -205,51 +240,3 @@ class ModelPrediction(Resource):
 
         return modelcfg
 
-
-class DatasetPreprocessing():
-    @staticmethod
-    def prepareTraining(modelcfg, df):
-
-        if modelcfg.hasCategoricals():
-            x = pd.get_dummies(df[modelcfg.features], columns=modelcfg.categoricals)
-        else:
-            x = df[modelcfg.features]
-    
-        y = df[modelcfg.dependent]
-
-        if modelcfg.dependentEncode:
-            le = LabelEncoder()
-            y = le.fit_transform(y)
-
-        x_temp = x.copy()
-        for col in x.columns:
-            if x[col].isnull().values.any():
-                imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
-                x_temp[col] = imputer.fit_transform(x[[col]]).ravel()
-
-        x = x_temp
-
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = modelcfg.testsize, random_state=0)
-
-        if modelcfg.hasStandardScaled():
-            if not modelcfg.standard_scaler_fitted:
-                x_train[modelcfg.standard_scaled] = modelcfg.standard_scaler.fit_transform(x_train[modelcfg.standard_scaled].values)
-                modelcfg.standard_scaler_fitted = True
-
-            x_test[modelcfg.standard_scaled] = modelcfg.standard_scaler.transform(x_test[modelcfg.standard_scaled].values)
-
-        return modelcfg, x_train, x_test, y_train, y_test
-
-    @staticmethod
-    def preparePrediction(modelcfg, df):
-        if modelcfg.hasCategoricals():
-            x = pd.get_dummies(df[modelcfg.features], columns=modelcfg.categoricals)
-        else:
-            x = df[modelcfg.features]
-
-        x = x.reindex(columns=modelcfg.columns, fill_value=0)
- 
-        if modelcfg.hasStandardScaled():
-            x[modelcfg.standard_scaled] = modelcfg.standard_scaler.transform(x[modelcfg.standard_scaled].values)
-
-        return x

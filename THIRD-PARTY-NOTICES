@@ -15,10 +15,20 @@ Licensor: Python Software Foundatio
 Website: https://www.python.org
 License: PSF License
 
-Component: uwsgi
-Licensor: uwsgi Project
-Website: https://uwsgi-docs.readthedocs.io/
-License: GNU GENERAL PUBLIC LICENSE v2
+Component: click
+Licensor: Pallets
+Website: https://click.palletsprojects.com/en/7.x/
+License: BSD-3-Clause License
+
+Component: PyYAML
+Licensor: Ingy döt Net
+Website: https://pyyaml.org/
+License: MIT License
+
+Component: waitress
+Licensor: Pylons Project
+Website: https://docs.pylonsproject.org/projects/waitress/en/latest/
+License: Zope Public License (ZPL) Version 2.1
 
 Component: flask
 Licensor: Pallets

@@ -8,7 +8,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='learninghouse',
-    version='0.4',
+    version='0.5',
     description='learningHouse - Teach your smart home everything',
     long_description=long_description,
     long_description_content_type='text/markdown',        
@@ -18,8 +18,7 @@ setup(
     classifiers=[ 
         'Development Status :: 3 - Alpha',
 
-        'Intended Audience :: Smarthome user',
-        'Topic :: Smart home :: House automation',
+        'Topic :: Home Automation',
 
         'License :: OSI Approved :: MIT License',
 

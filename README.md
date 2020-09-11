@@ -1,6 +1,6 @@
 # learningHouse Service
 
-![learningHouse Logo](./artwork/learninghouse_logo.svg)
+![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/artwork/learninghouse_logo.svg)
 
 ## Introduction
 

@@ -35,4 +35,4 @@ matrix:
   fast_finish: true
 env:
   matrix:
-    - VERSION=0.3
+    - VERSION=0.5

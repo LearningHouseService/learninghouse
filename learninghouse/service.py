@@ -7,6 +7,8 @@ from waitress import serve
 
 from .model import ModelPrediction, ModelTraining, ModelAPI
 
+version = '0.6'
+
 app = Flask(__name__)
 api = Api(app)
 

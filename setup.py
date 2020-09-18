@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+from learninghouse.service import version
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -8,7 +9,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='learninghouse',
-    version='0.5',
+    version=version,
     description='learningHouse - Teach your smart home everything',
     long_description=long_description,
     long_description_content_type='text/markdown',        
@@ -29,8 +30,8 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='smart home, machine learning, house automation',
-    package_dir={'': 'src'},
-    packages=find_packages(where='src'),
+    package_dir={'learninghouse': 'learninghouse'},
+    packages=['learninghouse'],
     python_requires='>=3.6, <4',
     install_requires = [
         'waitress', 

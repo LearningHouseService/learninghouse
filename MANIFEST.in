@@ -1,5 +1,3 @@
-include pyproject.toml
-
 # Include the README
 include *.md
 
@@ -8,3 +6,7 @@ include LICENSE
 
 # Include information about third party licensors
 include THIRD-PARTY-NOTICES
+
+# Include information about version
+include versioneer.py
+include learninghouse/_version.py

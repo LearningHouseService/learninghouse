@@ -1,14 +1,28 @@
+dist: bionic
 language: python
 python:
-  - "3.6"
-script:
-  - touch do_tests_here
+  - "3.8"
+cache: 
+  pip: true
+
+install: 
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
+  - pip install .
+
+script: echo "Run tests here" 
+
+build: 
+  script:
+    - python setup.py sdist bdist_wheel
+
 deploy:
   provider: pypi
-  username: __token__
+  username: "__token__"
   password:
-    secure: OcWnxTjtJ00hZKfOq2hZVYCf+AGmVOrLo9CvKRulEajsmS8dB39SCoHCL8p0VcarvBEPyHbMPgGeV0bua0YBNoSqqDSc/KBHGaEGbtqF2wUdUAbt+QMZdpjdjhR3il7DF7fQQyRw41DKaQ8uvJiIgYCXq7MDDPLGTaQNc2WO3F8McR/GFlGPZo2bKqJFXXyM/eFk1QvcwiHHgwmrqgoF5qpzy6nl5QBbGIQEjQwDMLiaqX2QWNA3pJ+mVBa43z+J6m71xourGlt0bX4lhCsrNPwlGyhD44KSTIhoSJZnlNi0NpSKb2wn3DjlK3rZ1U0kUnx3iU3jjlxxnF4sFQp4genNDR9Z9Aywd5BVC2ECCZ7iVwK2BzlJCaJtwRnTbQR7iB+B/FgduKg1yleotRcXx31phKd6hPhTnxjD0io0YUjWDHh84QndijzaP3qAWmxlq3CTDlNtD+iqJKJFvlwuOaPuL2Jm3c1J3jmX7L5tC29FQSdqiI6qXN4129sKsH6U/g9MUk1V18gX+0G1kdiklRwRPV53rh0h5G0SAwgbspjOZ5kSpFCWJjj+dHuizy1Weu162nyB1kHiaz8tEGiqvP4Z/5FcVrjmQiGoNfZ3sm7kl1Zjgf6aZ6J2te83cYlrh/NqzC8f1azilqN4we/SI4B2xeWPdeC9dS7l6nJ6D9A=
+    secure: "OcWnxTjtJ00hZKfOq2hZVYCf+AGmVOrLo9CvKRulEajsmS8dB39SCoHCL8p0VcarvBEPyHbMPgGeV0bua0YBNoSqqDSc/KBHGaEGbtqF2wUdUAbt+QMZdpjdjhR3il7DF7fQQyRw41DKaQ8uvJiIgYCXq7MDDPLGTaQNc2WO3F8McR/GFlGPZo2bKqJFXXyM/eFk1QvcwiHHgwmrqgoF5qpzy6nl5QBbGIQEjQwDMLiaqX2QWNA3pJ+mVBa43z+J6m71xourGlt0bX4lhCsrNPwlGyhD44KSTIhoSJZnlNi0NpSKb2wn3DjlK3rZ1U0kUnx3iU3jjlxxnF4sFQp4genNDR9Z9Aywd5BVC2ECCZ7iVwK2BzlJCaJtwRnTbQR7iB+B/FgduKg1yleotRcXx31phKd6hPhTnxjD0io0YUjWDHh84QndijzaP3qAWmxlq3CTDlNtD+iqJKJFvlwuOaPuL2Jm3c1J3jmX7L5tC29FQSdqiI6qXN4129sKsH6U/g9MUk1V18gX+0G1kdiklRwRPV53rh0h5G0SAwgbspjOZ5kSpFCWJjj+dHuizy1Weu162nyB1kHiaz8tEGiqvP4Z/5FcVrjmQiGoNfZ3sm7kl1Zjgf6aZ6J2te83cYlrh/NqzC8f1azilqN4we/SI4B2xeWPdeC9dS7l6nJ6D9A="
   skip_existing: true
   distributions: sdist bdist_wheel
+  on:
     tags: true
     branch: master

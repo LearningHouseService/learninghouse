@@ -1,15 +1,15 @@
-from setuptools import setup
-from learninghouse.service import version
-import pathlib
+import setuptools
+import versioneer
 
-here = pathlib.Path(__file__).parent.resolve()
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+with open("requirements.txt", "r") as fh:
+    requirements = [line.strip() for line in fh]
 
-# Get the long description from the README file
-long_description = (here / 'README.md').read_text(encoding='utf-8')
-
-setup(
+setuptools.setup(
     name='learninghouse',
-    version=version,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description='learningHouse - Teach your smart home everything',
     long_description=long_description,
     long_description_content_type='text/markdown',        
@@ -33,14 +33,7 @@ setup(
     package_dir={'learninghouse': 'learninghouse'},
     packages=['learninghouse'],
     python_requires='>=3.6, <4',
-    install_requires = [
-        'waitress', 
-        'flask', 'flask_restful',
-        'click', 
-        'pyyaml',
-        'numpy', 'pandas',
-        'scikit-learn'
-    ],
+    install_requires = requirements,
     entry_points={
         'console_scripts': [
             'learninghouse=learninghouse.cli:cli'

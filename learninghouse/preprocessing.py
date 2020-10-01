@@ -2,7 +2,25 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
+import time
+from datetime import datetime
+
 class DatasetPreprocessing():
+    @staticmethod
+    def addTimeInformation(data):
+        if 'timestamp' not in data:
+            data['timestamp'] = datetime.now().timestamp()
+
+        date = datetime.fromtimestamp(data['timestamp'])
+        data['datetime'] = date.strftime('%Y-%m-%d %H:%M:%s')
+        data['month_of_year'] = date.month
+        data['day_of_month'] = date.day
+        data['day_of_week'] = date.strftime('%A')
+        data['hour_of_day'] = date.hour
+        data['minute_of_hour'] = date.minute
+
+        return data
+
     @staticmethod
     def prepareTraining(modelcfg, df):
         if modelcfg.hasCategoricals():

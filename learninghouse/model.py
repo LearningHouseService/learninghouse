@@ -131,6 +131,7 @@ class ModelTraining(Resource):
         if request.content_length > 0 and request.is_json:
             filename = ModelTraining.TRAINING_FILE % model
             jsonData = request.get_json()
+            jsonData = DatasetPreprocessing.addTimeInformation(jsonData)
             if path.exists(filename):
                 df_temp = pd.read_csv(filename)
                 df = df_temp.append([jsonData], ignore_index = True)
@@ -194,8 +195,9 @@ class ModelPrediction(Resource):
         try: 
             modelcfg = ModelPrediction._loadModelcfg(model)
 
-            json_data = request.get_json(force = True)
-            query = pd.DataFrame([json_data])
+            jsonData = request.get_json(force = True)
+            jsonData = DatasetPreprocessing.addTimeInformation(jsonData)
+            query = pd.DataFrame([jsonData])
 
             x = DatasetPreprocessing.preparePrediction(modelcfg, query)
 

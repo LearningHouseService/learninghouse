@@ -4,8 +4,15 @@ python:
   - "3.6"
 cache: 
   pip: true
-install: pip install -r requirements.txt
-build: python setup.py sdist bdist_wheel
+
+install: 
+  script: 
+    - pip install -r requirements.txt
+
+build: 
+  script:
+    - python setup.py sdist bdist_wheel
+
 deploy:
   provider: pypi
   username: "__token__"

@@ -5,7 +5,8 @@ python:
 cache: 
   pip: true
 install:
-  - python setup.py install
+  - pip install -r requirements.txt
+  - pip install -e ./
 build:
   - python setup.py sdist bdist_wheel
 deploy:

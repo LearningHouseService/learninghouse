@@ -5,9 +5,11 @@ from flask_restful import Api
 
 from waitress import serve
 
+from . import __version__
+
 from .model import ModelPrediction, ModelTraining, ModelAPI
 
-version = '0.6'
+print(__version__)
 
 app = Flask(__name__)
 api = Api(app)

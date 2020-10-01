@@ -9,7 +9,7 @@ cache:
 install:
   - python setup.py install
 build:
-  script: python setup.py sdist bdist_wheel
+  - python setup.py sdist bdist_wheel
 deploy:
   provider: pypi
   username: "__token__"

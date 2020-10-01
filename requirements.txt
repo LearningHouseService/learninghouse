@@ -1,11 +1,3 @@
-waitress 
-flask
-flask_restful
-click 
-pyyaml
-numpy
-pandas
-scikit-learn
 setuptools
 wheel
 twine

@@ -8,7 +8,7 @@ cache:
 install: 
   - pip install --upgrade pip
   - pip install -r requirements.txt
-  - pip install .
+  - pip install --no-use-pep517 .
 
 script: echo "Run tests here" 
 

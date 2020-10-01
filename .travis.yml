@@ -5,9 +5,7 @@ python:
 cache: 
   pip: true
 
-install: 
-  script: 
-    - pip install -r requirements.txt
+install: pip install -r requirements.txt
 
 build: 
   script:

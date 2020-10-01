@@ -1,7 +1,8 @@
 language: python
 python:
   - "3.6"
-
+script:
+  - touch do_tests_here
 deploy:
   provider: pypi
   username: __token__

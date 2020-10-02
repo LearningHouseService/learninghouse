@@ -12,6 +12,7 @@ script: echo "Run tests here"
 build:
   script:
   - python setup.py sdist bdist_wheel
+  - ls dist/
 deploy:
   - provider: releases
     api_key:
@@ -22,7 +23,7 @@ deploy:
       tags: true
       branch: master
       repo: LearningHouseService/learninghouse-core
-    skip_cleanup: 'true'
+    skip_cleanup: true
   - provider: pypi
     username: __token__
     password:

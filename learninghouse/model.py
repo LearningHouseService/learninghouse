@@ -16,6 +16,8 @@ import time
 import pandas as pd
 import numpy as np
 
+from . import __version__
+
 from .preprocessing import DatasetPreprocessing
 from .estimator import EstimatorFactory
 
@@ -56,6 +58,7 @@ class ModelConfiguration():
         self.columns = None
         self.score = 0.0
         self.confusion = None
+        self.version = __version__
 
     def __loadInitialConfig(self, name):
         with open(ModelConfiguration.CONFIG_FILE % name, 'r') as configFile:
@@ -91,7 +94,11 @@ class ModelConfiguration():
             'standard_scaled': self.standard_scaled,
             'dependent': self.dependent,
             'score': self.score,
-            'confusion': self.confusion
+            'confusion': self.confusion,
+            'version': {
+                'model': self.version,
+                'service': __version__
+            }
         }
 
     def dump(self, estimator, columns, score, confusion):

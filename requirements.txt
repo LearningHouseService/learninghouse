@@ -6,7 +6,3 @@ pyyaml
 numpy 
 pandas
 scikit-learn
-versioneer
-setuptools
-wheel
-twine

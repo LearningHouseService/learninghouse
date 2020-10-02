@@ -1,3 +1,4 @@
+os: linux
 dist: bionic
 language: python
 python:
@@ -8,13 +9,13 @@ install:
 - pip install --upgrade pip
 - pip install -r requirements.txt
 - pip install .
-script: echo "Run tests here"
-build:
-  script:
+script: 
+  - echo "Run tests here"
   - python setup.py sdist bdist_wheel
+  - ls dist/
 deploy:
   - provider: releases
-    api_key:
+    token:
       secure: T2rfB/TyH3TpF65TpaAfZLUul3NR71W8IaWtD++NzoewyAJbmiB9xmSaWAPW/7EtQtw94m3SM90EFbfXqJlilYvz/eUY9Z3h5kgVb55qPqwFvD4b1H74ET3mSeYRZlgWhvLE/1Y5tELHVKkMwQBbOPYitmeo7aLIhATchhPNmgTrn38JKAijYTw5/tU1CRPe24xww6ruIiNgSqYyptG735CZVWP5laCBlcnBDJssMMehnT5fffNgMLhEIHofMHWnx+9cijHy4kkiiaZm/bLkrXDwyb36yTkbzXtyf1q4LJq1TigqGcM5jmHUTwEn0ceTffCPR7g42ncKoGXPXD3YRAiWbBDcyGjyPsDxWMCwQPmLTxK9/WV2NISRzW4jSNxLQmFE9r+AcdFcBRwzWyIGvUgTK+XJFXIJidKzhBhhK5aQgoZZnLFZ03D+QQKVwu4PFtTJQY05itMxRMac1sspML19jjCERLjvyn0G07EU4izKeKTAldDl1jGZA7uXSf8LVUJ0cy0uFaEjZLhww/sUATdYgj9kdTJ5ai+vFOK3dbQ+O9WCywzNJSHB7a10WRRfjzP4d/0j97E4UD8trzo4AA3GVOGAPfxPPMJgYe5hFUPSBK3AVnFEMwYq8pE2UINSpMfwcIZcnP5VmBpGWx3puxYDA2RkKnAUJodx+F8KndU=
     file_glob: true
     file: "dist/*"
@@ -22,7 +23,7 @@ deploy:
       tags: true
       branch: master
       repo: LearningHouseService/learninghouse-core
-    skip_cleanup: 'true'
+    skip_cleanup: true
   - provider: pypi
     username: __token__
     password:

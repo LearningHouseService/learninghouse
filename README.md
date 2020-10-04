@@ -1,6 +1,6 @@
 # learningHouse Service 
 [![License](https://img.shields.io/github/license/LearningHouseService/learninghouse-core)](https://github.com/LearningHouseService/learninghouse-core/blob/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/LearningHouseService/learninghouse-core)](https://travis-ci.org/LearningHouseService/learninghouse-core) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) 
+[![Build Status](https://img.shields.io/travis/LearningHouseService/learninghouse-core)](https://travis-ci.org/LearningHouseService/learninghouse-core) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) [![Docker version](https://img.shields.io/docker/v/learninghouseservice/learninghouse/latest?label=docker)](https://hub.docker.com/r/learninghouseservice/learninghouse)
 
 ![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/artwork/learninghouse_logo.svg)
 
@@ -8,7 +8,7 @@
 
 **learningHouse Service** provides machine learning algorithms based on scikit-learn python library as a RESTful API, with the purpose to give smart home fans an easy possibility to teach their homes.
 
-*Add the moment this project is in a very early state. Please share your ideas what you want to teach your home by opening an issue. Really looking forward for your feedback.*
+*Add the moment this project is in a very early state. Please share your ideas what you want to teach your home by opening an [issue](https://github.com/LearningHouseService/learninghouse-core/issues). Really looking forward for your feedback.*
 
 ## Installation
 
@@ -19,7 +19,7 @@ pip install -U learninghouse
 
 Install and update using docker
 ```
-docker pull learninghouseservice/learninghouse
+docker pull learninghouseservice/learninghouse:latest
 ```
 
 ### Prepare configuration directory
@@ -116,6 +116,12 @@ learninghouse --production --host 127.0.0.1 --port 5001
 ```
 
 *Service in production mode is not logging anything yet*
+
+Run with docker:
+
+```
+docker run --name learninghouse --rm -v models:/learninghouse/models -p 5000:5000 learninghouseservice/learninghouse:latest
+```
 
 ## Train model
 

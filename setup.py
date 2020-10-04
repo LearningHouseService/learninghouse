@@ -17,7 +17,7 @@ setuptools.setup(
     author='Johannes Ott',
     author_email='info@johannes-ott.net',
     classifiers=[ 
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         'Topic :: Home Automation',
 

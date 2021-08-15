@@ -34,4 +34,4 @@ matrix:
   fast_finish: true
 env:
   matrix:
-    - VERSION=0.7.0
+    - VERSION=0.8.0

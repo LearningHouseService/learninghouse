@@ -5,7 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 
 class EstimatorFactory():
     @staticmethod
-    def getEstimator(estimatorcfg):
+    def get_estimator(estimatorcfg):
         options = estimatorcfg['options']
 
         ESTIMATORS = {

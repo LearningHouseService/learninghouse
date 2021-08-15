@@ -21,9 +21,12 @@ from . import __version__
 from .preprocessing import DatasetPreprocessing
 from .estimator import EstimatorFactory
 
+
+from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix, accuracy_score
+
 
 class ModelConfiguration():
     CONFIG_FILE = 'models/config/%s.json'
@@ -32,27 +35,31 @@ class ModelConfiguration():
     def __init__(self, name):
         self.name = name
 
-        self.__jsonConfig = self.__loadInitialConfig(name)
+        self.__json_config = self.__load_initial_config(name)
 
-        self.estimatorcfg = self.__requiredConfig('estimator')
-        self.testsize = self.__requiredConfig('test_size')
-        self.features = self.__requiredConfig('features')
-        self.dependent = self.__requiredConfig('dependent')
+        self.estimatorcfg = self.__required_config('estimator')
+        self.testsize = self.__required_config('test_size')
+        self.features = self.__required_config('features')
+        self.dependent = self.__required_config('dependent')
 
-        self.categoricals = self.__optionalConfig('categoricals')
+        self.categoricals = self.__optional_config('categoricals')
         if self.categoricals is None:
-            self.nonCategoricals = self.features
+            self.non_categoricals = self.features
         else:
-            self.nonCategoricals = [item for item in self.features if item not in set(self.categoricals)]
+            self.non_categoricals = [
+                item for item in self.features if item not in set(self.categoricals)]
 
         self.imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
 
-        self.standard_scaled = self.__optionalConfig('standard_scaled')
+        self.standard_scaled = self.__optional_config('standard_scaled')
         if self.standard_scaled is not None:
             self.standard_scaler = StandardScaler()
             self.standard_scaler_fitted = False
 
-        self.dependentEncode = self.__optionalConfig('dependent_encode', False)
+        self.dependent_encode = self.__optional_config(
+            'dependent_encode', False)
+        if self.dependent_encode:
+            self.dependent_encoder = LabelEncoder()
 
         self.estimator = None
         self.columns = None
@@ -60,38 +67,39 @@ class ModelConfiguration():
         self.confusion = None
         self.version = __version__
 
-    def __loadInitialConfig(self, name):
+    def __load_initial_config(self, name):
         with open(ModelConfiguration.CONFIG_FILE % name, 'r') as configFile:
             return json.load(configFile)
 
-    def __requiredConfig(self, param):
-        if param in self.__jsonConfig:
-            return self.__jsonConfig[param]
+    def __required_config(self, param):
+        if param in self.__json_config:
+            return self.__json_config[param]
         else:
             raise Exception('Missing required param %s' % param)
 
-    def __optionalConfig(self, param, default = None):
-        if param in self.__jsonConfig:
-            return self.__jsonConfig[param]
+    def __optional_config(self, param, default=None):
+        if param in self.__json_config:
+            return self.__json_config[param]
         else:
             return default
 
-    def hasCategoricals(self):
+    def has_categoricals(self):
         return self.categoricals is not None
 
-    def hasStandardScaled(self):
+    def has_standard_scaled(self):
         return self.standard_scaled is not None
 
-    def hasColumns(self):
+    def has_columns(self):
         return self.columns is not None
 
-    def configObject(self):
+    def config_object(self):
         return {
             'name': self.name,
             'estimator_config': self.estimatorcfg,
             'features': self.features,
             'categoricals': self.categoricals,
             'standard_scaled': self.standard_scaled,
+            'dependent_encode': self.dependent_encode,
             'dependent': self.dependent,
             'score': self.score,
             'confusion': self.confusion,
@@ -109,26 +117,28 @@ class ModelConfiguration():
 
         dump(self, ModelConfiguration.COMPILED_FILE % self.name)
 
+
 class ModelAPI(Resource):
     @staticmethod
-    def makeJSONResponse(data, statusCode = 200, errorCode = None):
-        if errorCode is not None:
-            data['error'] = errorCode
+    def make_json_response(data, status_code=200, error_code=None):
+        if error_code is not None:
+            data['error'] = error_code
 
         resp = jsonify(data)
-        resp.status_code = statusCode
+        resp.status_code = status_code
         return resp
 
-    @staticmethod 
+    @staticmethod
     def get(model):
         try:
             modelcfg = load(ModelConfiguration.COMPILED_FILE % model)
-            return ModelAPI.makeJSONResponse(modelcfg.configObject())
+            return ModelAPI.make_json_response(modelcfg.config_object())
         except FileNotFoundError:
-            return ModelAPI.makeJSONResponse({}, 404, 'NOT_TRAINED')
+            return ModelAPI.make_json_response({}, 404, 'NOT_TRAINED')
         except:
             print("Unexpected error:", sys.exc_info()[0])
-            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
+            return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
+
 
 class ModelTraining(Resource):
     TRAINING_FILE = 'models/training/%s.csv'
@@ -137,32 +147,32 @@ class ModelTraining(Resource):
     def put(model):
         if request.content_length > 0 and request.is_json:
             filename = ModelTraining.TRAINING_FILE % model
-            jsonData = request.get_json()
-            jsonData = DatasetPreprocessing.addTimeInformation(jsonData)
+            json_data = request.get_json()
+            json_data = DatasetPreprocessing.add_time_information(json_data)
             if path.exists(filename):
                 df_temp = pd.read_csv(filename)
-                df = df_temp.append([jsonData], ignore_index = True)
+                df = df_temp.append([json_data], ignore_index=True)
             else:
-                df = pd.DataFrame([jsonData])
+                df = pd.DataFrame([json_data])
 
-            df.to_csv(filename, sep = ',', index = False)
-                
+            df.to_csv(filename, sep=',', index=False)
+
             return ModelTraining.train(model, df)
         else:
-            return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
+            return ModelAPI.make_json_response({}, 400, 'BAD_REQUEST')
 
     @staticmethod
     def post(model):
         filename = ModelTraining.TRAINING_FILE % model
-        
+
         if request.content_length == 0:
             if path.exists(filename):
                 df = pd.read_csv(filename)
                 return ModelTraining.train(model, df)
             else:
-                return ModelAPI.makeJSONResponse({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
+                return ModelAPI.make_json_response({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
         else:
-            return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
+            return ModelAPI.make_json_response({}, 400, 'BAD_REQUEST')
 
     @staticmethod
     def train(model, df):
@@ -170,16 +180,17 @@ class ModelTraining(Resource):
             modelcfg = ModelConfiguration(model)
 
             if len(df.index) < 10:
-                return ModelAPI.makeJSONResponse({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
+                return ModelAPI.make_json_response({}, 202, 'NOT_ENOUGH_TRAINING_DATA')
 
-            modelcfg, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepareTraining(modelcfg, df)
+            modelcfg, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepare_training(
+                modelcfg, df)
 
-            estimator = EstimatorFactory.getEstimator(modelcfg.estimatorcfg)
-            
+            estimator = EstimatorFactory.get_estimator(modelcfg.estimatorcfg)
+
             columns = x_train.columns
 
             estimator.fit(x_train, y_train)
-            
+
             y_pred = estimator.predict(x_test)
 
             cm = confusion_matrix(y_test, y_pred)
@@ -187,50 +198,58 @@ class ModelTraining(Resource):
 
             modelcfg.dump(estimator, columns, score, cm.tolist())
 
-            return ModelAPI.makeJSONResponse(modelcfg.configObject())
+            return ModelAPI.make_json_response(modelcfg.config_object())
         except FileNotFoundError:
-            return ModelAPI.makeJSONResponse({}, 404, 'NO_CONFIGURATION')
-        except:
-            print("Unexpected error:", sys.exc_info()[0])
-            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
+            return ModelAPI.make_json_response({}, 404, 'NO_CONFIGURATION')
+        # except:
+        #    print("Unexpected error:", sys.exc_info()[0])
+        #    return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
+
 
 class ModelPrediction(Resource):
     modelcfgs = {}
 
     @staticmethod
     def post(model):
-        try: 
-            modelcfg = ModelPrediction._loadModelcfg(model)
+        try:
+            modelcfg = ModelPrediction._load_modelcfg(model)
 
-            jsonData = request.get_json(force = True)
-            jsonData = DatasetPreprocessing.addTimeInformation(jsonData)
-            query = pd.DataFrame([jsonData])
+            json_data = request.get_json(force=True)
+            json_data = DatasetPreprocessing.add_time_information(json_data)
+            query = pd.DataFrame([json_data])
 
-            x = DatasetPreprocessing.preparePrediction(modelcfg, query)
+            x = DatasetPreprocessing.prepare_prediction(modelcfg, query)
 
-            prediction = list(map(float, modelcfg.estimator.predict(x)))
+            prediction = modelcfg.estimator.predict(x)
+
+            if modelcfg.dependent_encode:
+                prediction = modelcfg.dependent_encoder.inverse_transform(
+                    prediction)
+                prediction = list(map(bool, prediction))
+            else:
+                prediction = list(map(float, prediction))
 
             result = {
-                'model': modelcfg.configObject(),
+                'model': modelcfg.config_object(),
                 'prediction': prediction[0]
             }
 
-            return ModelAPI.makeJSONResponse(result)
+            return ModelAPI.make_json_response(result)
         except BadRequest as e:
-            return ModelAPI.makeJSONResponse({}, 400, 'BAD_REQUEST')
+            return ModelAPI.make_json_response({}, 400, 'BAD_REQUEST')
         except KeyError as e:
-            return ModelAPI.makeJSONResponse({'message': e.args[0]}, 400, 'MISSING_KEY')
+            return ModelAPI.make_json_response({'message': e.args[0]}, 400, 'MISSING_KEY')
         except FileNotFoundError:
-            return ModelAPI.makeJSONResponse({}, 404, 'NOT_TRAINED')
+            return ModelAPI.make_json_response({}, 404, 'NOT_TRAINED')
         except:
             print("Unexpected error:", sys.exc_info()[0])
-            return ModelAPI.makeJSONResponse({}, 500, 'UNKNOWN_ERROR')
+            return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
 
     @staticmethod
-    def _loadModelcfg(model):
+    def _load_modelcfg(model):
         filename = ModelConfiguration.COMPILED_FILE % model
         stamp = stat(filename).st_mtime
-        
+
         if model in ModelPrediction.modelcfgs:
             if ModelPrediction.modelcfgs[model]['stamp'] == stamp:
                 modelcfg = ModelPrediction.modelcfgs[model]['model']
@@ -248,4 +267,3 @@ class ModelPrediction(Resource):
             }
 
         return modelcfg
-

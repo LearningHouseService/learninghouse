@@ -42,13 +42,6 @@ class ModelConfiguration():
         self.features = self.__required_config('features')
         self.dependent = self.__required_config('dependent')
 
-        self.categoricals = self.__optional_config('categoricals')
-        if self.categoricals is None:
-            self.non_categoricals = self.features
-        else:
-            self.non_categoricals = [
-                item for item in self.features if item not in set(self.categoricals)]
-
         self.imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
 
         self.standard_scaled = self.__optional_config('standard_scaled')
@@ -83,9 +76,6 @@ class ModelConfiguration():
         else:
             return default
 
-    def has_categoricals(self):
-        return self.categoricals is not None
-
     def has_standard_scaled(self):
         return self.standard_scaled is not None
 
@@ -97,7 +87,6 @@ class ModelConfiguration():
             'name': self.name,
             'estimator_config': self.estimatorcfg,
             'features': self.features,
-            'categoricals': self.categoricals,
             'standard_scaled': self.standard_scaled,
             'dependent_encode': self.dependent_encode,
             'dependent': self.dependent,
@@ -233,6 +222,7 @@ class ModelPrediction(Resource):
 
             result = {
                 'model': modelcfg.config_object(),
+                'preprocessed_query': x.head(1).to_dict('records'),
                 'prediction': prediction[0]
             }
 

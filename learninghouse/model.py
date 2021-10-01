@@ -16,7 +16,7 @@ import time
 import pandas as pd
 import numpy as np
 
-from . import __version__
+from . import __version__, logger
 
 from .preprocessing import DatasetPreprocessing
 from .estimator import EstimatorFactory
@@ -75,7 +75,7 @@ class ModelConfiguration():
         if param in self.__json_config:
             return self.__json_config[param]
         else:
-            raise Exception('Missing required param %s' % param)
+            raise RuntimeError('Missing required param %s' % param)
 
     def __optional_config(self, param, default=None):
         if param in self.__json_config:
@@ -135,8 +135,8 @@ class ModelAPI(Resource):
             return ModelAPI.make_json_response(modelcfg.config_object())
         except FileNotFoundError:
             return ModelAPI.make_json_response({}, 404, 'NOT_TRAINED')
-        except:
-            print("Unexpected error:", sys.exc_info()[0])
+        except Exception as e:
+            logger.error(e)
             return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
 
 
@@ -201,9 +201,11 @@ class ModelTraining(Resource):
             return ModelAPI.make_json_response(modelcfg.config_object())
         except FileNotFoundError:
             return ModelAPI.make_json_response({}, 404, 'NO_CONFIGURATION')
-        # except:
-        #    print("Unexpected error:", sys.exc_info()[0])
-        #    return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
+        except KeyError as e:
+            return ModelAPI.make_json_response({'message': e.args[0]}, 400, 'MISSING_KEY')
+        except Exception as e:
+            logger.error(e)
+            return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
 
 
 class ModelPrediction(Resource):
@@ -241,8 +243,8 @@ class ModelPrediction(Resource):
             return ModelAPI.make_json_response({'message': e.args[0]}, 400, 'MISSING_KEY')
         except FileNotFoundError:
             return ModelAPI.make_json_response({}, 404, 'NOT_TRAINED')
-        except:
-            print("Unexpected error:", sys.exc_info()[0])
+        except Exception as e:
+            logger.error(e)
             return ModelAPI.make_json_response({}, 500, 'UNKNOWN_ERROR')
 
     @staticmethod

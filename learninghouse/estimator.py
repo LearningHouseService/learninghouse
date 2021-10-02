@@ -3,14 +3,15 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 
+
 class EstimatorFactory():
-    @staticmethod
-    def get_estimator(estimatorcfg):
+    ESTIMATORS = {
+        "DecisionTreeClassifier": DecisionTreeClassifier,
+        "RandomForestClassifier": RandomForestClassifier
+    }
+
+    @classmethod
+    def get_estimator(cls, estimatorcfg):
         options = estimatorcfg['options']
 
-        ESTIMATORS = {
-            "DecisionTreeClassifier": DecisionTreeClassifier,
-            "RandomForestClassifier": RandomForestClassifier
-        }
-
-        return ESTIMATORS[estimatorcfg['class']](**options)
+        return cls.ESTIMATORS[estimatorcfg['class']](**options)

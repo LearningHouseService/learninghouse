@@ -20,6 +20,16 @@ Licensor: Pallets
 Website: https://click.palletsprojects.com/en/7.x/
 License: BSD-3-Clause License
 
+Component: click_log
+Licensor: click-contrib
+Website: https://github.com/click-contrib/click-log
+License: MIT License
+
+Component: paste
+Licensor: Chris Dent
+Website: https://pythonpaste.readthedocs.io/en/latest/
+License: MIT License
+
 Component: PyYAML
 Licensor: Ingy döt Net
 Website: https://pyyaml.org/

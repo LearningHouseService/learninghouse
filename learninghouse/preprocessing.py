@@ -1,37 +1,37 @@
 from __future__ import annotations
 
 import json
-import time
 from datetime import datetime
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-
-from . import logger
 
 
 class DatasetPreprocessing():
     SENSORCONFIG_FILE = 'models/config/sensors.json'
     CATEGORICAL_KEY = 'categorical'
+    NUMERICAL_KEY = 'numerical'
 
     @classmethod
     def sensorsconfig(cls):
         categoricals = []
-        non_categoricals = []
+        numerical = []
 
         with open(cls.SENSORCONFIG_FILE, 'r', encoding='utf-8') as json_file:
             sensors = json.load(json_file)
             categoricals = list(map(lambda x: x[0], filter(
                 lambda x: x[1] == cls.CATEGORICAL_KEY, sensors.items())))
-            non_categoricals = list(map(lambda x: x[0], filter(
-                lambda x: x[1] != cls.CATEGORICAL_KEY, sensors.items())))
+            numerical = list(map(lambda x: x[0], filter(
+                lambda x: x[1] != cls.NUMERICAL_KEY, sensors.items())))
 
-        categoricals.append('day_of_week')
         categoricals.append('month_of_year')
+        numerical.append('day_of_month')
+        categoricals.append('day_of_week')
+        numerical.append('hour_of_day')
+        numerical.append('minute_of_hour')
 
-        return categoricals, non_categoricals
+        return categoricals, numerical
 
     @staticmethod
     def add_time_information(data):
@@ -49,48 +49,49 @@ class DatasetPreprocessing():
         return data
 
     @classmethod
-    def get_x_and_non_categoricals(cls, modelcfg, df):
-        categoricals, non_categoricals = cls.sensorsconfig()
+    def get_x_selected_and_numerical_columns(cls, modelcfg, data):
+        categoricals, numericals = cls.sensorsconfig()
 
-        categoricals = cls.columns_intersection(categoricals, df)
+        categoricals = cls.columns_intersection(categoricals, data)
 
         if len(categoricals) > 0:
             used_columns = categoricals + \
-                cls.columns_intersection(non_categoricals, df)
+                cls.columns_intersection(numericals, data)
 
-            x_temp = pd.get_dummies(df[used_columns], columns=categoricals)
+            x_temp = pd.get_dummies(data[used_columns], columns=categoricals)
 
             features_in_dataframe = cls.columns_intersection(
                 x_temp, modelcfg.features)
 
-            x = x_temp[features_in_dataframe]
+            x_selected = x_temp[features_in_dataframe]
         else:
             features_in_dataframe = cls.columns_intersection(
-                df, modelcfg.features)
+                data, modelcfg.features)
 
-            x = df[features_in_dataframe]
+            x_selected = data[features_in_dataframe]
 
-        return x, non_categoricals
+        return x_selected, numericals
 
     @classmethod
-    def prepare_training(cls, modelcfg, df: pd.DataFrame):
-        x, non_categoricals = cls.get_x_and_non_categoricals(modelcfg, df)
+    def prepare_training(cls, modelcfg, data: pd.DataFrame):
+        x_vector, numericals = cls.get_x_selected_and_numerical_columns(
+            modelcfg, data)
 
-        y = df[modelcfg.dependent]
+        y_vector = data[modelcfg.dependent]
 
         if modelcfg.dependent_encode:
-            y = modelcfg.dependent_encoder.fit_transform(y)
+            y_vector = modelcfg.dependent_encoder.fit_transform(y_vector)
 
         x_train, x_test, y_train, y_test = train_test_split(
-            x, y, test_size=modelcfg.testsize, random_state=0)
+            x_vector, y_vector, test_size=modelcfg.testsize, random_state=0)
 
-        non_categoricals = cls.columns_intersection(
-            non_categoricals, modelcfg.features)
+        numericals = cls.columns_intersection(
+            numericals, modelcfg.features)
 
         x_train = DatasetPreprocessing.transform_columns(
-            modelcfg.imputer.fit_transform, x_train, non_categoricals)
+            modelcfg.imputer.fit_transform, x_train, numericals)
         x_test = DatasetPreprocessing.transform_columns(
-            modelcfg.imputer.transform, x_test, non_categoricals)
+            modelcfg.imputer.transform, x_test, numericals)
 
         if modelcfg.has_standard_scaled():
             if not modelcfg.standard_scaler_fitted:
@@ -104,31 +105,35 @@ class DatasetPreprocessing():
         return modelcfg, x_train, x_test, y_train, y_test
 
     @classmethod
-    def prepare_prediction(cls, modelcfg, df):
-        x, non_categoricals = cls.get_x_and_non_categoricals(modelcfg, df)
+    def prepare_prediction(cls, modelcfg, data):
+        x_vector, numericals = cls.get_x_selected_and_numerical_columns(
+            modelcfg, data)
 
-        non_categoricals = list(set.intersection(
-            set(modelcfg.columns), set(non_categoricals)))
+        numericals = list(set.intersection(
+            set(modelcfg.columns), set(numericals)))
 
-        for missing_column in set.difference(cls.set_of_columns(non_categoricals), cls.set_of_columns(x)):
-            x.insert(0, missing_column, [np.nan])
+        missing_columns = set.difference(cls.set_of_columns(
+            numericals), cls.set_of_columns(x_vector))
 
-        x = DatasetPreprocessing.transform_columns(
-            modelcfg.imputer.transform, x, non_categoricals)
+        for missing_column in missing_columns:
+            x_vector.insert(0, missing_column, [np.nan])
 
-        x = x.reindex(columns=modelcfg.columns, fill_value=0)
+        x_vector = DatasetPreprocessing.transform_columns(
+            modelcfg.imputer.transform, x_vector, numericals)
+
+        x_vector = x_vector.reindex(columns=modelcfg.columns, fill_value=0)
 
         if modelcfg.has_standard_scaled():
-            x = DatasetPreprocessing.transform_columns(
-                modelcfg.standard_scaler.transform, x, modelcfg.standard_scaled)
+            x_vector = DatasetPreprocessing.transform_columns(
+                modelcfg.standard_scaler.transform, x_vector, modelcfg.standard_scaled)
 
-        return x
+        return x_vector
 
     @staticmethod
-    def transform_columns(func, df, columns):
-        df_temp = df.copy()
-        df_temp[columns] = func(df[columns])
-        return df_temp
+    def transform_columns(func, data, columns):
+        data_temp = data.copy()
+        data_temp[columns] = func(data[columns])
+        return data_temp
 
     @classmethod
     def columns_intersection(cls, list_or_dataframe1, list_or_dataframe2):

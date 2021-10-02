@@ -1,6 +1,3 @@
-#coding: utf-8
-import logging
-
 from flask import Flask
 from flask_restful import Api
 from paste.translogger import TransLogger

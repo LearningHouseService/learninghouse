@@ -1,7 +1,8 @@
 #coding: utf-8
 
-from ._version import get_versions
 import logging
+from ._version import get_versions
+
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)

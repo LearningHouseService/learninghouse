@@ -21,7 +21,8 @@ ENV LHS_HOME=/learninghouse \
     USER_ID=9002 \
     GROUP_ID=9002 \
     HOST=0.0.0.0 \
-    PORT=5000
+    PORT=5000 \
+    VERBOSITY_LEVEL=INFO
 
 COPY entrypoint.sh /
 COPY start.sh ${LHS_HOME}/start.sh

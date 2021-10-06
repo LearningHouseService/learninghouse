@@ -33,7 +33,7 @@ class DatasetPreprocessing():
         numericals.append('hour_of_day')
         numericals.append('minute_of_hour')
 
-        logger.info('Sensors config: %s, %s', categoricals, numericals)
+        logger.debug('Sensors config: %s, %s', categoricals, numericals)
 
         return categoricals, numericals
 
@@ -73,6 +73,8 @@ class DatasetPreprocessing():
                 data, modelcfg.features)
 
             x_selected = data[features_in_dataframe]
+
+        x_selected = x_selected.reindex(sorted(x_selected.columns), axis=1)
 
         return x_selected, numericals
 
@@ -122,10 +124,11 @@ class DatasetPreprocessing():
         for missing_column in missing_columns:
             x_vector.insert(0, missing_column, [np.nan])
 
+        x_vector = x_vector.reindex(columns=modelcfg.columns, fill_value=0)
+        x_vector = x_vector.reindex(sorted(x_vector.columns), axis=1)
+
         x_vector = DatasetPreprocessing.transform_columns(
             modelcfg.imputer.transform, x_vector, numericals)
-
-        x_vector = x_vector.reindex(columns=modelcfg.columns, fill_value=0)
 
         if modelcfg.has_standard_scaled():
             x_vector = DatasetPreprocessing.transform_columns(

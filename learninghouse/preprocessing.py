@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+from . import logger
+
 
 class DatasetPreprocessing():
     SENSORCONFIG_FILE = 'models/config/sensors.json'
@@ -16,22 +18,24 @@ class DatasetPreprocessing():
     @classmethod
     def sensorsconfig(cls):
         categoricals = []
-        numerical = []
+        numericals = []
 
         with open(cls.SENSORCONFIG_FILE, 'r', encoding='utf-8') as json_file:
             sensors = json.load(json_file)
             categoricals = list(map(lambda x: x[0], filter(
                 lambda x: x[1] == cls.CATEGORICAL_KEY, sensors.items())))
-            numerical = list(map(lambda x: x[0], filter(
-                lambda x: x[1] != cls.NUMERICAL_KEY, sensors.items())))
+            numericals = list(map(lambda x: x[0], filter(
+                lambda x: x[1] == cls.NUMERICAL_KEY, sensors.items())))
 
         categoricals.append('month_of_year')
-        numerical.append('day_of_month')
+        numericals.append('day_of_month')
         categoricals.append('day_of_week')
-        numerical.append('hour_of_day')
-        numerical.append('minute_of_hour')
+        numericals.append('hour_of_day')
+        numericals.append('minute_of_hour')
 
-        return categoricals, numerical
+        logger.info('Sensors config: %s, %s', categoricals, numericals)
+
+        return categoricals, numericals
 
     @staticmethod
     def add_time_information(data):

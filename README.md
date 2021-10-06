@@ -41,7 +41,7 @@ Configuration is stored in json format.
 
 ### General configuration
 
-In general send data of all sensors to **learningHouse Service** especially when training your models. The service will save all data fields even if they are not used in current model configuration as a `feature`. This will give you the possibility to choose different features later on to improve your model after some training (There will be some features later on to support you with this improvment). 
+In general send data of all sensors to **learningHouse Service** especially when training your models. The service will save all data fields even if they are not used in current model configuration as a `feature`. This will give you the possibility to choose different features later on to improve your model after some training (There will be some service later on to support you with this improvment). 
 
 In general there are two different data types your sensor data can be divided in. `Numerical data` can be processed directly by your models. `Categorical data` has to be preproccesed by the service to be used as a `feature`. `Categorical data` can be identified by a simple rule:
 
@@ -78,11 +78,9 @@ Store a darkness.json in models/config directory with following content:
 ```
 {
     "estimator": {
-        "class": "RandomForestClassifier",
-        "options": {
-            "n_estimators": 100, 
-            "random_state": 0
-        }
+        "typed": "classifier",
+        "estimators": 100, 
+        "max_depth": 5
     },
     "features": ["azimuth", "elevation", "rain_gauge", "pressure_trend_1h_falling"],
     "dependent": "darkness",
@@ -95,18 +93,20 @@ Store a darkness.json in models/config directory with following content:
 
 #### Estimator
 
-First of all we choose an `estimator` with one of scikit-learn estimator classes and configure it with the options you can find at API description. 
+**LearningHouse Service** can predict values using an estimator. An estimator can be of type `classifier` which fits best for your needs if you have somekind of categorical output like in the example true and false. If you want to predict a numerical value for example the setpoint of an heating equipment use the type `regressor` instead.
 
-At the moment learningHouse service supports the following estimators from scikit-learn:
+For both types **learningHouse Service** uses a machine learning algorithm called random forest estimation. This algorithm builds a "forest" of decision trees with your `features` and takes the mean of the prediction of all of them to give you a best result. For more details see the API description of scikit-learn:
 
-| Estimator class | API Reference for options |
+| Estimator type | API Reference |
 |-----------------|-------------------|
-| DecisionTreeClassifier | https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html#sklearn.tree.DecisionTreeClassifier |
+| RandomForestRegressor | https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor |
 | RandomForestClassifier | https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier |
+
+You can adjust the amount of decision trees by using `estimators` (default: 100) option. And the maximum depth of each tree by using `max_depth` (default: 5) option. Both options are optional. Try to resize this value to optimize the accuracy of your model.
 
 #### Features
 
-The list of `features` is required and holds the names of the sensor data the model uses to take a decision. `Categorical data` as mentioned above will be preprocessed by the service and is divided to one column by each known value. You can use each column as a seperate `feature`. There will be a feature in this service later on to help you to choose the set of best features. Meanwhile use the ones you think they maybe have influence on the decision as a first try.
+The list of `features` is required and holds the names of the sensor data the model uses to take a decision. `Categorical data` as mentioned above will be preprocessed by the service and is divided to one column by each known value. You can use each column as a seperate `feature`. There will be a service later on to help you to choose the set of best features. Meanwhile use the ones you think they maybe have influence on the decision as a first try and start training your house with all sensor data as mentioned above.
 
 #### Dependent variable
 
@@ -136,11 +136,19 @@ To start service in production mode and specify listen address and port use foll
 learninghouse --production --host 127.0.0.1 --port 5001
 ```
 
+For more or less log output set the verbosity level of the service to DEBUG, INFO (default), WARNING, ERROR or CRITICAL
+
+```
+learninghouse --production --host 127.0.0.1 --port 5001 --verbosity DEBUG
+```
+
 Run with docker:
 
 ```
 docker run --name learninghouse --rm -v models:/learninghouse/models -p 5000:5000 learninghouseservice/learninghouse:latest
 ```
+
+Like above you can adjust the VERBOSITY_LEVEL by adding it as an environment variable.
 
 ## Train model
 

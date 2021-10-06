@@ -5,9 +5,10 @@ from os import path, stat
 
 import numpy as np
 import pandas as pd
-from flask import jsonify, request
+from flask import jsonify, request, __version__ as flask_version
 from flask_restful import Resource
 from joblib import dump, load
+from sklearn import __version__ as skl_version
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -48,7 +49,7 @@ class ModelConfiguration():
         self.columns = None
         self.score = 0.0
         self.confusion = None
-        self.version = __version__
+        self.versions = self.actual_versions()
 
     @staticmethod
     def __load_initial_config(name):
@@ -83,10 +84,20 @@ class ModelConfiguration():
             'dependent': self.dependent,
             'score': self.score,
             'confusion': self.confusion,
-            'version': {
-                'model': self.version,
-                'service': __version__
+            'versions': {
+                'model': self.versions,
+                'running': self.actual_versions()
             }
+        }
+
+    @staticmethod
+    def actual_versions():
+        return {
+            'learninghouse': __version__,
+            'scikit-learn': skl_version,
+            'pandas': pd.__version__,
+            'numpy': np.__version__,
+            'flask': flask_version
         }
 
     def dump(self, estimator, columns, score, confusion):
@@ -170,7 +181,8 @@ class ModelTraining(Resource):
             modelcfg, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepare_training(
                 modelcfg, data)
 
-            estimator = EstimatorFactory.get_estimator(modelcfg.estimatorcfg)
+            estimator, modelcfg.estimatorcfg = EstimatorFactory.get_estimator(
+                **modelcfg.estimatorcfg)
 
             columns = x_train.columns
 

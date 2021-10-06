@@ -13,6 +13,7 @@ from .service import run
 @click.option('--port', default=5000)
 @click_log.simple_verbosity_option(logger)
 def cli(**kwargs):
+    logger.info('CLI provided by click (%s)', click.__version__)
     run(**kwargs)
 
 

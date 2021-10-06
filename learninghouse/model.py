@@ -174,6 +174,8 @@ class ModelTraining(Resource):
 
             columns = x_train.columns
 
+            logger.debug('Train data columns: %s', columns)
+
             estimator.fit(x_train, y_train)
 
             y_pred = estimator.predict(x_test)
@@ -207,6 +209,8 @@ class ModelPrediction(Resource):
 
             prepared_query = DatasetPreprocessing.prepare_prediction(
                 modelcfg, query)
+
+            logger.debug('Predict data columns: %s', prepared_query.columns)
 
             prediction = modelcfg.estimator.predict(prepared_query)
 

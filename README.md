@@ -1,6 +1,5 @@
 # learningHouse Service - Docker
-[![License](https://img.shields.io/github/license/LearningHouseService/learninghouse-core)](https://github.com/LearningHouseService/learninghouse-core/blob/master/LICENSE)
-[![Build Status](https://img.shields.io/travis/LearningHouseService/learninghouse-core)](https://travis-ci.org/LearningHouseService/learninghouse-core) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) [![Docker version](https://img.shields.io/docker/v/learninghouseservice/learninghouse/latest?label=docker)](https://hub.docker.com/r/learninghouseservice/learninghouse)
+[![License](https://img.shields.io/github/license/LearningHouseService/learninghouse-core)](https://github.com/LearningHouseService/learninghouse-core/blob/master/LICENSE) [![Release](https://img.shields.io/github/v/release/LearningHouseService/learninghouse-core)](https://github.com/LearningHouseService/learninghouse-core/releases/latest) [![Build Status](https://img.shields.io/travis/com/LearningHouseService/learninghouse-core)](https://app.travis-ci.com/LearningHouseService/learninghouse-core) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) [![Docker version](https://img.shields.io/docker/v/learninghouseservice/learninghouse/latest?label=docker)](https://hub.docker.com/r/learninghouseservice/learninghouse)
 
 ![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/artwork/learninghouse_logo.svg)
 

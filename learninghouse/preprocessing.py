@@ -74,7 +74,7 @@ class DatasetPreprocessing():
 
             x_selected = data[features_in_dataframe]
 
-        x_selected = x_selected.reindex(sorted(x_selected.columns), axis=1)
+        x_selected = cls.sort_columns(x_selected)
 
         return x_selected, numericals
 
@@ -108,6 +108,9 @@ class DatasetPreprocessing():
             x_test = DatasetPreprocessing.transform_columns(
                 modelcfg.standard_scaler.transform, x_test, modelcfg.standard_scaled)
 
+        x_train = cls.sort_columns(x_train)
+        x_test = cls.sort_columns(x_test)
+
         return modelcfg, x_train, x_test, y_train, y_test
 
     @classmethod
@@ -115,8 +118,8 @@ class DatasetPreprocessing():
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
             modelcfg, data)
 
-        numericals = list(set.intersection(
-            set(modelcfg.columns), set(numericals)))
+        numericals = cls.columns_intersection(
+            modelcfg.columns.tolist(), numericals)
 
         missing_columns = set.difference(cls.set_of_columns(
             numericals), cls.set_of_columns(x_vector))
@@ -125,7 +128,7 @@ class DatasetPreprocessing():
             x_vector.insert(0, missing_column, [np.nan])
 
         x_vector = x_vector.reindex(columns=modelcfg.columns, fill_value=0)
-        x_vector = x_vector.reindex(sorted(x_vector.columns), axis=1)
+        x_vector = cls.sort_columns(x_vector)
 
         x_vector = DatasetPreprocessing.transform_columns(
             modelcfg.imputer.transform, x_vector, numericals)
@@ -134,7 +137,7 @@ class DatasetPreprocessing():
             x_vector = DatasetPreprocessing.transform_columns(
                 modelcfg.standard_scaler.transform, x_vector, modelcfg.standard_scaled)
 
-        return x_vector
+        return cls.sort_columns(x_vector)
 
     @staticmethod
     def transform_columns(func, data, columns):
@@ -142,11 +145,16 @@ class DatasetPreprocessing():
         data_temp[columns] = func(data[columns])
         return data_temp
 
+    @staticmethod
+    def sort_columns(data):
+        data_temp = data.copy()
+        return data_temp.reindex(sorted(data.columns), axis=1)
+
     @classmethod
     def columns_intersection(cls, list_or_dataframe1, list_or_dataframe2):
         set1 = cls.set_of_columns(list_or_dataframe1)
         set2 = cls.set_of_columns(list_or_dataframe2)
-        return list(set.intersection(set1, set2))
+        return sorted(list(set.intersection(set1, set2)))
 
     @staticmethod
     def set_of_columns(list_or_dataframe):

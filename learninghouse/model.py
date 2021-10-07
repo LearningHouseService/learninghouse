@@ -190,12 +190,15 @@ class ModelTraining(Resource):
 
             estimator.fit(x_train, y_train)
 
-            y_pred = estimator.predict(x_test)
+            if modelcfg.estimatorcfg['typed'] == 'classifier':
+                y_pred = estimator.predict(x_test)
+                confusion = confusion_matrix(y_test, y_pred).tolist()
+                score = accuracy_score(y_test, y_pred)
+            else:
+                confusion = None
+                score = estimator.score(x_test, y_test)
 
-            confusion = confusion_matrix(y_test, y_pred)
-            score = accuracy_score(y_test, y_pred)
-
-            modelcfg.dump(estimator, columns, score, confusion.tolist())
+            modelcfg.dump(estimator, columns, score, confusion)
 
             return ModelAPI.make_json_response(modelcfg.config_object())
         except FileNotFoundError:
@@ -226,7 +229,7 @@ class ModelPrediction(Resource):
 
             prediction = modelcfg.estimator.predict(prepared_query)
 
-            if modelcfg.dependent_encode:
+            if modelcfg.dependent_encode and modelcfg.estimatorcfg['typed'] == 'classifier':
                 prediction = modelcfg.dependent_encoder.inverse_transform(
                     prediction)
                 prediction = list(map(bool, prediction))

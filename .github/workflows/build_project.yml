@@ -1,4 +1,4 @@
-name: Build Python Package
+name: build-project
 
 on: [push, pull_request]
 

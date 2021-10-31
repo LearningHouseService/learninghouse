@@ -3,8 +3,17 @@ import versioneer
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-with open("requirements.txt", "r") as fh:
-    requirements = [line.strip() for line in fh]
+
+requirements = ["waitress",
+                "flask",
+                "flask_restful",
+                "click",
+                "click_log",
+                "paste",
+                "pyyaml",
+                "numpy",
+                "pandas",
+                "scikit-learn"]
 
 setuptools.setup(
     name='learninghouse',
@@ -12,11 +21,11 @@ setuptools.setup(
     cmdclass=versioneer.get_cmdclass(),
     description='learningHouse - Teach your smart home everything',
     long_description=long_description,
-    long_description_content_type='text/markdown',        
+    long_description_content_type='text/markdown',
     url='https://github.com/LearningHouseService/learninghouse-core',
     author='Johannes Ott',
     author_email='info@johannes-ott.net',
-    classifiers=[ 
+    classifiers=[
         'Development Status :: 4 - Beta',
 
         'Topic :: Home Automation',
@@ -27,13 +36,15 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='smart home, machine learning, house automation',
     package_dir={'learninghouse': 'learninghouse'},
     packages=['learninghouse'],
     python_requires='>=3.6, <4',
-    install_requires = requirements,
+    install_requires=requirements,
     entry_points={
         'console_scripts': [
             'learninghouse=learninghouse.cli:cli'

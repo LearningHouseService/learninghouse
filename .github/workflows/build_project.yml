@@ -13,8 +13,14 @@ jobs:
         id: prep
         run: |
           VERSION=0.11.0
-          DOCKER_IMAGE=${{ secrets.DOCKER_REPO }}/learninghouse
-        
+
+          if [ "${{github.event_name}}" == "pull-request" ]
+          then
+            DOCKER_IMAGE=pullrequest/learninghouse
+          else
+            DOCKER_IMAGE=${{ secrets.DOCKER_REPO }}/learninghouse
+          fi
+
           TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:latest"
 
           echo ${DOCKER_IMAGE}
@@ -24,6 +30,8 @@ jobs:
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=docker_image::${DOCKER_IMAGE}
           echo ::set-output name=build_date::$(date +"%Y-%m-%dT%H:%M:%SZ")
+
+        shell: bash
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@master

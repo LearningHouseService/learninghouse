@@ -17,6 +17,8 @@ jobs:
         
           TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:latest"
 
+          echo ${DOCKER_IMAGE}
+
           # Set output parameters.
           echo ::set-output name=version::${VERSION}
           echo ::set-output name=tags::${TAGS}

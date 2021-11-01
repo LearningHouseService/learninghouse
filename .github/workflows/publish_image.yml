@@ -7,7 +7,7 @@ on:
 
 jobs:
   docker:
-    if: github.repository == 'LearningHouseService/learninghouse'
+    if: github.repository == 'LearningHouseService/learninghouse-docker'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

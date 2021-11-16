@@ -14,9 +14,9 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from werkzeug.exceptions import BadRequest
 
-from . import __version__, logger
-from .estimator import EstimatorFactory
-from .preprocessing import DatasetPreprocessing
+from learninghouse import __version__, logger
+from learninghouse.estimator import EstimatorFactory
+from learninghouse.preprocessing import DatasetPreprocessing
 
 
 class ModelConfiguration():

@@ -1,6 +1,9 @@
 #coding: utf-8
 
+from typing import Optional
+
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
 
 
 class EstimatorFactory():

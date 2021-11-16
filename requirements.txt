@@ -1,6 +1,6 @@
-waitress 
-flask
-flask_restful
+fastapi
+uvicorn[standard]
+pydantic
 click
 click_log
 paste

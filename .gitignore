@@ -2,6 +2,10 @@
 **/models/*/*.csv
 **/models/*/*.pkl
 
+**/brain/*/*.json
+**/brain/*/*.csv
+**/brain/*/*.pkl
+
 logging.yaml
 
 # Byte-compiled / optimized / DLL files

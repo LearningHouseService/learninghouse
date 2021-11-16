@@ -1,12 +1,12 @@
 import setuptools
 import versioneer
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-requirements = ["waitress",
-                "flask",
-                "flask_restful",
+requirements = ["fastapi",
+                "pydantic",
+                "uvicorn[standard]",
                 "click",
                 "click_log",
                 "paste",

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import json
 from datetime import datetime
 
@@ -9,9 +11,12 @@ from sklearn.model_selection import train_test_split
 
 from learninghouse import logger
 
+if TYPE_CHECKING:
+    from learninghouse.brain import BrainConfiguration
+
 
 class DatasetPreprocessing():
-    SENSORCONFIG_FILE = 'models/config/sensors.json'
+    SENSORCONFIG_FILE = 'brain/config/sensors.json'
     CATEGORICAL_KEY = 'categorical'
     NUMERICAL_KEY = 'numerical'
 
@@ -38,7 +43,7 @@ class DatasetPreprocessing():
         return categoricals, numericals
 
     @staticmethod
-    def add_time_information(data):
+    def add_time_information(data: pd.DataFrame):
         if 'timestamp' not in data:
             data['timestamp'] = datetime.now().timestamp()
 
@@ -53,7 +58,7 @@ class DatasetPreprocessing():
         return data
 
     @classmethod
-    def get_x_selected_and_numerical_columns(cls, modelcfg, data):
+    def get_x_selected_and_numerical_columns(cls, brain: BrainConfiguration, data):
         categoricals, numericals = cls.sensorsconfig()
 
         categoricals = cls.columns_intersection(categoricals, data)
@@ -65,12 +70,12 @@ class DatasetPreprocessing():
             x_temp = pd.get_dummies(data[used_columns], columns=categoricals)
 
             features_in_dataframe = cls.columns_intersection(
-                x_temp, modelcfg.features)
+                x_temp, brain.dataset.features)
 
             x_selected = x_temp[features_in_dataframe]
         else:
             features_in_dataframe = cls.columns_intersection(
-                data, modelcfg.features)
+                data, brain.dataset.features)
 
             x_selected = data[features_in_dataframe]
 
@@ -79,39 +84,31 @@ class DatasetPreprocessing():
         return x_selected, numericals
 
     @classmethod
-    def prepare_training(cls, modelcfg, data: pd.DataFrame):
+    def prepare_training(cls, brain: BrainConfiguration, data: pd.DataFrame):
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
-            modelcfg, data)
+            brain, data)
 
-        y_vector = data[modelcfg.dependent]
+        y_vector = data[brain.dataset.dependent]
 
-        if modelcfg.dependent_encode:
-            y_vector = modelcfg.dependent_encoder.fit_transform(y_vector)
+        if brain.preprocessing.dependent_encode:
+            y_vector = brain.preprocessing.dependent_encoder.fit_transform(
+                y_vector)
 
         x_train, x_test, y_train, y_test = train_test_split(
-            x_vector, y_vector, test_size=modelcfg.testsize, random_state=0)
+            x_vector, y_vector, test_size=brain.preprocessing.testsize, random_state=0)
 
         numericals = cls.columns_intersection(
-            numericals, modelcfg.features)
+            numericals, brain.dataset.features)
 
         x_train = DatasetPreprocessing.transform_columns(
-            modelcfg.imputer.fit_transform, x_train, numericals)
+            brain.preprocessing.imputer.fit_transform, x_train, numericals)
         x_test = DatasetPreprocessing.transform_columns(
-            modelcfg.imputer.transform, x_test, numericals)
-
-        if modelcfg.has_standard_scaled():
-            if not modelcfg.standard_scaler_fitted:
-                x_train = DatasetPreprocessing.transform_columns(
-                    modelcfg.standard_scaler.fit_transform, x_train, modelcfg.standard_scaled)
-                modelcfg.standard_scaler_fitted = True
-
-            x_test = DatasetPreprocessing.transform_columns(
-                modelcfg.standard_scaler.transform, x_test, modelcfg.standard_scaled)
+            brain.preprocessing.imputer.transform, x_test, numericals)
 
         x_train = cls.sort_columns(x_train)
         x_test = cls.sort_columns(x_test)
 
-        return modelcfg, x_train, x_test, y_train, y_test
+        return brain, x_train, x_test, y_train, y_test
 
     @classmethod
     def prepare_prediction(cls, modelcfg, data):

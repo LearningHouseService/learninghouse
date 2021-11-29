@@ -1,8 +1,9 @@
-from typing import List
+from typing import Any, Dict, List
+
+from pydantic import BaseModel
 
 from learninghouse import ServiceVersions, versions
 from learninghouse.estimator.api import EstimatorConfiguration
-from pydantic import BaseModel
 
 
 class BrainErrorMessage(BaseModel):
@@ -30,5 +31,29 @@ class BrainInfo(BaseModel):
                 'dependent_encode': True,
                 'score': 0.85,
                 'versions': versions
+            }
+        }
+
+
+class BrainRequest(BaseModel):
+    data: Dict[str, Any]
+
+
+class BrainTrainingRequest(BrainRequest):
+    class Config:
+        # pylint: disable=too-few-public-methods
+        schema_extra = {
+            'example': {
+                'data': {
+                    'azimuth': 321.4441223144531,
+                    'elevation': -19.691608428955078,
+                    'rain_gauge': 0.0,
+                    'pressure': 971.0,
+                    'pressure_trend_1h': "falling",
+                    'temperature_outside': 23.0,
+                    'temperature_trend_1h': "rising",
+                    'light_state': False,
+                    'darkness': True
+                }
             }
         }

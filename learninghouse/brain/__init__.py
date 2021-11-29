@@ -1,18 +1,26 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from os import path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import joblib
+import pandas as pd
 from fastapi import FastAPI, Path, Request
 from fastapi.responses import JSONResponse
 from learninghouse import ServiceVersions, logger, versions
-from learninghouse.brain.api import BrainErrorMessage, BrainInfo
-from learninghouse.brain.exceptions import (BrainException, BrainNotActual,
+from learninghouse.brain.api import (BrainErrorMessage, BrainInfo,
+                                     BrainTrainingRequest)
+from learninghouse.brain.exceptions import (BrainException,
+                                            BrainNoConfiguration,
+                                            BrainNotActual, BrainNotEnoughData,
                                             BrainNotTrained)
+from learninghouse.estimator import EstimatorFactory
 from learninghouse.estimator.api import EstimatorConfiguration
+from learninghouse.preprocessing import DatasetPreprocessing
 from learninghouse.preprocessing.api import (DatasetConfiguration,
                                              PreprocessingConfiguration)
+from sklearn.metrics import accuracy_score
 
 if TYPE_CHECKING:
     from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -31,8 +39,8 @@ class BrainConfiguration():
             **self._required_param(json_config, 'estimator'))
 
         self.dataset: DatasetConfiguration = DatasetConfiguration(
-            self._required_param(json_config, 'features'),
-            self._required_param(json_config, 'dependent')
+            features=self._required_param(json_config, 'features'),
+            dependent=self._required_param(json_config, 'dependent')
         )
 
         self.preprocessing: PreprocessingConfiguration = PreprocessingConfiguration(
@@ -47,7 +55,7 @@ class BrainConfiguration():
 
     @classmethod
     def _load_initial_config(cls, name: str):
-        with open(BrainConfiguration.CONFIG_FILE % name, 'r', encoding='utf-8') as config_file:
+        with open(cls.CONFIG_FILE % name, 'r', encoding='utf-8') as config_file:
             return json.load(config_file)
 
     @classmethod
@@ -104,6 +112,67 @@ class BrainConfiguration():
         joblib.dump(self, self.COMPILED_FILE % self.name)
 
 
+class BrainTraining():
+    TRAINING_FILE = 'brain/training/%s.csv'
+
+    @classmethod
+    def request(cls, brain: str, request_data: Optional[Dict[str, Any]] = None):
+        filename = cls.TRAINING_FILE % brain
+
+        if request_data is None:
+            if path.exists(filename):
+                data = pd.read_csv(filename)
+            else:
+                raise BrainNotEnoughData()
+        else:
+            request_data = DatasetPreprocessing.add_time_information(
+                request_data)
+            if path.exists(filename):
+                data_temp = pd.read_csv(filename)
+                data = data_temp.append([request_data], ignore_index=True)
+            else:
+                data = pd.DataFrame([request_data])
+
+            data.to_csv(filename, sep=',', index=False)
+
+        return cls.train(brain, data)
+
+    @staticmethod
+    def train(name: str, data: pd.DataFrame):
+        try:
+            brain = BrainConfiguration(name)
+
+            if len(data.index) < 10:
+                raise BrainNotEnoughData()
+
+            brain, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepare_training(
+                brain, data)
+
+            estimator = EstimatorFactory.get_estimator(brain.estimatorcfg)
+
+            columns = x_train.columns
+
+            logger.debug('Train data columns: %s', columns)
+
+            estimator.fit(x_train, y_train)
+
+            if brain.estimatorcfg.typed == 'classifier':
+                y_pred = estimator.predict(x_test)
+                score = accuracy_score(y_test, y_pred)
+            else:
+                score = estimator.score(x_test, y_test)
+
+            brain.compile(estimator, columns.to_list(), score)
+
+            return brain.info()
+        except FileNotFoundError as exc:
+            logger.exception(exc)
+            raise BrainNoConfiguration() from exc
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.exception(exc)
+            raise BrainException() from exc
+
+
 class BrainAPI():
     @staticmethod
     def register(app: FastAPI) -> FastAPI:
@@ -124,8 +193,38 @@ class BrainAPI():
                      BrainNotActual.STATUS_CODE: BrainNotActual.description(),
                      BrainException.STATUS_CODE: BrainException.description()
                  })
-        async def info(name: str):
+        async def info_get(name: str):
             brain_config = BrainConfiguration.load_compiled(name)
-            return brain_config
+            return brain_config.info()
+
+        @app.post('/brain/{name}/training',
+                  response_model=BrainInfo,
+                  summary='Train the brain again',
+                  description='After version updates train the brain with existing data.',
+                  tags=['brain'],
+                  responses={
+                      200: {
+                          'description': 'Information of the trained brain'
+                      },
+                      BrainNotEnoughData.STATUS_CODE: BrainNotEnoughData.description(),
+                      BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.description()
+                  })
+        async def training_post(name: str):
+            return BrainTraining.request(name)
+
+        @app.put('/brain/{name}/training',
+                 response_model=BrainInfo,
+                 summary='Train the brain with new data',
+                 description='Train the brain with additional data.',
+                 tags=['brain'],
+                 responses={
+                     200: {
+                         'description': 'Information of the trained brain'
+                     },
+                     BrainNotEnoughData.STATUS_CODE: BrainNotEnoughData.description(),
+                     BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.description()
+                 })
+        async def training_put(name: str, request_data: BrainTrainingRequest):
+            return BrainTraining.request(name, request_data.data)
 
         return app

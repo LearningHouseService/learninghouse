@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import json
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-
 from learninghouse import logger
+from sklearn.model_selection import train_test_split
 
 if TYPE_CHECKING:
     from learninghouse.brain import BrainConfiguration
@@ -21,7 +19,7 @@ class DatasetPreprocessing():
     NUMERICAL_KEY = 'numerical'
 
     @classmethod
-    def sensorsconfig(cls):
+    def sensorsconfig(cls) -> Tuple[List[str], List[str]]:
         categoricals = []
         numericals = []
 
@@ -43,7 +41,7 @@ class DatasetPreprocessing():
         return categoricals, numericals
 
     @staticmethod
-    def add_time_information(data: pd.DataFrame):
+    def add_time_information(data: Dict[str, Any]) -> Dict[str, Any]:
         if 'timestamp' not in data:
             data['timestamp'] = datetime.now().timestamp()
 
@@ -58,7 +56,10 @@ class DatasetPreprocessing():
         return data
 
     @classmethod
-    def get_x_selected_and_numerical_columns(cls, brain: BrainConfiguration, data):
+    def get_x_selected_and_numerical_columns(cls,
+                                             brain: BrainConfiguration,
+                                             data: pd.DataFrame) \
+            -> Tuple[pd.DataFrame, List[str]]:
         categoricals, numericals = cls.sensorsconfig()
 
         categoricals = cls.columns_intersection(categoricals, data)
@@ -84,7 +85,10 @@ class DatasetPreprocessing():
         return x_selected, numericals
 
     @classmethod
-    def prepare_training(cls, brain: BrainConfiguration, data: pd.DataFrame):
+    def prepare_training(cls,
+                         brain: BrainConfiguration,
+                         data: pd.DataFrame) \
+            -> Tuple[BrainConfiguration, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
             brain, data)
 
@@ -111,12 +115,14 @@ class DatasetPreprocessing():
         return brain, x_train, x_test, y_train, y_test
 
     @classmethod
-    def prepare_prediction(cls, modelcfg, data):
+    def prepare_prediction(cls,
+                           brain: BrainConfiguration,
+                           data: pd.DataFrame) -> pd.DataFrame:
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
-            modelcfg, data)
+            brain, data)
 
         numericals = cls.columns_intersection(
-            modelcfg.columns.tolist(), numericals)
+            brain.preprocessing.columns, numericals)
 
         missing_columns = set.difference(cls.set_of_columns(
             numericals), cls.set_of_columns(x_vector))
@@ -124,37 +130,39 @@ class DatasetPreprocessing():
         for missing_column in missing_columns:
             x_vector.insert(0, missing_column, [np.nan])
 
-        x_vector = x_vector.reindex(columns=modelcfg.columns, fill_value=0)
+        x_vector = x_vector.reindex(
+            columns=brain.preprocessing.columns, fill_value=0)
         x_vector = cls.sort_columns(x_vector)
 
         x_vector = DatasetPreprocessing.transform_columns(
-            modelcfg.imputer.transform, x_vector, numericals)
-
-        if modelcfg.has_standard_scaled():
-            x_vector = DatasetPreprocessing.transform_columns(
-                modelcfg.standard_scaler.transform, x_vector, modelcfg.standard_scaled)
+            brain.preprocessing.imputer.transform, x_vector, numericals)
 
         return cls.sort_columns(x_vector)
 
     @staticmethod
-    def transform_columns(func, data, columns):
+    def transform_columns(func: Callable,
+                          data: pd.DataFrame,
+                          columns: List[str]) -> pd.DataFrame():
         data_temp = data.copy()
         data_temp[columns] = func(data[columns])
         return data_temp
 
     @staticmethod
-    def sort_columns(data):
+    def sort_columns(data: pd.DataFrame) -> pd.DataFrame:
         data_temp = data.copy()
         return data_temp.reindex(sorted(data.columns), axis=1)
 
     @classmethod
-    def columns_intersection(cls, list_or_dataframe1, list_or_dataframe2):
+    def columns_intersection(cls,
+                             list_or_dataframe1: pd.DataFrame | List[str],
+                             list_or_dataframe2: pd.DataFrame | List[str]) \
+            -> List[str]:
         set1 = cls.set_of_columns(list_or_dataframe1)
         set2 = cls.set_of_columns(list_or_dataframe2)
         return sorted(list(set.intersection(set1, set2)))
 
     @staticmethod
-    def set_of_columns(list_or_dataframe):
+    def set_of_columns(list_or_dataframe: pd.DataFrame | List[str]) -> Set[str]:
         set_of_columns = None
         if isinstance(list_or_dataframe, pd.DataFrame):
             set_of_columns = set(list_or_dataframe.columns.values.tolist())

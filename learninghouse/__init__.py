@@ -2,6 +2,8 @@ import logging
 
 from typing import Optional
 
+from enum import Enum
+
 from pydantic import BaseModel
 
 from fastapi import __version__ as fastapi_version
@@ -31,3 +33,13 @@ class ServiceVersions(BaseModel):
 
 
 versions = ServiceVersions()
+
+
+class LearningHouseEnum(Enum):
+    def __new__(cls, *args):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __str__(self) -> str:
+        return str(self.value)

@@ -75,7 +75,7 @@ class BrainNotActual(BrainException):
     def description(cls) -> Dict:
         return {
             'model': BrainErrorMessage,
-            'description': 'If brain was not compiled with actual versions of service and libraries.',
+            'description': 'If brain was not trained with actual versions of service and libraries.',
             'content': {
                 MIMETYPE_JSON: {
                     'example': {

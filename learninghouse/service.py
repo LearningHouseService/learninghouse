@@ -3,14 +3,14 @@ import uvicorn
 
 
 from learninghouse import versions, logger
-from learninghouse.brain import BrainAPI
+from learninghouse.brain import register as brain_register_api
 
 APP_REFERENCE = "learninghouse.service:app"
 
 app = FastAPI(
     title='learningHouse Service',
     version=versions.service)
-app = BrainAPI.register(app)
+app = brain_register_api(app)
 
 
 def run(production, host, port):

@@ -8,8 +8,8 @@ from sklearn.preprocessing import LabelEncoder
 
 
 class DatasetConfiguration(BaseModel):
-    features: List[str]
     dependent: str
+    features: Optional[List[str]] = None
 
 
 class PreprocessingConfiguration():

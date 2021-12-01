@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
+from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set,
+                    Tuple)
 
 import numpy as np
 import pandas as pd
-from learninghouse import logger
 from sklearn.model_selection import train_test_split
+from learninghouse import logger
 
 if TYPE_CHECKING:
     from learninghouse.brain import BrainConfiguration
@@ -58,27 +59,34 @@ class DatasetPreprocessing():
     @classmethod
     def get_x_selected_and_numerical_columns(cls,
                                              brain: BrainConfiguration,
-                                             data: pd.DataFrame) \
+                                             data: pd.DataFrame,
+                                             only_features: bool) \
             -> Tuple[pd.DataFrame, List[str]]:
         categoricals, numericals = cls.sensorsconfig()
 
         categoricals = cls.columns_intersection(categoricals, data)
 
-        if len(categoricals) > 0:
-            used_columns = categoricals + \
-                cls.columns_intersection(numericals, data)
+        used_columns = categoricals + \
+            cls.columns_intersection(numericals, data)
 
+        if len(categoricals) > 0:
             x_temp = pd.get_dummies(data[used_columns], columns=categoricals)
 
-            features_in_dataframe = cls.columns_intersection(
-                x_temp, brain.dataset.features)
+            if only_features:
+                features_in_dataframe = cls.columns_intersection(
+                    x_temp, brain.dataset.features)
 
-            x_selected = x_temp[features_in_dataframe]
+                x_selected = x_temp[features_in_dataframe]
+            else:
+                x_selected = x_temp
         else:
-            features_in_dataframe = cls.columns_intersection(
-                data, brain.dataset.features)
+            if only_features:
+                features_in_dataframe = cls.columns_intersection(
+                    data, brain.dataset.features)
 
-            x_selected = data[features_in_dataframe]
+                x_selected = data[features_in_dataframe]
+            else:
+                x_selected = data[used_columns]
 
         x_selected = cls.sort_columns(x_selected)
 
@@ -87,10 +95,11 @@ class DatasetPreprocessing():
     @classmethod
     def prepare_training(cls,
                          brain: BrainConfiguration,
-                         data: pd.DataFrame) \
+                         data: pd.DataFrame,
+                         only_features: bool) \
             -> Tuple[BrainConfiguration, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
-            brain, data)
+            brain, data, only_features)
 
         y_vector = data[brain.dataset.dependent]
 
@@ -101,8 +110,13 @@ class DatasetPreprocessing():
         x_train, x_test, y_train, y_test = train_test_split(
             x_vector, y_vector, test_size=brain.preprocessing.testsize, random_state=0)
 
-        numericals = cls.columns_intersection(
-            numericals, brain.dataset.features)
+        if only_features:
+            numericals = cls.columns_intersection(
+                numericals, brain.dataset.features)
+        else:
+            numericals = cls.columns_intersection(numericals, data)
+
+        logger.warning(numericals)
 
         x_train = DatasetPreprocessing.transform_columns(
             brain.preprocessing.imputer.fit_transform, x_train, numericals)
@@ -119,13 +133,20 @@ class DatasetPreprocessing():
                            brain: BrainConfiguration,
                            data: pd.DataFrame) -> pd.DataFrame:
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
-            brain, data)
+            brain, data, True)
+
+        logger.warning(numericals)
+        logger.warning(brain.preprocessing.columns)
 
         numericals = cls.columns_intersection(
             brain.preprocessing.columns, numericals)
 
+        logger.warning(numericals)
+
         missing_columns = set.difference(cls.set_of_columns(
             numericals), cls.set_of_columns(x_vector))
+
+        logger.warning(missing_columns)
 
         for missing_column in missing_columns:
             x_vector.insert(0, missing_column, [np.nan])

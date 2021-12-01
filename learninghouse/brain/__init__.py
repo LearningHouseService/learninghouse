@@ -8,6 +8,9 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, Path, Request
 from fastapi.responses import JSONResponse
+from sklearn.feature_selection import SelectFromModel
+from sklearn.metrics import accuracy_score
+
 from learninghouse import ServiceVersions, logger, versions
 from learninghouse.brain.api import (BrainErrorMessage,
                                      BrainEstimatorConfiguration,
@@ -22,7 +25,6 @@ from learninghouse.brain.exceptions import (BrainException,
 from learninghouse.preprocessing import DatasetPreprocessing
 from learninghouse.preprocessing.api import (DatasetConfiguration,
                                              PreprocessingConfiguration)
-from sklearn.metrics import accuracy_score
 
 if TYPE_CHECKING:
     from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -41,7 +43,6 @@ class BrainConfiguration():
             **self._required_param(json_config, 'estimator'))
 
         self.dataset: DatasetConfiguration = DatasetConfiguration(
-            features=self._required_param(json_config, 'features'),
             dependent=self._required_param(json_config, 'dependent')
         )
 
@@ -156,13 +157,18 @@ class BrainTraining():
                 raise BrainNotEnoughData()
 
             brain, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepare_training(
-                brain, data)
+                brain, data, False)
 
             estimator = brain.estimator()
 
-            columns = x_train.columns
+            selector = SelectFromModel(estimator)
+            selector.fit(x_train, y_train)
 
-            logger.debug('Train data columns: %s', columns)
+            brain.dataset.features = x_train.columns[(
+                selector.get_support())].values.tolist()
+
+            brain, x_train, x_test, y_train, y_test = DatasetPreprocessing.prepare_training(
+                brain, data, True)
 
             estimator.fit(x_train, y_train)
 
@@ -172,7 +178,7 @@ class BrainTraining():
             else:
                 score = estimator.score(x_test, y_test)
 
-            brain.compile(columns.tolist(), score)
+            brain.compile(x_train.columns.tolist(), score)
 
             return brain.info()
         except FileNotFoundError as exc:

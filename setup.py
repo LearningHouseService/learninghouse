@@ -9,8 +9,6 @@ requirements = ["fastapi",
                 "uvicorn[standard]",
                 "click",
                 "click_log",
-                "paste",
-                "pyyaml",
                 "numpy",
                 "pandas",
                 "scikit-learn"]
@@ -26,7 +24,7 @@ setuptools.setup(
     author='Johannes Ott',
     author_email='info@johannes-ott.net',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
 
         'Topic :: Home Automation',
 

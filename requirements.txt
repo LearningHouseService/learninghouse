@@ -3,8 +3,6 @@ uvicorn[standard]
 pydantic
 click
 click_log
-paste
-pyyaml
 numpy 
 pandas
 scikit-learn

@@ -29,6 +29,11 @@ if TYPE_CHECKING:
 
 
 class BrainConfiguration():
+    CONFIG_DIR = 'config'
+    CONFIG_EXTENSION = 'json'
+
+    COMPILED_DIR = 'compiled'
+    COMPILED_EXTENSION = 'pkl'
 
     def __init__(self, name: str):
         self.name: str = name
@@ -54,7 +59,8 @@ class BrainConfiguration():
 
     @classmethod
     def _load_initial_config(cls, name: str) -> Dict[str, Any]:
-        filename = sanitize_configuration_filename('config', name, 'json')
+        filename = sanitize_configuration_filename(
+            cls.CONFIG_DIR, name, cls.CONFIG_EXTENSION)
         print(filename)
 
         with open(filename, 'r', encoding='utf-8') as config_file:
@@ -105,7 +111,8 @@ class BrainConfiguration():
     @classmethod
     def load_compiled(cls, name: str) -> BrainConfiguration:
         try:
-            filename = sanitize_configuration_filename('compiled', name, 'pkl')
+            filename = sanitize_configuration_filename(
+                cls.COMPILED_DIR, name, cls.COMPILED_EXTENSION)
             brain_config = joblib.load(filename)
             if brain_config.versions != versions:
                 raise BrainNotActual()
@@ -121,7 +128,7 @@ class BrainConfiguration():
         self.score = score
 
         filename = sanitize_configuration_filename(
-            'compiled', self.name, 'pkl')
+            self.COMPILED_DIR, self.name, self.COMPILED_EXTENSION)
 
         joblib.dump(self, filename)
 
@@ -183,7 +190,6 @@ class BrainTraining():
 
             return brain.info()
         except FileNotFoundError as exc:
-            logger.exception(exc)
             raise BrainNoConfiguration() from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
@@ -227,7 +233,8 @@ class BrainPrediction():
 
     @classmethod
     def _load_brain(cls, name: str) -> BrainConfiguration:
-        filename = sanitize_configuration_filename('compiled', name, 'pkl')
+        filename = sanitize_configuration_filename(
+            BrainConfiguration.COMPILED_DIR, name, BrainConfiguration.COMPILED_EXTENSION)
         stamp = stat(filename).st_mtime
 
         if not(name in cls.brains and cls.brains[name]['stamp'] == stamp):

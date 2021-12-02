@@ -1,47 +1,13 @@
-from typing import Dict, Optional
+from typing import Dict
 
 from fastapi import status
-from fastapi.responses import JSONResponse
-from learninghouse.brain.api import BrainErrorMessage
+from learninghouse.core.exceptions import LearningHouseException
+from learninghouse.models import LearningHouseErrorMessage
 
 MIMETYPE_JSON = 'application/json'
 
 
-class BrainException(Exception):
-    STATUS_CODE = status.HTTP_500_INTERNAL_SERVER_ERROR
-    UNKNOWN = 'UNKNOWN'
-
-    def __init__(self,
-                 status_code: Optional[int] = None,
-                 key: Optional[str] = None,
-                 description: Optional[str] = None):
-        super().__init__()
-        self.http_status_code: int = status_code or self.STATUS_CODE
-        self.error: BrainErrorMessage = BrainErrorMessage(
-            error=key or self.UNKNOWN,
-            description=description or ''
-        )
-
-    def response(self) -> JSONResponse:
-        return JSONResponse(content=self.error.dict(), status_code=self.http_status_code)
-
-    @classmethod
-    def description(cls) -> Dict:
-        return {
-            'model': BrainErrorMessage,
-            'description': 'An exception occured which is not handled by the service now. Please write an issue on GitHub.',
-            'content': {
-                MIMETYPE_JSON: {
-                    'example': {
-                        'error': cls.UNKNOWN,
-                        'description': ''
-                    }
-                }
-            }
-        }
-
-
-class BrainNotTrained(BrainException):
+class BrainNotTrained(LearningHouseException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
     NOT_TRAINED = 'NOT_TRAINED'
 
@@ -51,7 +17,7 @@ class BrainNotTrained(BrainException):
     @classmethod
     def description(cls) -> Dict:
         return {
-            'model': BrainErrorMessage,
+            'model': LearningHouseErrorMessage,
             'description': 'No trained model with this name found.',
             'content': {
                 MIMETYPE_JSON: {
@@ -64,7 +30,7 @@ class BrainNotTrained(BrainException):
         }
 
 
-class BrainNotActual(BrainException):
+class BrainNotActual(LearningHouseException):
     STATUS_CODE = status.HTTP_428_PRECONDITION_REQUIRED
     NOT_ACTUAL = 'NOT_ACTUAL'
 
@@ -74,7 +40,7 @@ class BrainNotActual(BrainException):
     @classmethod
     def description(cls) -> Dict:
         return {
-            'model': BrainErrorMessage,
+            'model': LearningHouseErrorMessage,
             'description': 'If brain was not trained with actual versions of service and libraries.',
             'content': {
                 MIMETYPE_JSON: {
@@ -87,7 +53,7 @@ class BrainNotActual(BrainException):
         }
 
 
-class BrainNotEnoughData(BrainException):
+class BrainNotEnoughData(LearningHouseException):
     STATUS_CODE = status.HTTP_202_ACCEPTED
     NOT_ENOUGH_TRAINING_DATA = 'NOT_ENOUGH_TRAINING_DATA'
 
@@ -97,7 +63,7 @@ class BrainNotEnoughData(BrainException):
     @classmethod
     def description(cls) -> Dict:
         return {
-            'model': BrainErrorMessage,
+            'model': LearningHouseErrorMessage,
             'description': 'Brain needs at least 10 data points to be trained.',
             'content': {
                 MIMETYPE_JSON: {
@@ -110,7 +76,7 @@ class BrainNotEnoughData(BrainException):
         }
 
 
-class BrainNoConfiguration(BrainException):
+class BrainNoConfiguration(LearningHouseException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
     NO_CONFIGURATION = 'NO_CONFIGURATION'
 
@@ -120,7 +86,7 @@ class BrainNoConfiguration(BrainException):
     @classmethod
     def description(cls) -> Dict:
         return {
-            'model': BrainErrorMessage,
+            'model': LearningHouseErrorMessage,
             'description': 'No brain configuration found.',
             'content': {
                 MIMETYPE_JSON: {
@@ -133,7 +99,7 @@ class BrainNoConfiguration(BrainException):
         }
 
 
-class BrainBadRequest(BrainException):
+class BrainBadRequest(LearningHouseException):
     STATUS_CODE = status.HTTP_400_BAD_REQUEST
     BAD_REQUEST = 'BAD_REQUEST'
 
@@ -143,7 +109,7 @@ class BrainBadRequest(BrainException):
     @classmethod
     def description(cls) -> Dict:
         return {
-            'model': BrainErrorMessage,
+            'model': LearningHouseErrorMessage,
             'description': 'Brain received a bad request.',
             'content': {
                 MIMETYPE_JSON: {

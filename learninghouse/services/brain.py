@@ -6,33 +6,29 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import joblib
 import pandas as pd
-from fastapi import FastAPI, Path, Request
-from fastapi.responses import JSONResponse
 from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import accuracy_score
 
-from learninghouse import ServiceVersions, logger, versions
-from learninghouse.brain.api import (BrainErrorMessage,
-                                     BrainEstimatorConfiguration,
-                                     BrainEstimatorType, BrainInfo,
-                                     BrainPredictionRequest,
-                                     BrainPredictionResult,
-                                     BrainTrainingRequest)
-from learninghouse.brain.exceptions import (BrainException,
-                                            BrainNoConfiguration,
-                                            BrainNotActual, BrainNotEnoughData,
-                                            BrainNotTrained)
-from learninghouse.preprocessing import DatasetPreprocessing
-from learninghouse.preprocessing.api import (DatasetConfiguration,
-                                             PreprocessingConfiguration)
+from learninghouse import logger, versions
+from learninghouse.core.exceptions import LearningHouseException
+from learninghouse.core.exceptions.brain import (BrainNoConfiguration,
+                                                 BrainNotActual,
+                                                 BrainNotEnoughData,
+                                                 BrainNotTrained)
+from learninghouse.models import LearningHouseVersions
+from learninghouse.models.brain import (BrainEstimatorConfiguration,
+                                        BrainEstimatorType, BrainInfo,
+                                        BrainPredictionResult)
+from learninghouse.models.preprocessing import (DatasetConfiguration,
+                                                PreprocessingConfiguration)
+from learninghouse.services import sanitize_configuration_filename
+from learninghouse.services.preprocessing import DatasetPreprocessing
 
 if TYPE_CHECKING:
     from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
 class BrainConfiguration():
-    CONFIG_FILE = 'brain/config/%s.json'
-    COMPILED_FILE = 'brain/compiled/%s.pkl'
 
     def __init__(self, name: str):
         self.name: str = name
@@ -54,11 +50,14 @@ class BrainConfiguration():
         self._estimator: Optional[Union[RandomForestClassifier,
                                         RandomForestRegressor]] = None
         self.score: Optional[float] = 0.0
-        self.versions: ServiceVersions = versions
+        self.versions: LearningHouseVersions = versions
 
     @classmethod
     def _load_initial_config(cls, name: str) -> Dict[str, Any]:
-        with open(cls.CONFIG_FILE % name, 'r', encoding='utf-8') as config_file:
+        filename = sanitize_configuration_filename('config', name, 'json')
+        print(filename)
+
+        with open(filename, 'r', encoding='utf-8') as config_file:
             return json.load(config_file)
 
     @classmethod
@@ -106,7 +105,8 @@ class BrainConfiguration():
     @classmethod
     def load_compiled(cls, name: str) -> BrainConfiguration:
         try:
-            brain_config = joblib.load(cls.COMPILED_FILE % name)
+            filename = sanitize_configuration_filename('compiled', name, 'pkl')
+            brain_config = joblib.load(filename)
             if brain_config.versions != versions:
                 raise BrainNotActual()
 
@@ -120,15 +120,16 @@ class BrainConfiguration():
         self.preprocessing.columns = columns
         self.score = score
 
-        joblib.dump(self, self.COMPILED_FILE % self.name)
+        filename = sanitize_configuration_filename(
+            'compiled', self.name, 'pkl')
+
+        joblib.dump(self, filename)
 
 
 class BrainTraining():
-    TRAINING_FILE = 'brain/training/%s.csv'
-
     @classmethod
-    def request(cls, brain: str, request_data: Optional[Dict[str, Any]] = None) -> BrainInfo:
-        filename = cls.TRAINING_FILE % brain
+    def request(cls, name: str, request_data: Optional[Dict[str, Any]] = None) -> BrainInfo:
+        filename = sanitize_configuration_filename('training', name, 'csv')
 
         if request_data is None:
             if path.exists(filename):
@@ -146,7 +147,7 @@ class BrainTraining():
 
             data.to_csv(filename, sep=',', index=False)
 
-        return cls.train(brain, data)
+        return cls.train(name, data)
 
     @staticmethod
     def train(name: str, data: pd.DataFrame) -> BrainInfo:
@@ -182,10 +183,11 @@ class BrainTraining():
 
             return brain.info()
         except FileNotFoundError as exc:
+            logger.exception(exc)
             raise BrainNoConfiguration() from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
-            raise BrainException() from exc
+            raise LearningHouseException() from exc
 
 
 class BrainPrediction():
@@ -221,11 +223,11 @@ class BrainPrediction():
             raise BrainNotTrained() from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
-            raise BrainException() from exc
+            raise LearningHouseException() from exc
 
     @classmethod
     def _load_brain(cls, name: str) -> BrainConfiguration:
-        filename = BrainConfiguration.COMPILED_FILE % name
+        filename = sanitize_configuration_filename('compiled', name, 'pkl')
         stamp = stat(filename).st_mtime
 
         if not(name in cls.brains and cls.brains[name]['stamp'] == stamp):
@@ -235,76 +237,3 @@ class BrainPrediction():
             }
 
         return cls.brains[name]['brain']
-
-
-def register(app: FastAPI) -> FastAPI:
-    @app.exception_handler(BrainException)
-    async def exception_handler(request: Request, exc: BrainException):  # pylint: disable=unused-argument
-        return exc.response()
-
-    @app.get('/brain/{name}/info',
-             response_model=BrainInfo,
-             summary='Retrieve information',
-             description='Retrieve all information of a trained brain.',
-             tags=['brain'],
-             responses={
-                 200: {
-                     'description': 'Information of the trained brain'
-                 },
-                 BrainNotTrained.STATUS_CODE: BrainNotTrained.description(),
-                 BrainNotActual.STATUS_CODE: BrainNotActual.description(),
-                 BrainException.STATUS_CODE: BrainException.description()
-             })
-    async def info_get(name: str):
-        brain_config = BrainConfiguration.load_compiled(name)
-        return brain_config.info()
-
-    @app.post('/brain/{name}/training',
-              response_model=BrainInfo,
-              summary='Train the brain again',
-              description='After version updates train the brain with existing data.',
-              tags=['brain'],
-              responses={
-                  200: {
-                      'description': 'Information of the trained brain'
-                  },
-                  BrainNotEnoughData.STATUS_CODE: BrainNotEnoughData.description(),
-                  BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.description(),
-                  BrainException.STATUS_CODE: BrainException.description()
-              })
-    async def training_post(name: str):
-        return BrainTraining.request(name)
-
-    @app.put('/brain/{name}/training',
-             response_model=BrainInfo,
-             summary='Train the brain with new data',
-             description='Train the brain with additional data.',
-             tags=['brain'],
-             responses={
-                 200: {
-                     'description': 'Information of the trained brain'
-                 },
-                 BrainNotEnoughData.STATUS_CODE: BrainNotEnoughData.description(),
-                 BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.description(),
-                 BrainException.STATUS_CODE: BrainException.description()
-             })
-    async def training_put(name: str, request_data: BrainTrainingRequest):
-        return BrainTraining.request(name, request_data.data)
-
-    @app.post('/brain/{name}/prediction',
-              response_model=BrainPredictionResult,
-              summary='Prediction',
-              description='Predict a new dataset with given brain.',
-              tags=['brain'],
-              responses={
-                  200: {
-                      'description': 'Prediction result'
-                  },
-                  BrainNotActual.STATUS_CODE: BrainNotActual.description(),
-                  BrainNotTrained.STATUS_CODE: BrainNotTrained.description(),
-                  BrainException.STATUS_CODE: BrainException.description()
-              })
-    async def prediction_post(name: str, request_data: BrainPredictionRequest):
-        return BrainPrediction.prediction(name, request_data.data)
-
-    return app

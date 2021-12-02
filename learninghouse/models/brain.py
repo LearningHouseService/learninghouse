@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Type, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
-
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
-from learninghouse import ServiceVersions, versions, LearningHouseEnum
+from learninghouse import versions
+from learninghouse.core import LearningHouseEnum
+from learninghouse.models import LearningHouseVersions
 
 
 class BrainEstimatorType(LearningHouseEnum):
@@ -52,11 +53,6 @@ class BrainEstimatorConfiguration(BaseModel):
         }
 
 
-class BrainErrorMessage(BaseModel):
-    error: str
-    description: str = ''
-
-
 class BrainInfo(BaseModel):
     """
     Information of the trained brain.
@@ -67,7 +63,7 @@ class BrainInfo(BaseModel):
     dependent: str
     dependent_encode: bool
     score: float
-    versions: ServiceVersions
+    versions: LearningHouseVersions
 
     class Config:  # pylint: disable=too-few-public-methods
         schema_extra = {

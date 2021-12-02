@@ -1,45 +1,32 @@
-import logging
-
 from typing import Optional
 
-from enum import Enum
-
-from pydantic import BaseModel
+import logging
 
 from fastapi import __version__ as fastapi_version
 from numpy.version import version as np_version
 from pandas import __version__ as pd_version
+from pydantic import BaseModel
 from sklearn import __version__ as skl_version
+
+from learninghouse.models import LearningHouseVersions
 
 from ._version import get_versions
 
 __version__ = get_versions()['version']
 del get_versions
 
+versions = LearningHouseVersions(
+    service=__version__,
+    fastapi=fastapi_version,
+    sklearn=skl_version,
+    numpy=np_version,
+    pandas=pd_version
+)
+
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
+
 uvi_logger = logging.getLogger("uvicorn.error")
 uvi_logger.propagate = False
-
-
-class ServiceVersions(BaseModel):
-    service: Optional[str] = __version__
-    fastapi: Optional[str] = fastapi_version
-    sklearn: Optional[str] = skl_version
-    numpy: Optional[str] = np_version
-    pandas: Optional[str] = pd_version
-
-
-versions = ServiceVersions()
-
-
-class LearningHouseEnum(Enum):
-    def __new__(cls, *args):
-        obj = object.__new__(cls)
-        obj._value_ = args[0]
-        return obj
-
-    def __str__(self) -> str:
-        return str(self.value)

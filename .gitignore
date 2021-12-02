@@ -2,9 +2,9 @@
 **/models/*/*.csv
 **/models/*/*.pkl
 
-**/brain/*/*.json
-**/brain/*/*.csv
-**/brain/*/*.pkl
+**/brains/*/*.json
+**/brains/*/*.csv
+**/brains/*/*.pkl
 
 logging.yaml
 

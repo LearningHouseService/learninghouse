@@ -2,20 +2,20 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set,
-                    Tuple)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
 
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+
 from learninghouse import logger
+from learninghouse.services import sanitize_configuration_filename
 
 if TYPE_CHECKING:
     from learninghouse.brain import BrainConfiguration
 
 
 class DatasetPreprocessing():
-    SENSORCONFIG_FILE = 'brain/config/sensors.json'
     CATEGORICAL_KEY = 'categorical'
     NUMERICAL_KEY = 'numerical'
 
@@ -24,7 +24,9 @@ class DatasetPreprocessing():
         categoricals = []
         numericals = []
 
-        with open(cls.SENSORCONFIG_FILE, 'r', encoding='utf-8') as json_file:
+        filename = sanitize_configuration_filename('config', 'sensors', 'json')
+
+        with open(filename, 'r', encoding='utf-8') as json_file:
             sensors = json.load(json_file)
             categoricals = list(map(lambda x: x[0], filter(
                 lambda x: x[1] == cls.CATEGORICAL_KEY, sensors.items())))

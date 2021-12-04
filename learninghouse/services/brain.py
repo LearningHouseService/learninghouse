@@ -9,12 +9,13 @@ import pandas as pd
 from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import accuracy_score
 
-from learninghouse import logger, versions
-from learninghouse.core.exceptions import LearningHouseException
-from learninghouse.core.exceptions.brain import (BrainNoConfiguration,
-                                                 BrainNotActual,
-                                                 BrainNotEnoughData,
-                                                 BrainNotTrained)
+from learninghouse import versions
+from learninghouse.api.errors import LearningHouseException
+from learninghouse.api.errors.brain import (BrainNoConfiguration,
+                                            BrainNotActual,
+                                            BrainNotEnoughData,
+                                            BrainNotTrained)
+from learninghouse.core.logging import logger
 from learninghouse.models import LearningHouseVersions
 from learninghouse.models.brain import (BrainEstimatorConfiguration,
                                         BrainEstimatorType, BrainInfo,
@@ -115,6 +116,7 @@ class BrainConfiguration():
                 cls.COMPILED_DIR, name, cls.COMPILED_EXTENSION)
             brain_config = joblib.load(filename)
             if brain_config.versions != versions:
+                logger.warning(f'Missmatch versions: {brain_config.versions}')
                 raise BrainNotActual()
 
             return brain_config

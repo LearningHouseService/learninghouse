@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
-from learninghouse import logger
 from learninghouse.services import sanitize_configuration_filename
 
 if TYPE_CHECKING:
@@ -39,7 +37,7 @@ class DatasetPreprocessing():
         numericals.append('hour_of_day')
         numericals.append('minute_of_hour')
 
-        logger.debug('Sensors config: %s, %s', categoricals, numericals)
+        # logger.debug('Sensors config: %s, %s', categoricals, numericals)
 
         return categoricals, numericals
 
@@ -118,8 +116,6 @@ class DatasetPreprocessing():
         else:
             numericals = cls.columns_intersection(numericals, data)
 
-        logger.warning(numericals)
-
         x_train = DatasetPreprocessing.transform_columns(
             brain.preprocessing.imputer.fit_transform, x_train, numericals)
         x_test = DatasetPreprocessing.transform_columns(
@@ -137,18 +133,11 @@ class DatasetPreprocessing():
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
             brain, data, True)
 
-        logger.warning(numericals)
-        logger.warning(brain.preprocessing.columns)
-
         numericals = cls.columns_intersection(
             brain.preprocessing.columns, numericals)
 
-        logger.warning(numericals)
-
         missing_columns = set.difference(cls.set_of_columns(
             numericals), cls.set_of_columns(x_vector))
-
-        logger.warning(missing_columns)
 
         for missing_column in missing_columns:
             x_vector.insert(0, missing_column, [np.nan])

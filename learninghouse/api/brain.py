@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 
-from learninghouse.core.exceptions import LearningHouseException
-from learninghouse.core.exceptions.brain import (BrainNoConfiguration,
-                                                 BrainNotActual,
-                                                 BrainNotEnoughData,
-                                                 BrainNotTrained)
+from learninghouse.api.errors import LearningHouseException
+from learninghouse.api.errors.brain import (BrainNoConfiguration,
+                                            BrainNotActual,
+                                            BrainNotEnoughData,
+                                            BrainNotTrained)
 from learninghouse.models.brain import (BrainInfo, BrainPredictionRequest,
                                         BrainPredictionResult,
                                         BrainTrainingRequest)

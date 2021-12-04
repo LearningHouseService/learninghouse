@@ -15,16 +15,6 @@ Licensor: Python Software Foundatio
 Website: https://www.python.org
 License: PSF License
 
-Component: click
-Licensor: Pallets
-Website: https://click.palletsprojects.com/en/7.x/
-License: BSD-3-Clause License
-
-Component: click_log
-Licensor: click-contrib
-Website: https://github.com/click-contrib/click-log
-License: MIT License
-
 Component: FastAPI
 Licensor: Sebastián Ramírez
 Website: https://fastapi.tiangolo.com/
@@ -38,6 +28,11 @@ License: BSD-3-Clause License
 Component: Pydantic
 Licensor: Samuel Colvin
 Website: https://github.com/samuelcolvin/pydantic
+License: MIT License
+
+Component: Loguru
+Licensor: Loguru Contributors
+Website: https://github.com/Delgan/loguru
 License: MIT License
 
 Component: numpy

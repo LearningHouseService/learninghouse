@@ -1,6 +1,6 @@
 from os import path
 
-from learninghouse.core.exceptions import LearningHouseSecurityException
+from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
 
 

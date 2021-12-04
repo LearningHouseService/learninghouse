@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from fastapi import status
+from fastapi import status, Request
 from fastapi.responses import JSONResponse
 
 from learninghouse.models import LearningHouseErrorMessage
@@ -38,7 +38,7 @@ class LearningHouseException(Exception):
                 }
             }
         }
-        
+
 
 class LearningHouseSecurityException(LearningHouseException):
     STATUS_CODE = status.HTTP_403_FORBIDDEN
@@ -61,3 +61,7 @@ class LearningHouseSecurityException(LearningHouseException):
                 }
             }
         }
+
+
+async def learninghouse_exception_handler(request: Request, exc: LearningHouseException):  # pylint: disable=unused-argument
+    return exc.response()

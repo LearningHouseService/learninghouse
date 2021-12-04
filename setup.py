@@ -43,6 +43,11 @@ setuptools.setup(
     packages=['learninghouse'],
     python_requires='>=3.6, <4',
     install_requires=requirements,
+    entry_points={
+        'console_scripts': [
+            'learninghouse=learninghouse.service:run'
+        ]
+    },
     project_urls={
         'Bug Reports': 'https://github.com/LearningHouseService/learninghouse-core/issues'
     }

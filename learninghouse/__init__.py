@@ -1,7 +1,5 @@
 from typing import Optional
 
-import logging
-
 from fastapi import __version__ as fastapi_version
 from numpy.version import version as np_version
 from pandas import __version__ as pd_version
@@ -22,11 +20,3 @@ versions = LearningHouseVersions(
     numpy=np_version,
     pandas=pd_version
 )
-
-
-logging.basicConfig()
-logger = logging.getLogger(__name__)
-
-
-uvi_logger = logging.getLogger("uvicorn.error")
-uvi_logger.propagate = False

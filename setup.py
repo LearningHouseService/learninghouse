@@ -33,8 +33,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='smart home, machine learning, house automation',
-    package_dir={'learninghouse': 'learninghouse'},
-    packages=['learninghouse'],
+    packages=setuptools.find_packages(exclude=['tests']),
+    include_package_data=True,
     python_requires='>=3.6, <4',
     install_requires=[req for req in requirements if req[:2] != "# "],
     entry_points={

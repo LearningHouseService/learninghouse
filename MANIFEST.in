@@ -9,6 +9,8 @@ include THIRD-PARTY-NOTICES
 
 include requirements.txt
 
+recursive-include learninghouse *.py
+
 # Include information about version
 include versioneer.py
 include learninghouse/_version.py

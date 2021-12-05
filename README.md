@@ -23,16 +23,21 @@ docker pull learninghouseservice/learninghouse:latest
 
 ### Prepare configuration directory
 ```
-mkdir -p brain/config
-mkdir -p brain/training
-mkdir -p brain/compiled
+mkdir -p brains/config
+mkdir -p brains/training
+mkdir -p brains/compiled
 ```
 
-The `config` directory holds the model configuration as json-file. The models are the brains of your learning house.
+The `brains` directory holds the model configuration as json-file. The models are the brains of your learning house.
 
 The directories `training` and `compiled` are used by service to store data.
 
 Training data is stored as csv file, trained brains are stored as object dump.
+
+### Service configuration
+
+Download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example) 
+and rename it to .env. You can modify default configuration values to your needs in this file.
 
 ## Configuration of brains
 
@@ -40,7 +45,7 @@ Configuration is stored in json format.
 
 ### General configuration
 
-In general send data of all sensors to **learningHouse Service** especially when training your brains. The service will save all data fields even if they are not used in current brain configuration as a `feature`. The service will choose the best feature set each time you train a brain.
+In general send data of all sensors to **learningHouse Service** especially when training your brains. The service will save all data fields even if they are not used as a `feature` at the moment. The service will choose the best feature set each time you train a brain.
 
 In general there are two different data types your sensor data can be divided in. `Numerical data` can be processed directly by your models. `Categorical data` has to be preproccesed by the service to be used as a `feature`. `Categorical data` can be identified by a simple rule:
 
@@ -51,7 +56,7 @@ Some examples for categorical data:
 - pressure_trend: Values of 'falling', 'rising', 'consistent'
 - month_of_year: 1 ('January'), 2 ('Februrary'), ...
 
-To enable the servie to use the data of your sensors as `features` for your brain, you have to give the service information about the data type. For this put a sensors.json to the directory brain/config. List all your sensors and their data type.
+To enable the service to use the data of your sensors as `features` for your brain, you have to give the service information about the data type. For this put a sensors.json to the directory brain/config. List all your sensors and their data type.
 
 Example content of sensors.json:
 
@@ -72,7 +77,7 @@ Example content of sensors.json:
 
 The brain decides whether it is so dark that the light has to be switched on. It uses the sun azimuth and sun elevation, the rain gauge and the one hour trend of air pressure. The data of the other senors (pressure, temperature_outside, light_state) isn't used in this example. It use a machine learning algorithm called RandomForestClassifier.
 
-Store a darkness.json in brain/config directory with following content:
+Store a darkness.json in brains/config directory with following content:
 
 ```
 {
@@ -121,29 +126,20 @@ The accuracy between 80 % and 90 % between is a good score to gain. Below your b
 
 Training of the brain will start, when there are at least 10 data points.
 
-## Run service
+## Run service 
 
-In the console type `learninghouse` to start the service in development mode. By default the service will run on port 5000. In development mode you will see some log information.
+### In console
 
-To start service in production mode and specify listen address and port use following command:
+Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example)
+to .env and modify it to your needs.
 
-```
-learninghouse --production --host 127.0.0.1 --port 5000
-```
+Then just run `learninghouse` to run the service. By default the service will listen to http://localhost:5000/
 
-For more or less log output set the verbosity level of the service to DEBUG, INFO (default), WARNING, ERROR or CRITICAL
-
-```
-learninghouse --production --host 127.0.0.1 --port 5000 --verbosity DEBUG
-```
-
-Run with docker:
+### With docker:
 
 ```
-docker run --name learninghouse --rm -v brain:/learninghouse/brain -p 5000:5000 learninghouseservice/learninghouse:latest
+docker run --name learninghouse --rm -v brains:/learninghouse/brains -p 5000:5000 learninghouseservice/learninghouse:latest
 ```
-
-Like above you can adjust the VERBOSITY_LEVEL by adding it as an environment variable.
 
 ## API Documentation
 

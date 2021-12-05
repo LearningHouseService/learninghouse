@@ -15,40 +15,25 @@ Licensor: Python Software Foundatio
 Website: https://www.python.org
 License: PSF License
 
-Component: click
-Licensor: Pallets
-Website: https://click.palletsprojects.com/en/7.x/
-License: BSD-3-Clause License
-
-Component: click_log
-Licensor: click-contrib
-Website: https://github.com/click-contrib/click-log
+Component: FastAPI
+Licensor: Sebastián Ramírez
+Website: https://fastapi.tiangolo.com/
 License: MIT License
 
-Component: paste
-Licensor: Chris Dent
-Website: https://pythonpaste.readthedocs.io/en/latest/
-License: MIT License
-
-Component: PyYAML
-Licensor: Ingy döt Net
-Website: https://pyyaml.org/
-License: MIT License
-
-Component: waitress
-Licensor: Pylons Project
-Website: https://docs.pylonsproject.org/projects/waitress/en/latest/
-License: Zope Public License (ZPL) Version 2.1
-
-Component: flask
-Licensor: Pallets
-Website: https://palletsprojects.com/p/flask/
+Component: Uvicorn
+Licensor: encode
+Website: https://www.uvicorn.org/
 License: BSD-3-Clause License
 
-Component: flask_restful
-Licensor: Twilio, Inc.
-Website: https://flask-restful.readthedocs.io
-License: BSD-3-Clause License
+Component: Pydantic
+Licensor: Samuel Colvin
+Website: https://github.com/samuelcolvin/pydantic
+License: MIT License
+
+Component: Loguru
+Licensor: Loguru Contributors
+Website: https://github.com/Delgan/loguru
+License: MIT License
 
 Component: numpy
 Licensor: NumPy Developers

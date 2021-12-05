@@ -1,19 +1,11 @@
 import setuptools
 import versioneer
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-requirements = ["waitress",
-                "flask",
-                "flask_restful",
-                "click",
-                "click_log",
-                "paste",
-                "pyyaml",
-                "numpy",
-                "pandas",
-                "scikit-learn"]
+with open("requirements.txt", "r", encoding="utf-8") as fh:
+    requirements = fh.readlines()
 
 setuptools.setup(
     name='learninghouse',
@@ -26,7 +18,7 @@ setuptools.setup(
     author='Johannes Ott',
     author_email='info@johannes-ott.net',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
 
         'Topic :: Home Automation',
 
@@ -44,10 +36,10 @@ setuptools.setup(
     package_dir={'learninghouse': 'learninghouse'},
     packages=['learninghouse'],
     python_requires='>=3.6, <4',
-    install_requires=requirements,
+    install_requires=[req for req in requirements if req[:2] != "# "],
     entry_points={
         'console_scripts': [
-            'learninghouse=learninghouse.cli:cli'
+            'learninghouse=learninghouse.service:run'
         ]
     },
     project_urls={

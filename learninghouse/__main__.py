@@ -1,3 +1,4 @@
-import sys
-from .cli import cli
-sys.exit(cli(prog_name='learninghouse'))
+from learninghouse.service import run
+
+if __name__ == '__main__':
+    run()

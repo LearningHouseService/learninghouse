@@ -1,31 +1,53 @@
-from flask import Flask, __version__ as flask_version
-from flask_restful import Api
-from paste.translogger import TransLogger
-from waitress import serve
+import uvicorn
+from fastapi import FastAPI
 
-from sklearn import __version__ as skl_version
-from pandas import __version__ as pd_version
-from numpy.version import version as np_version
+from learninghouse import versions
+from learninghouse.api import brain
+from learninghouse.api.errors import LearningHouseException, learninghouse_exception_handler
+from learninghouse.core.settings import service_settings
+from learninghouse.core.logging import initialize_logging, logger
 
-from . import __version__, logger
-from .model import ModelAPI, ModelPrediction, ModelTraining
-
-app = Flask(__name__)
-api = Api(app)
-
-api.add_resource(ModelPrediction, '/prediction/<string:model>')
-api.add_resource(ModelTraining, '/training/<string:model>')
-api.add_resource(ModelAPI, '/info/<string:model>')
+APP_REFERENCE = 'learninghouse.service:app'
 
 
-def run(production, host, port):
-    logger.info('Running LearningHouse service % s', __version__)
-    logger.info('Libraries scikit-learn (%s), pandas(%s), numpy(%s), flask(%s)',
-                skl_version, pd_version, np_version, flask_version)
+def get_application() -> FastAPI:
+    settings = service_settings()
 
-    if production:
-        logger.info('Running in production mode')
-        serve(TransLogger(app, logger=logger), host=host, port=port)
-    else:
-        logger.info('Running in development mode')
-        app.run(host=host, port=port, debug=False)
+    initialize_logging(settings.logging_level)
+
+    application = FastAPI(**settings.fastapi_kwargs)
+    application.include_router(brain.router)
+
+    application.add_exception_handler(
+        LearningHouseException, learninghouse_exception_handler)
+
+    return application
+
+
+app = get_application()
+
+
+def run():
+    settings = service_settings()
+    logger.info(f'Running {settings.title} {versions.service}')
+    logger.info(versions.libraries_versions)
+    logger.info(f'Running in {settings.environment} mode')
+    logger.info(f'Listening on {settings.base_url}')
+    logger.info(f'Configuration directory {settings.brains_directory}')
+    logger.info(f'URL to OpenAPI file {settings.openapi_url}')
+
+    if settings.environment == 'production':
+        if settings.debug:
+            logger.warning(
+                'Debugging active. Recommendation: Do not use in production mode!')
+
+        if settings.reload:
+            logger.warning(
+                'Reloading active. Recommendation: Do not use in production mode!')
+
+    if settings.documentation_url is not None:
+        logger.info(
+            f'See interactive documentation {settings.documentation_url}')
+
+    uvicorn.run(app=APP_REFERENCE, log_config=None,
+                **settings.uvicorn_kwargs)

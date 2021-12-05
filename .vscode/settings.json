@@ -19,5 +19,8 @@
     ],
     "python.linting.enabled": true,
     "python.pythonPath": "/usr/bin/python3",
-    "git.alwaysSignOff": true
+    "git.alwaysSignOff": true,
+    "python.sortImports.args": [
+        "--src=${workspaceFolder}"
+    ]
 }

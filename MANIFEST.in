@@ -7,6 +7,8 @@ include LICENSE
 # Include information about third party licensors
 include THIRD-PARTY-NOTICES
 
+include requirements.txt
+
 # Include information about version
 include versioneer.py
 include learninghouse/_version.py

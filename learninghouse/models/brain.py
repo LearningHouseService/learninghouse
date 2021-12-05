@@ -10,7 +10,10 @@ from learninghouse.models import LearningHouseVersions
 
 class BrainEstimatorType(LearningHouseEnum):
     """
-        **LearningHouse Service** can predict values using an estimator. An estimator can be of type `classifier` which fits best for your needs if you have somekind of categorical output like in the darkness example true and false. If you want to predict a numerical value for example the setpoint of an heating equipment use the type `regressor` instead.
+        **LearningHouse Service** can predict values using an estimator. An estimator can be
+        of type `classifier` which fits best for your needs if you have somekind of categorical
+        output like in the darkness example true and false. If you want to predict a numerical
+        value for example the setpoint of an heating equipment use the type `regressor` instead.
     """
     CLASSIFIER = 'classifier', RandomForestClassifier
     REGRESSOR = 'regressor', RandomForestRegressor
@@ -19,24 +22,47 @@ class BrainEstimatorType(LearningHouseEnum):
                  typed: str,
                  estimator_class: Union[Type[RandomForestClassifier],
                                         Type[RandomForestRegressor]]):
-        self.typed: str = typed
-        self.estimator_class: Union[Type[RandomForestClassifier],
-                                    Type[RandomForestRegressor]] = estimator_class
+        self._typed: str = typed
+        self._estimator_class: Union[Type[RandomForestClassifier],
+                                     Type[RandomForestRegressor]] = estimator_class
+
+    @property
+    def typed(self) -> str:
+        return self._typed
+
+    @property
+    def estimator_class(self) -> Union[Type[RandomForestClassifier],
+                                       Type[RandomForestRegressor]]:
+        return self._estimator_class
 
 
 class BrainEstimatorConfiguration(BaseModel):
     """
-    **LearningHouse Service** can predict values using an estimator. An estimator can be of type `classifier` which fits best for your needs if you have somekind of categorical output like in the darkness example true and false. If you want to predict a numerical value for example the setpoint of an heating equipment use the type `regressor` instead.
+    **LearningHouse Service** can predict values using an estimator.
+    An estimator can be of type `classifier` which fits best for your
+    needs if you have somekind of categorical output like in the
+    darkness example true and false. If you want to predict a numerical
+    value for example the setpoint of an heating equipment use the type
+    `regressor` instead.
 
-    For both types **learningHouse Service** uses a machine learning algorithm called random forest estimation. This algorithm builds a "forest" of decision trees with your `features` and takes the mean of the prediction of all of them to give you a best result. For more details see the API description of scikit-learn:
+    For both types **learningHouse Service** uses a machine learning
+    algorithm called random forest estimation. This algorithm builds
+    a "forest" of decision trees with your `features` and takes the mean
+    of the prediction of all of them to give you a best result. For more
+    details see the API description of scikit-learn:
 
     | Estimator type | API Reference |
     |-----------------|-------------------|
-    | RandomForestRegressor | https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor |
-    | RandomForestClassifier | https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier |
+    | RandomForestRegressor | \
+        https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor |
+    | RandomForestClassifier | \
+        https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier |
 
-    You can adjust the amount of decision trees by using `estimators` (default: 100) option. And the maximum depth of each tree by using `max_depth` (default: 5) option. Both options are optional. Try to resize this value to optimize the accuracy of your model.
-    """
+    You can adjust the amount of decision trees by using `estimators`
+    (default: 100) option. And the maximum depth of each tree by using
+    `max_depth` (default: 5) option. Both options are optional. Try to
+    resize this value to optimize the accuracy of your model.
+    """  # pylint: disable=line-too-long
     typed: BrainEstimatorType
     estimators: Optional[int] = 100
     max_depth: Optional[int] = 5
@@ -87,9 +113,18 @@ class BrainTrainingRequest(BrainRequest):
     """
     For training with data send a PUT request to the service.
 
-    You can send either a field `timestamp` with your dataset containing a UNIX-Timestamp or the service will add this information with its current time. The service generate some further time relevant fields inside the training dataset you can although use as `features`. These are `month_of_year`, `day_of_month`, `day_of_week`, `hour_of_day` and `minute_of_hour`
+    You can send either a field `timestamp` with your dataset containing
+    a UNIX-Timestamp or the service will add this information with its
+    current time. The service generate some further time relevant fields
+    inside the training dataset you can although use as `features`.
+    These are `month_of_year`, `day_of_month`, `day_of_week`, `hour_of_day`
+    and `minute_of_hour`
 
-    If one of your sensors is not working at the moment and for this not sending a value the service will add a value by using the following rules. For `categorical data` all categorical columns will be set to zero. For `numerical data` the mean of all known training set values for this `feature` will be assumed.
+    If one of your sensors is not working at the moment and for this not
+    sending a value the service will add a value by using the following
+    rules. For `categorical data` all categorical columns will be set to
+    zero. For `numerical data` the mean of all known training set values
+    for this `feature` will be assumed.
     """
     class Config:  # pylint: disable=too-few-public-methods
         schema_extra = {

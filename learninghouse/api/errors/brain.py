@@ -2,8 +2,9 @@ from typing import Dict
 
 from fastapi import status
 
+from learninghouse import versions
 from learninghouse.api.errors import LearningHouseException
-from learninghouse.models import LearningHouseErrorMessage
+from learninghouse.models import LearningHouseErrorMessage, LearningHouseVersions
 
 MIMETYPE_JSON = 'application/json'
 
@@ -35,8 +36,14 @@ class BrainNotActual(LearningHouseException):
     STATUS_CODE = status.HTTP_428_PRECONDITION_REQUIRED
     NOT_ACTUAL = 'NOT_ACTUAL'
 
-    def __init__(self):
-        super().__init__(self.STATUS_CODE, self.NOT_ACTUAL)
+    def __init__(self, name: str, brain_versions: LearningHouseVersions):
+        description = f'The versions of trained brain {name} are not the same as service. '
+        description += f'Versions service: {versions}. '
+        description += f'Versions brain: {brain_versions}. '
+        description += 'Please train the brain again.'
+        super().__init__(self.STATUS_CODE,
+                         self.NOT_ACTUAL,
+                         description)
 
     @classmethod
     def description(cls) -> Dict:

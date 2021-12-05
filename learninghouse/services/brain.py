@@ -62,7 +62,6 @@ class BrainConfiguration():
     def _load_initial_config(cls, name: str) -> Dict[str, Any]:
         filename = sanitize_configuration_filename(
             cls.CONFIG_DIR, name, cls.CONFIG_EXTENSION)
-        print(filename)
 
         with open(filename, 'r', encoding='utf-8') as config_file:
             return json.load(config_file)
@@ -116,8 +115,9 @@ class BrainConfiguration():
                 cls.COMPILED_DIR, name, cls.COMPILED_EXTENSION)
             brain_config = joblib.load(filename)
             if brain_config.versions != versions:
-                logger.warning(f'Missmatch versions: {brain_config.versions}')
-                raise BrainNotActual()
+                logger.warning(
+                    'Trained brain {name} is not actual. Versions: {brain_config.versions}')
+                raise BrainNotActual(name, brain_config.versions)
 
             return brain_config
         except FileNotFoundError as exc:

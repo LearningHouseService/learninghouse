@@ -4,14 +4,8 @@ import versioneer
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-requirements = ["fastapi",
-                "pydantic",
-                "uvicorn[standard]",
-                "click",
-                "click_log",
-                "numpy",
-                "pandas",
-                "scikit-learn"]
+with open("requirements.txt", "r", encoding="utf-8") as fh:
+    requirements = fh.readlines()
 
 setuptools.setup(
     name='learninghouse',
@@ -42,7 +36,7 @@ setuptools.setup(
     package_dir={'learninghouse': 'learninghouse'},
     packages=['learninghouse'],
     python_requires='>=3.6, <4',
-    install_requires=requirements,
+    install_requires=[req for req in requirements if req[:2] != "# "],
     entry_points={
         'console_scripts': [
             'learninghouse=learninghouse.service:run'

@@ -33,6 +33,8 @@ def run():
     logger.info(versions.libraries_versions)
     logger.info(f'Running in {settings.environment} mode')
     logger.info(f'Listening on {settings.base_url}')
+    logger.info(f'Configuration directory {settings.brains_directory}')
+    logger.info(f'URL to OpenAPI file {settings.openapi_url}')
 
     if settings.environment == 'production':
         if settings.debug:

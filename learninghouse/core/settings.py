@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -8,24 +8,21 @@ from learninghouse import versions
 from learninghouse.core import LearningHouseEnum
 from learninghouse.core.logging import LoggingLevelEnum
 
-BASE_DIR = Path(__file__).parent.parent.parent
-
 
 class ServiceSettings(BaseSettings):
     debug: bool = False
     docs_url: str = '/docs'
-    openapi_prefix: str = ''
-    openapi_url: str = '/openapi.json'
+    openapi_file: str = '/learninghouse_api.json'
     redoc_url: Optional[str] = None
     title: str = 'learningHouse Service'
 
-    host: str = '0.0.0.0'
+    host: str = '127.0.0.1'
     port: int = 5000
     reload: bool = False
 
     environment: str = 'production'
 
-    config_directory: DirectoryPath = BASE_DIR / 'brains'
+    config_directory: DirectoryPath = './brains'
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
@@ -37,8 +34,7 @@ class ServiceSettings(BaseSettings):
     def fastapi_kwargs(self) -> Dict[str, Any]:
         return {'debug': self.debug,
                 'docs_url': self.docs_url,
-                'openapi_prefix': self.openapi_prefix,
-                'openapi_url': self.openapi_url,
+                'openapi_url': self.openapi_file,
                 'redoc_url': self.redoc_url,
                 'title': self.title,
                 'version': versions.service
@@ -80,10 +76,9 @@ class ServiceSettings(BaseSettings):
 
         return documentation_url
 
-
-class ProductionSettings(ServiceSettings):
-    class Config(ServiceSettings.Config):  # pylint: disable=too-few-public-methods
-        env_file = '.env'
+    @property
+    def openapi_url(self) -> str:
+        return self.base_url + self.openapi_file
 
 
 class DevelopmentSettings(ServiceSettings):
@@ -98,15 +93,22 @@ class DevelopmentSettings(ServiceSettings):
 
 
 class ServiceEnvironment(LearningHouseEnum):
-    PROD = 'production', ProductionSettings
+    PROD = 'production', ServiceSettings
     DEV = 'development', DevelopmentSettings
 
     def __init__(self,
                  description: str,
-                 settings_class: Union[Type[ProductionSettings], Type[DevelopmentSettings]]):
-        self.description: str = description
-        self.settings_class: Union[Type[ProductionSettings],
-                                   Type[DevelopmentSettings]] = settings_class
+                 settings_class: ServiceSettings):
+        self._description: str = description
+        self._settings_class: ServiceSettings = settings_class
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    @property
+    def settings_class(self) -> ServiceSettings:
+        return self._settings_class
 
 
 class ServiceBaseSettings(BaseSettings):
@@ -120,4 +122,4 @@ class ServiceBaseSettings(BaseSettings):
 @lru_cache()
 def service_settings() -> ServiceSettings:
     environment = ServiceBaseSettings().environment
-    return environment.settings_class()  # pylint: disable=no-member
+    return environment.settings_class()

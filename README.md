@@ -10,3 +10,5 @@
 For configuration see: 
 
 https://github.com/LearningHouseService/learninghouse-core 
+
+For all environment variables see [.env.example file](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example)

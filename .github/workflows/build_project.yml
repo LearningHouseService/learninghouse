@@ -12,7 +12,7 @@ jobs:
       - name: Prepare Metadata
         id: prep
         run: |
-          VERSION=0.11.0
+          VERSION=$(cat VERSION)
 
           if [ "${{github.event_name}}" == "pull_request" ]
           then

@@ -5,12 +5,10 @@ ARG VERSION
 ENV LHS_HOME=/learninghouse \
     USER_ID=9002 \
     GROUP_ID=9002 \
-    HOST=0.0.0.0 \
-    PORT=5000 \
-    VERBOSITY_LEVEL=INFO
+    LEARNINGHOUSE_HOST=0.0.0.0 \
+    LEARNINGHOUSE_PORT=5000
 
 COPY entrypoint.sh /
-COPY start.sh ${LHS_HOME}/start.sh
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
@@ -22,15 +20,15 @@ RUN apt-get update && \
 
 RUN pip3 install --upgrade pip && \
     mkdir -p ${LHS_HOME} && \
-    mkdir -p ${LHS_HOME}/models/config && \
-    mkdir -p ${LHS_HOME}/models/training && \
-    mkdir -p ${LHS_HOME}/models/compiled && \
+    mkdir -p ${LHS_HOME}/brains/config && \
+    mkdir -p ${LHS_HOME}/brains/training && \
+    mkdir -p ${LHS_HOME}/brains/compiled && \
     cd ${LHS_HOME} && \
     pip3 install learninghouse==${VERSION} && \
-    chmod +x /entrypoint.sh ${LHS_HOME}/start.sh
+    chmod +x /entrypoint.sh
 
 EXPOSE 5000
 WORKDIR ${LHS_HOME}
-VOLUME ["${LHS_HOME}/models"]
+VOLUME ["${LHS_HOME}/brains"]
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gosu", "learninghouse", "tini", "-s", "./start.sh"]
+CMD ["gosu", "learninghouse", "tini", "-s", "learninghouse"]

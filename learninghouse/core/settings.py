@@ -28,7 +28,7 @@ class ServiceSettings(BaseSettings):
 
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True
-        prefix = 'learninghouse_'
+        env_prefix = 'learninghouse_'
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:

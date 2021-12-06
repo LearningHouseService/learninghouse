@@ -32,7 +32,7 @@ def run():
     logger.info(f'Running {settings.title} {versions.service}')
     logger.info(versions.libraries_versions)
     logger.info(f'Running in {settings.environment} mode')
-    logger.info(f'Listening on {settings.base_url}')
+    logger.info(f'Listening on {settings.host}:{settings.port}')
     logger.info(f'Configuration directory {settings.brains_directory}')
     logger.info(f'URL to OpenAPI file {settings.openapi_url}')
 

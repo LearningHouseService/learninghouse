@@ -50,6 +50,11 @@ Licensor: The scikit-learn developers
 Website: scikit-learn.org
 License: New BSD License
 
+Component: SwaggerUI
+Licensor: SmartBear
+Website: https://swagger.io/
+License: Apache-2.0 License
+
 Component: Parts of artwork
 Licensor: SVG Repo
 Website: https://www.svgrepo.com/

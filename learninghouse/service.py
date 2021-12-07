@@ -1,13 +1,19 @@
+from pathlib import Path
+
 import uvicorn
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from learninghouse import versions
-from learninghouse.api import brain
-from learninghouse.api.errors import LearningHouseException, learninghouse_exception_handler
-from learninghouse.core.settings import service_settings
+from learninghouse.api import brain, docs
+from learninghouse.api.errors import (LearningHouseException,
+                                      learninghouse_exception_handler)
 from learninghouse.core.logging import initialize_logging, logger
+from learninghouse.core.settings import service_settings
 
 APP_REFERENCE = 'learninghouse.service:app'
+
+STATIC_DIRECTORY = str(Path(__file__).parent / 'static')
 
 
 def get_application() -> FastAPI:
@@ -15,11 +21,16 @@ def get_application() -> FastAPI:
 
     initialize_logging(settings.logging_level)
 
-    application = FastAPI(**settings.fastapi_kwargs)
+    application = FastAPI(docs_url=None, redoc_url=None,
+                          **settings.fastapi_kwargs)
     application.include_router(brain.router)
+    application.include_router(docs.router)
 
     application.add_exception_handler(
         LearningHouseException, learninghouse_exception_handler)
+
+    application.mount(
+        '/static', StaticFiles(directory=STATIC_DIRECTORY), name='static')
 
     return application
 

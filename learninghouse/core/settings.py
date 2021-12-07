@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -13,7 +13,6 @@ class ServiceSettings(BaseSettings):
     debug: bool = False
     docs_url: str = '/docs'
     openapi_file: str = '/learninghouse_api.json'
-    redoc_url: Optional[str] = None
     title: str = 'learningHouse Service'
 
     host: str = '127.0.0.1'
@@ -33,9 +32,7 @@ class ServiceSettings(BaseSettings):
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
         return {'debug': self.debug,
-                'docs_url': self.docs_url,
                 'openapi_url': self.openapi_file,
-                'redoc_url': self.redoc_url,
                 'title': self.title,
                 'version': versions.service
                 }
@@ -71,14 +68,25 @@ class ServiceSettings(BaseSettings):
 
         if self.docs_url is not None:
             documentation_url = self.base_url + self.docs_url
-        elif self.redoc_url is not None:
-            documentation_url = self.base_url + self.redoc_url
 
         return documentation_url
 
     @property
+    def oauth2_redirect_url(self) -> Union[str, None]:
+        redirect_url = None
+
+        if self.docs_url is not None and self.is_oauth_activated:
+            redirect_url = self.docs_url + '/oauth2-redirect'
+
+        return redirect_url
+
+    @property
     def openapi_url(self) -> str:
         return self.base_url + self.openapi_file
+
+    @property
+    def is_oauth_activated(self) -> bool:
+        return False
 
 
 class DevelopmentSettings(ServiceSettings):

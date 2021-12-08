@@ -122,7 +122,7 @@ class Brain():
 
             return brain_config
         except FileNotFoundError as exc:
-            raise BrainNotTrained() from exc
+            raise BrainNotTrained(name) from exc
 
     def store_trained(self,
                       columns: List[str],
@@ -201,7 +201,7 @@ class BrainTraining():
 
             return brain.info
         except FileNotFoundError as exc:
-            raise BrainNoConfiguration() from exc
+            raise BrainNoConfiguration(name) from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
             raise LearningHouseException() from exc
@@ -237,7 +237,7 @@ class BrainPrediction():
                 prediction=prediction[0]
             )
         except FileNotFoundError as exc:
-            raise BrainNotTrained() from exc
+            raise BrainNotTrained(name) from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
             raise LearningHouseException() from exc

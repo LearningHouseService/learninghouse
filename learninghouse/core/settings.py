@@ -8,6 +8,8 @@ from learninghouse import versions
 from learninghouse.core import LearningHouseEnum
 from learninghouse.core.logging import LoggingLevelEnum
 
+LICENSE_URL = 'https://github.com/LearningHouseService/learninghouse-core/blob/master/LICENSE'
+
 
 class ServiceSettings(BaseSettings):
     debug: bool = False
@@ -34,7 +36,11 @@ class ServiceSettings(BaseSettings):
         return {'debug': self.debug,
                 'openapi_url': self.openapi_file,
                 'title': self.title,
-                'version': versions.service
+                'version': versions.service,
+                'license_info':  {
+                    'name': 'MIT License',
+                    'url': LICENSE_URL
+                }
                 }
 
     @property

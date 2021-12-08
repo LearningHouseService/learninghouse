@@ -31,7 +31,7 @@ def get_application() -> FastAPI:
                               LearningHouseException.STATUS_CODE:
                               LearningHouseException.api_description()
                           },
-                          **settings.fastapi_kwargs)
+                          ** settings.fastapi_kwargs)
     application.include_router(brain.router)
     application.include_router(docs.router)
 

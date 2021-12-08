@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
-from learninghouse.api.errors import \
-    LearningHouseSecurityException as SecurityException
+from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.api.errors.brain import (BrainNoConfiguration,
                                             BrainNotActual, BrainNotEnoughData,
                                             BrainNotTrained)
@@ -14,7 +13,8 @@ router = APIRouter(
     prefix='/brain',
     tags=['brain'],
     responses={
-        SecurityException.STATUS_CODE: SecurityException.api_description()
+        LearningHouseSecurityException.STATUS_CODE:
+        LearningHouseSecurityException.api_description()
     }
 )
 

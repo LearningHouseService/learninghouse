@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-from learninghouse.api.errors import LearningHouseException
 from learninghouse.api.errors import \
     LearningHouseSecurityException as SecurityException
 from learninghouse.api.errors.brain import (BrainNoConfiguration,
@@ -13,7 +12,10 @@ from learninghouse.services.brain import Brain, BrainPrediction, BrainTraining
 
 router = APIRouter(
     prefix='/brain',
-    tags=['brain']
+    tags=['brain'],
+    responses={
+        SecurityException.STATUS_CODE: SecurityException.api_description()
+    }
 )
 
 
@@ -26,10 +28,8 @@ router = APIRouter(
                 200: {
                     'description': 'Information of the trained brain'
                 },
-                SecurityException.STATUS_CODE: SecurityException.api_description(),
                 BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description(),
-                BrainNotActual.STATUS_CODE: BrainNotActual.api_description(),
-                LearningHouseException.STATUS_CODE: LearningHouseException.api_description()
+                BrainNotActual.STATUS_CODE: BrainNotActual.api_description()
             })
 async def info_get(name: str):
     brain_config = Brain.load_trained(name)
@@ -45,10 +45,8 @@ async def info_get(name: str):
                  200: {
                      'description': 'Information of the trained brain'
                  },
-                 SecurityException.STATUS_CODE: SecurityException.api_description(),
                  BrainNotEnoughData.STATUS_CODE: BrainNotEnoughData.api_description(),
-                 BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description(),
-                 LearningHouseException.STATUS_CODE: LearningHouseException.api_description()
+                 BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description()
              })
 async def training_post(name: str):
     return BrainTraining.request(name)
@@ -63,10 +61,8 @@ async def training_post(name: str):
                 200: {
                     'description': 'Information of the trained brain'
                 },
-                SecurityException.STATUS_CODE: SecurityException.api_description(),
                 BrainNotEnoughData.STATUS_CODE: BrainNotEnoughData.api_description(),
-                BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description(),
-                LearningHouseException.STATUS_CODE: LearningHouseException.api_description()
+                BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description()
             })
 async def training_put(name: str, request_data: BrainTrainingRequest):
     return BrainTraining.request(name, request_data.data)
@@ -81,10 +77,8 @@ async def training_put(name: str, request_data: BrainTrainingRequest):
                  200: {
                      'description': 'Prediction result'
                  },
-                 SecurityException.STATUS_CODE: SecurityException.api_description(),
                  BrainNotActual.STATUS_CODE: BrainNotActual.api_description(),
-                 BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description(),
-                 LearningHouseException.STATUS_CODE: LearningHouseException.api_description()
+                 BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description()
              })
 async def prediction_post(name: str, request_data: BrainPredictionRequest):
     return BrainPrediction.prediction(name, request_data.data)

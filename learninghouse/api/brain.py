@@ -8,7 +8,7 @@ from learninghouse.api.errors.brain import (BrainNoConfiguration,
 from learninghouse.models.brain import (BrainInfo, BrainPredictionRequest,
                                         BrainPredictionResult,
                                         BrainTrainingRequest)
-from learninghouse.services.brain import (BrainConfiguration, BrainPrediction,
+from learninghouse.services.brain import (Brain, BrainPrediction,
                                           BrainTraining)
 
 router = APIRouter(
@@ -31,8 +31,8 @@ router = APIRouter(
                 LearningHouseException.STATUS_CODE: LearningHouseException.description()
             })
 async def info_get(name: str):
-    brain_config = BrainConfiguration.load_compiled(name)
-    return brain_config.info()
+    brain_config = Brain.load_trained(name)
+    return brain_config.info
 
 
 @router.post('/{name}/training',

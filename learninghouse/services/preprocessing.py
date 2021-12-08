@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from learninghouse.services import sanitize_configuration_filename
+
+from learninghouse.core.settings import service_settings
 
 if TYPE_CHECKING:
     from learninghouse.brain import BrainConfiguration
@@ -22,7 +23,7 @@ class DatasetPreprocessing():
         categoricals = []
         numericals = []
 
-        filename = sanitize_configuration_filename('config', 'sensors', 'json')
+        filename = service_settings().brains_directory / 'sensors.json'
 
         with open(filename, 'r', encoding='utf-8') as json_file:
             sensors = json.load(json_file)
@@ -36,8 +37,6 @@ class DatasetPreprocessing():
         categoricals.append('day_of_week')
         numericals.append('hour_of_day')
         numericals.append('minute_of_hour')
-
-        # logger.debug('Sensors config: %s, %s', categoricals, numericals)
 
         return categoricals, numericals
 
@@ -103,12 +102,12 @@ class DatasetPreprocessing():
 
         y_vector = data[brain.dataset.dependent]
 
-        if brain.preprocessing.dependent_encode:
-            y_vector = brain.preprocessing.dependent_encoder.fit_transform(
+        if brain.dataset.dependent_encode:
+            y_vector = brain.dataset.dependent_encoder.fit_transform(
                 y_vector)
 
         x_train, x_test, y_train, y_test = train_test_split(
-            x_vector, y_vector, test_size=brain.preprocessing.testsize, random_state=0)
+            x_vector, y_vector, test_size=brain.dataset.testsize, random_state=0)
 
         if only_features:
             numericals = cls.columns_intersection(
@@ -116,10 +115,10 @@ class DatasetPreprocessing():
         else:
             numericals = cls.columns_intersection(numericals, data)
 
-        x_train = DatasetPreprocessing.transform_columns(
-            brain.preprocessing.imputer.fit_transform, x_train, numericals)
-        x_test = DatasetPreprocessing.transform_columns(
-            brain.preprocessing.imputer.transform, x_test, numericals)
+        x_train = cls.transform_columns(
+            brain.dataset.imputer.fit_transform, x_train, numericals)
+        x_test = cls.transform_columns(
+            brain.dataset.imputer.transform, x_test, numericals)
 
         x_train = cls.sort_columns(x_train)
         x_test = cls.sort_columns(x_test)
@@ -134,7 +133,7 @@ class DatasetPreprocessing():
             brain, data, True)
 
         numericals = cls.columns_intersection(
-            brain.preprocessing.columns, numericals)
+            brain.dataset.columns, numericals)
 
         missing_columns = set.difference(cls.set_of_columns(
             numericals), cls.set_of_columns(x_vector))
@@ -143,11 +142,11 @@ class DatasetPreprocessing():
             x_vector.insert(0, missing_column, [np.nan])
 
         x_vector = x_vector.reindex(
-            columns=brain.preprocessing.columns, fill_value=0)
+            columns=brain.dataset.columns, fill_value=0)
         x_vector = cls.sort_columns(x_vector)
 
-        x_vector = DatasetPreprocessing.transform_columns(
-            brain.preprocessing.imputer.transform, x_vector, numericals)
+        x_vector = cls.transform_columns(
+            brain.dataset.imputer.transform, x_vector, numericals)
 
         return cls.sort_columns(x_vector)
 

@@ -2,6 +2,7 @@
 **/models/*/*.csv
 **/models/*/*.pkl
 
+**/brains/*.json
 **/brains/*/*.json
 **/brains/*/*.csv
 **/brains/*/*.pkl

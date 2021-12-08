@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Type, Union
 
+from datetime import datetime
 from pydantic import BaseModel
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
@@ -89,6 +90,7 @@ class BrainInfo(BaseModel):
     dependent: str
     dependent_encode: bool
     score: float
+    trained_at: datetime
     versions: LearningHouseVersions
 
     class Config:  # pylint: disable=too-few-public-methods
@@ -100,6 +102,7 @@ class BrainInfo(BaseModel):
                 'dependent': 'darkness',
                 'dependent_encode': True,
                 'score': 0.85,
+                'trained_at': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
                 'versions': versions
             }
         }

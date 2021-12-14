@@ -117,7 +117,7 @@ class Brain():
             brain_config = joblib.load(filename)
             if brain_config.versions != versions:
                 logger.warning(
-                    'Trained brain {name} is not actual. Versions: {brain_config.versions}')
+                    f'Trained brain {name} is not actual. Versions: {brain_config.versions}')
                 raise BrainNotActual(name, brain_config.versions)
 
             return brain_config

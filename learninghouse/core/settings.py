@@ -5,6 +5,8 @@ from typing import Any, Dict, Union
 from pydantic import BaseSettings, DirectoryPath
 
 from learninghouse import versions
+from learninghouse.api.errors import (LearningHouseException,
+                                      LearningHouseValidationError)
 from learninghouse.core import LearningHouseEnum
 from learninghouse.core.logging import LoggingLevelEnum
 
@@ -34,9 +36,17 @@ class ServiceSettings(BaseSettings):
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
         return {'debug': self.debug,
-                'openapi_url': self.openapi_file,
                 'title': self.title,
+                'openapi_url': self.openapi_file,
+                'docs_url': None,
+                'redoc_url': None,
                 'version': versions.service,
+                'responses': {
+                    LearningHouseValidationError.STATUS_CODE:
+                    LearningHouseValidationError.api_description(),
+                    LearningHouseException.STATUS_CODE:
+                    LearningHouseException.api_description()
+                },
                 'license_info':  {
                     'name': 'MIT License',
                     'url': LICENSE_URL

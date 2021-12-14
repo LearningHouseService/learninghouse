@@ -8,7 +8,6 @@ from fastapi.staticfiles import StaticFiles
 from learninghouse import versions
 from learninghouse.api import brain, docs
 from learninghouse.api.errors import (LearningHouseException,
-                                      LearningHouseValidationError,
                                       learninghouse_exception_handler,
                                       validation_error_handler)
 from learninghouse.core.logging import initialize_logging, logger
@@ -24,14 +23,7 @@ def get_application() -> FastAPI:
 
     initialize_logging(settings.logging_level)
 
-    application = FastAPI(docs_url=None, redoc_url=None,
-                          responses={
-                              LearningHouseValidationError.STATUS_CODE:
-                              LearningHouseValidationError.api_description(),
-                              LearningHouseException.STATUS_CODE:
-                              LearningHouseException.api_description()
-                          },
-                          ** settings.fastapi_kwargs)
+    application = FastAPI(**settings.fastapi_kwargs)
     application.include_router(brain.router)
     application.include_router(docs.router)
 

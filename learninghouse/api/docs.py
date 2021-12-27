@@ -15,7 +15,7 @@ if settings.docs_url is not None:
     @router.get(settings.docs_url)
     async def custom_swagger_ui_html() -> HTMLResponse:
         return get_swagger_ui_html(
-            openapi_url=settings.openapi_url,
+            openapi_url=settings.openapi_file,
             title=settings.title + " - Swagger UI",
             oauth2_redirect_url=settings.oauth2_redirect_url,
             swagger_js_url="/static/docs/swagger-ui-bundle.js",

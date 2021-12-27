@@ -23,25 +23,19 @@ docker pull learninghouseservice/learninghouse:latest
 
 ### Prepare configuration directory
 ```
-mkdir -p brains/config
-mkdir -p brains/training
-mkdir -p brains/compiled
+mkdir -p brains
 ```
 
 The `brains` directory holds the model configuration as json-file. The models are the brains of your learning house.
 
-The directories `training` and `compiled` are used by service to store data.
-
-Training data is stored as csv file, trained brains are stored as object dump.
+There will be one subdirectory per brain, where all files relevant for a brain will be stored.
+The brain subdirectory needs a `config.json` holding the basic configuration. The service will store a `training_data.csv` holding
+all data of your sensors and an object dump of the trained model to a file called `trained.pkl`.
 
 ### Service configuration
 
 Download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example) 
 and rename it to .env. You can modify default configuration values to your needs in this file.
-
-## Configuration of brains
-
-Configuration is stored in json format.
 
 ### General configuration
 
@@ -56,7 +50,7 @@ Some examples for categorical data:
 - pressure_trend: Values of 'falling', 'rising', 'consistent'
 - month_of_year: 1 ('January'), 2 ('Februrary'), ...
 
-To enable the service to use the data of your sensors as `features` for your brain, you have to give the service information about the data type. For this put a sensors.json to the directory brain/config. List all your sensors and their data type.
+To enable the service to use the data of your sensors as `features` for your brain, you have to give the service information about the data type. For this put a `sensors.json` to the directory brains. List all your sensors and their data type.
 
 Example content of sensors.json:
 
@@ -75,9 +69,9 @@ Example content of sensors.json:
 
 ### Example brain
 
-The brain decides whether it is so dark that the light has to be switched on. It uses the sun azimuth and sun elevation, the rain gauge and the one hour trend of air pressure. The data of the other senors (pressure, temperature_outside, light_state) isn't used in this example. It use a machine learning algorithm called RandomForestClassifier.
+The brain decides whether it is so dark that the light has to be switched on. It uses a machine learning algorithm called RandomForestClassifier.
 
-Store a darkness.json in brains/config directory with following content:
+Store a config.json in brains/darkness subdirectory with following content:
 
 ```
 {

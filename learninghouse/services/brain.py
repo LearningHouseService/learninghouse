@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 import json
 from os import path, stat
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -20,8 +21,7 @@ from learninghouse.models import LearningHouseVersions
 from learninghouse.models.brain import (BrainEstimatorConfiguration,
                                         BrainEstimatorType, BrainInfo,
                                         BrainPredictionResult)
-from learninghouse.models.preprocessing import (DatasetConfiguration,
-                                                PreprocessingConfiguration)
+from learninghouse.models.preprocessing import DatasetConfiguration
 from learninghouse.services import sanitize_configuration_filename
 from learninghouse.services.preprocessing import DatasetPreprocessing
 
@@ -29,12 +29,10 @@ if TYPE_CHECKING:
     from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
-class BrainConfiguration():
-    CONFIG_DIR = 'config'
-    CONFIG_EXTENSION = 'json'
-
-    COMPILED_DIR = 'compiled'
-    COMPILED_EXTENSION = 'pkl'
+class Brain():
+    CONFIG_FILE = 'config.json'
+    TRAINED_FILE = 'trained.pkl'
+    INFO_FILE = 'info.json'
 
     def __init__(self, name: str):
         self.name: str = name
@@ -45,23 +43,24 @@ class BrainConfiguration():
             **self._required_param(json_config, 'estimator'))
 
         self.dataset: DatasetConfiguration = DatasetConfiguration(
-            dependent=self._required_param(json_config, 'dependent')
-        )
+            dependent=self._required_param(json_config, 'dependent'),
+            testsize=self._required_param(json_config, 'test_size'),
+            dependent_encode=self._optional_param(
+                json_config, 'dependent_encode', False),
 
-        self.preprocessing: PreprocessingConfiguration = PreprocessingConfiguration(
-            self._required_param(json_config, 'test_size'),
-            self._optional_param(json_config, 'dependent_encode', False)
         )
 
         self._estimator: Optional[Union[RandomForestClassifier,
                                         RandomForestRegressor]] = None
         self.score: Optional[float] = 0.0
+
         self.versions: LearningHouseVersions = versions
+
+        self.trained_at: Optional[datetime] = None
 
     @classmethod
     def _load_initial_config(cls, name: str) -> Dict[str, Any]:
-        filename = sanitize_configuration_filename(
-            cls.CONFIG_DIR, name, cls.CONFIG_EXTENSION)
+        filename = sanitize_configuration_filename(name, cls.CONFIG_FILE)
 
         with open(filename, 'r', encoding='utf-8') as config_file:
             return json.load(config_file)
@@ -95,50 +94,60 @@ class BrainConfiguration():
 
         return self._estimator
 
+    @property
     def info(self) -> BrainInfo:
         info = BrainInfo(
             name=self.name,
             estimator_config=self.estimatorcfg,
             features=self.dataset.features,
             dependent=self.dataset.dependent,
-            dependent_encode=self.preprocessing.dependent_encode,
+            dependent_encode=self.dataset.dependent_encode,
             score=self.score,
+            trained_at=self.trained_at,
             versions=self.versions
         )
 
         return info
 
     @classmethod
-    def load_compiled(cls, name: str) -> BrainConfiguration:
+    def load_trained(cls, name: str) -> Brain:
         try:
             filename = sanitize_configuration_filename(
-                cls.COMPILED_DIR, name, cls.COMPILED_EXTENSION)
+                name, cls.TRAINED_FILE)
             brain_config = joblib.load(filename)
             if brain_config.versions != versions:
                 logger.warning(
-                    'Trained brain {name} is not actual. Versions: {brain_config.versions}')
+                    f'Trained brain {name} is not actual. Versions: {brain_config.versions}')
                 raise BrainNotActual(name, brain_config.versions)
 
             return brain_config
         except FileNotFoundError as exc:
-            raise BrainNotTrained() from exc
+            raise BrainNotTrained(name) from exc
 
-    def compile(self,
-                columns: List[str],
-                score: float) -> None:
-        self.preprocessing.columns = columns
+    def store_trained(self,
+                      columns: List[str],
+                      score: float) -> None:
+        self.dataset.columns = columns
         self.score = score
+        self.trained_at = datetime.now()
 
         filename = sanitize_configuration_filename(
-            self.COMPILED_DIR, self.name, self.COMPILED_EXTENSION)
+            self.name, self.TRAINED_FILE)
 
         joblib.dump(self, filename)
 
+        filename = sanitize_configuration_filename(self.name, self.INFO_FILE)
+        with open(filename, 'w', encoding='utf-8') as infofile:
+            infofile.write(self.info.json(indent=4))
+
 
 class BrainTraining():
+    TRAINING_DATA_FILE = 'training_data.csv'
+
     @classmethod
     def request(cls, name: str, request_data: Optional[Dict[str, Any]] = None) -> BrainInfo:
-        filename = sanitize_configuration_filename('training', name, 'csv')
+        filename = sanitize_configuration_filename(
+            name, cls.TRAINING_DATA_FILE)
 
         if request_data is None:
             if path.exists(filename):
@@ -161,7 +170,7 @@ class BrainTraining():
     @staticmethod
     def train(name: str, data: pd.DataFrame) -> BrainInfo:
         try:
-            brain = BrainConfiguration(name)
+            brain = Brain(name)
 
             if len(data.index) < 10:
                 raise BrainNotEnoughData()
@@ -188,18 +197,18 @@ class BrainTraining():
             else:
                 score = estimator.score(x_test, y_test)
 
-            brain.compile(x_train.columns.tolist(), score)
+            brain.store_trained(x_train.columns.tolist(), score)
 
-            return brain.info()
+            return brain.info
         except FileNotFoundError as exc:
-            raise BrainNoConfiguration() from exc
+            raise BrainNoConfiguration(name) from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
             raise LearningHouseException() from exc
 
 
 class BrainPrediction():
-    brains: Dict[str, Dict[str, int | BrainConfiguration]] = {}
+    brains: Dict[str, Dict[str, int | Brain]] = {}
 
     @classmethod
     def prediction(cls, name: str, request_data: Dict[str, Any]):
@@ -214,35 +223,35 @@ class BrainPrediction():
 
             prediction = brain.estimator().predict(prepared_data)
 
-            if (brain.preprocessing.dependent_encode
+            if (brain.dataset.dependent_encode
                     and brain.estimatorcfg.typed == BrainEstimatorType.CLASSIFIER):
-                prediction = brain.preprocessing.dependent_encoder.inverse_transform(
+                prediction = brain.dataset.dependent_encoder.inverse_transform(
                     prediction)
                 prediction = list(map(bool, prediction))
             else:
                 prediction = list(map(float, prediction))
 
             return BrainPredictionResult(
-                brain=brain.info(),
+                brain=brain.info,
                 preprocessed=prepared_data.head(1).to_dict('records')[0],
                 prediction=prediction[0]
             )
         except FileNotFoundError as exc:
-            raise BrainNotTrained() from exc
+            raise BrainNotTrained(name) from exc
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception(exc)
             raise LearningHouseException() from exc
 
     @classmethod
-    def _load_brain(cls, name: str) -> BrainConfiguration:
+    def _load_brain(cls, name: str) -> Brain:
         filename = sanitize_configuration_filename(
-            BrainConfiguration.COMPILED_DIR, name, BrainConfiguration.COMPILED_EXTENSION)
+            name, Brain.TRAINED_FILE)
         stamp = stat(filename).st_mtime
 
         if not(name in cls.brains and cls.brains[name]['stamp'] == stamp):
             cls.brains[name] = {
                 'stamp': stamp,
-                'brain': BrainConfiguration.load_compiled(name)
+                'brain': Brain.load_trained(name)
             }
 
         return cls.brains[name]['brain']

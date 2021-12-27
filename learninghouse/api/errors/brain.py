@@ -12,20 +12,23 @@ MIMETYPE_JSON = 'application/json'
 class BrainNotTrained(LearningHouseException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
     NOT_TRAINED = 'NOT_TRAINED'
+    DESCRIPTION = 'No trained brain with {name} found.'
 
-    def __init__(self):
-        super().__init__(self.STATUS_CODE, self.NOT_TRAINED)
+    def __init__(self, name: str):
+        super().__init__(self.STATUS_CODE,
+                         self.NOT_TRAINED,
+                         self.DESCRIPTION.format(name=name))
 
     @classmethod
-    def description(cls) -> Dict:
+    def api_description(cls) -> Dict:
         return {
             'model': LearningHouseErrorMessage,
-            'description': 'No trained model with this name found.',
+            'description': 'No trained brain with this name found.',
             'content': {
                 MIMETYPE_JSON: {
                     'example': {
                         'error': cls.NOT_TRAINED,
-                        'description': ''
+                        'description': cls.DESCRIPTION
                     }
                 }
             }
@@ -35,26 +38,30 @@ class BrainNotTrained(LearningHouseException):
 class BrainNotActual(LearningHouseException):
     STATUS_CODE = status.HTTP_428_PRECONDITION_REQUIRED
     NOT_ACTUAL = 'NOT_ACTUAL'
+    DESCRIPTION = 'The versions of trained brain {name} are ' + \
+        'not the same as service. ' + \
+        'Versions service: {versions}. ' + \
+        'Versions brain: {brain_versions}. ' + \
+        'Please train the brain again.'
 
     def __init__(self, name: str, brain_versions: LearningHouseVersions):
-        description = f'The versions of trained brain {name} are not the same as service. '
-        description += f'Versions service: {versions}. '
-        description += f'Versions brain: {brain_versions}. '
-        description += 'Please train the brain again.'
         super().__init__(self.STATUS_CODE,
                          self.NOT_ACTUAL,
-                         description)
+                         self.DESCRIPTION.format(name=name,
+                                                 versions=versions,
+                                                 brain_versions=brain_versions))
 
     @classmethod
-    def description(cls) -> Dict:
+    def api_description(cls) -> Dict:
         return {
             'model': LearningHouseErrorMessage,
-            'description': 'If brain was not trained with actual versions of service and libraries.',
+            'description': 'If brain was not trained with actual versions ' +
+            'of service and libraries.',
             'content': {
                 MIMETYPE_JSON: {
                     'example': {
                         'error': cls.NOT_ACTUAL,
-                        'description': ''
+                        'description': cls.DESCRIPTION
                     }
                 }
             }
@@ -64,20 +71,24 @@ class BrainNotActual(LearningHouseException):
 class BrainNotEnoughData(LearningHouseException):
     STATUS_CODE = status.HTTP_202_ACCEPTED
     NOT_ENOUGH_TRAINING_DATA = 'NOT_ENOUGH_TRAINING_DATA'
+    DESCRIPTION = 'Brain was not trained because at least 10 data points are needed. ' + \
+        'But your new data point was saved.'
 
     def __init__(self):
-        super().__init__(self.STATUS_CODE, self.NOT_ENOUGH_TRAINING_DATA)
+        super().__init__(self.STATUS_CODE,
+                         self.NOT_ENOUGH_TRAINING_DATA,
+                         self.DESCRIPTION)
 
     @classmethod
-    def description(cls) -> Dict:
+    def api_description(cls) -> Dict:
         return {
             'model': LearningHouseErrorMessage,
-            'description': 'Brain needs at least 10 data points to be trained.',
+            'description': 'Response if there are not enough data points.',
             'content': {
                 MIMETYPE_JSON: {
                     'example': {
                         'error': cls.NOT_ENOUGH_TRAINING_DATA,
-                        'description': ''
+                        'description': cls.DESCRIPTION
                     }
                 }
             }
@@ -87,12 +98,15 @@ class BrainNotEnoughData(LearningHouseException):
 class BrainNoConfiguration(LearningHouseException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
     NO_CONFIGURATION = 'NO_CONFIGURATION'
+    DESCRIPTION = 'No configuration for brain {name} found.'
 
-    def __init__(self):
-        super().__init__(self.STATUS_CODE, self.NO_CONFIGURATION)
+    def __init__(self, name: str):
+        super().__init__(self.STATUS_CODE,
+                         self.NO_CONFIGURATION,
+                         self.DESCRIPTION.format(name=name))
 
     @classmethod
-    def description(cls) -> Dict:
+    def api_description(cls) -> Dict:
         return {
             'model': LearningHouseErrorMessage,
             'description': 'No brain configuration found.',
@@ -100,7 +114,7 @@ class BrainNoConfiguration(LearningHouseException):
                 MIMETYPE_JSON: {
                     'example': {
                         'error': cls.NO_CONFIGURATION,
-                        'description': ''
+                        'description': cls.DESCRIPTION
                     }
                 }
             }
@@ -115,7 +129,7 @@ class BrainBadRequest(LearningHouseException):
         super().__init__(self.STATUS_CODE, self.BAD_REQUEST, description)
 
     @classmethod
-    def description(cls) -> Dict:
+    def api_description(cls) -> Dict:
         return {
             'model': LearningHouseErrorMessage,
             'description': 'Brain received a bad request.',

@@ -4,6 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from learninghouse import versions
 from learninghouse.api import brain, docs
@@ -31,6 +32,14 @@ def get_application() -> FastAPI:
         RequestValidationError, validation_error_handler)
     application.add_exception_handler(
         LearningHouseException, learninghouse_exception_handler)
+
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     application.mount(
         '/static', StaticFiles(directory=STATIC_DIRECTORY), name='static')

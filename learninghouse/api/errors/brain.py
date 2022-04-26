@@ -142,3 +142,29 @@ class BrainBadRequest(LearningHouseException):
                 }
             }
         }
+
+
+class BrainExists(LearningHouseException):
+    STATUS_CODE = status.HTTP_400_BAD_REQUEST
+    EXISTS = 'EXISTS'
+    DESCRIPTION = 'The existing brain {name} can not be recreated. Use PUT to update.'
+
+    def __init__(self, name: str):
+        super().__init__(self.STATUS_CODE,
+                         self.EXISTS,
+                         self.DESCRIPTION.format(name=name))
+
+    @classmethod
+    def api_description(cls) -> Dict:
+        return {
+            'model': LearningHouseErrorMessage,
+            'description': 'An existing brain can not be recreated. Use PUT to update.',
+            'content': {
+                MIMETYPE_JSON: {
+                    'example': {
+                        'error': cls.EXISTS,
+                        'description': cls.DESCRIPTION
+                    }
+                }
+            }
+        }

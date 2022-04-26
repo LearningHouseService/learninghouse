@@ -7,8 +7,8 @@ from pydantic import BaseSettings, DirectoryPath
 from learninghouse import versions
 from learninghouse.api.errors import (LearningHouseException,
                                       LearningHouseValidationError)
-from learninghouse.core import LearningHouseEnum
 from learninghouse.core.logging import LoggingLevelEnum
+from learninghouse.models.base import EnumModel
 
 LICENSE_URL = 'https://github.com/LearningHouseService/learninghouse-core/blob/master/LICENSE'
 
@@ -57,7 +57,8 @@ class ServiceSettings(BaseSettings):
     def uvicorn_kwargs(self) -> Dict[str, Any]:
         kwargs = {
             'host': self.host,
-            'port': self.port
+            'port': self.port,
+            'headers': [('server', f'LearningHouse Service {versions.service}')]
         }
 
         if self.reload:
@@ -71,7 +72,7 @@ class ServiceSettings(BaseSettings):
 
     @property
     def base_url(self) -> str:
-        if self.host == '0.0.0.0' or self.host == '127.0.0.1':
+        if self.host in ('0.0.0.0', '127.0.0.1'):
             base_url = f'http://localhost:{self.port}'
         else:
             base_url = f'http://{self.host}:{self.port}'
@@ -116,13 +117,14 @@ class DevelopmentSettings(ServiceSettings):
         env_prefix = 'learninghouse_'
 
 
-class ServiceEnvironment(LearningHouseEnum):
+class ServiceEnvironment(str, EnumModel):
     PROD = 'production', ServiceSettings
     DEV = 'development', DevelopmentSettings
 
     def __init__(self,
                  description: str,
                  settings_class: ServiceSettings):
+        # pylint: disable=super-init-not-called
         self._description: str = description
         self._settings_class: ServiceSettings = settings_class
 

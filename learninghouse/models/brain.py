@@ -1,118 +1,29 @@
-from typing import Any, Dict, List, Optional, Type, Union
-
 from datetime import datetime
-from pydantic import BaseModel
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from typing import Dict, List, Union
+
+from pydantic import BaseModel, Field
 
 from learninghouse import versions
-from learninghouse.core import LearningHouseEnum
 from learninghouse.models import LearningHouseVersions
-
-
-class BrainEstimatorType(LearningHouseEnum):
-    """
-        **LearningHouse Service** can predict values using an estimator. An estimator can be
-        of type `classifier` which fits best for your needs if you have somekind of categorical
-        output like in the darkness example true and false. If you want to predict a numerical
-        value for example the setpoint of an heating equipment use the type `regressor` instead.
-    """
-    CLASSIFIER = 'classifier', RandomForestClassifier
-    REGRESSOR = 'regressor', RandomForestRegressor
-
-    def __init__(self,
-                 typed: str,
-                 estimator_class: Union[Type[RandomForestClassifier],
-                                        Type[RandomForestRegressor]]):
-        self._typed: str = typed
-        self._estimator_class: Union[Type[RandomForestClassifier],
-                                     Type[RandomForestRegressor]] = estimator_class
-
-    @property
-    def typed(self) -> str:
-        return self._typed
-
-    @property
-    def estimator_class(self) -> Union[Type[RandomForestClassifier],
-                                       Type[RandomForestRegressor]]:
-        return self._estimator_class
-
-
-class BrainEstimatorConfiguration(BaseModel):
-    """
-    **LearningHouse Service** can predict values using an estimator.
-    An estimator can be of type `classifier` which fits best for your
-    needs if you have somekind of categorical output like in the
-    darkness example true and false. If you want to predict a numerical
-    value for example the setpoint of an heating equipment use the type
-    `regressor` instead.
-
-    For both types **learningHouse Service** uses a machine learning
-    algorithm called random forest estimation. This algorithm builds
-    a "forest" of decision trees with your `features` and takes the mean
-    of the prediction of all of them to give you a best result. For more
-    details see the API description of scikit-learn:
-
-    | Estimator type | API Reference |
-    |-----------------|-------------------|
-    | RandomForestRegressor | \
-        https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html#sklearn.ensemble.RandomForestRegressor |
-    | RandomForestClassifier | \
-        https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html#sklearn.ensemble.RandomForestClassifier |
-
-    You can adjust the amount of decision trees by using `estimators`
-    (default: 100) option. And the maximum depth of each tree by using
-    `max_depth` (default: 5) option. Both options are optional. Try to
-    resize this value to optimize the accuracy of your model.
-    """  # pylint: disable=line-too-long
-    typed: BrainEstimatorType
-    estimators: Optional[int] = 100
-    max_depth: Optional[int] = 5
-    random_state: Optional[int] = 0
-
-    class Config:  # pylint: disable=too-few-public-methods
-        schema_extra = {
-            'example': {
-                'typed': 'classifier',
-                'estimators': 100,
-                'max_depth': 5,
-                'random_state': 0
-            }
-        }
+from learninghouse.models.configuration import BrainConfiguration
 
 
 class BrainInfo(BaseModel):
     """
     Information of the trained brain.
     """
-    name: str
-    estimator_config: BrainEstimatorConfiguration
-    features: List[str]
-    dependent: str
-    dependent_encode: bool
-    score: float
-    trained_at: datetime
-    versions: LearningHouseVersions
-
-    class Config:  # pylint: disable=too-few-public-methods
-        schema_extra = {
-            'example': {
-                'name': 'darkness',
-                'estimator_config': BrainEstimatorConfiguration.Config.schema_extra['example'],
-                'features': ['azimuth', 'elevation', 'rain_gauge', 'pressure_trend_1h_falling'],
-                'dependent': 'darkness',
-                'dependent_encode': True,
-                'score': 0.85,
-                'trained_at': datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'),
-                'versions': versions
-            }
-        }
+    name: str = Field(None, example='darkness')
+    configuration: BrainConfiguration = Field(None)
+    features: List[str] = Field(
+        None, example=['azimuth', 'elevation', 'rain_gauge', 'pressure_trend_1h_falling'])
+    training_data_size: int = Field(None, example=1234)
+    score: float = Field(None, example=0.85)
+    trained_at: datetime = Field(
+        None, example=datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
+    versions: LearningHouseVersions = Field(None, example=versions)
 
 
-class BrainRequest(BaseModel):
-    data: Dict[str, Any]
-
-
-class BrainTrainingRequest(BrainRequest):
+class BrainTrainingRequest(BaseModel):
     """
     For training with data send a PUT request to the service.
 
@@ -129,57 +40,39 @@ class BrainTrainingRequest(BrainRequest):
     zero. For `numerical data` the mean of all known training set values
     for this `feature` will be assumed.
     """
-    class Config:  # pylint: disable=too-few-public-methods
-        schema_extra = {
-            'example': {
-                'data': {
-                    'azimuth': 321.4441223144531,
-                    'elevation': -19.691608428955078,
-                    'rain_gauge': 0.0,
-                    'pressure': 971.0,
-                    'pressure_trend_1h': "falling",
-                    'temperature_outside': 23.0,
-                    'temperature_trend_1h': "rising",
-                    'light_state': False,
-                    'darkness': True
-                }
-            }
-        }
+
+    data: Dict[str, Union[int, float, str, bool]] = Field(None, example={
+        'azimuth': 321.4441223144531,
+        'elevation': -19.691608428955078,
+        'rain_gauge': 0.0,
+        'pressure': 971.0,
+        'pressure_trend_1h': "falling",
+        'temperature_outside': 23.0,
+        'temperature_trend_1h': "rising",
+        'light_state': False,
+        'darkness': True
+    })
 
 
-class BrainPredictionRequest(BrainRequest):
-    class Config:  # pylint: disable=too-few-public-methods
-        schema_extra = {
-            'example': {
-                'data': {
-                    'azimuth': 321.4441223144531,
-                    'elevation': -19.691608428955078,
-                    'rain_gauge': 0.0,
-                    'pressure': 971.0,
-                    'pressure_trend_1h': "falling",
-                    'temperature_outside': 23.0,
-                    'temperature_trend_1h': "rising",
-                    'light_state': False
-                }
-            }
-        }
+class BrainPredictionRequest(BaseModel):
+    data: Dict[str, Union[int, float, str, bool]] = Field(None, example={
+        'azimuth': 321.4441223144531,
+        'elevation': -19.691608428955078,
+        'rain_gauge': 0.0,
+        'pressure': 971.0,
+        'pressure_trend_1h': "falling",
+        'temperature_outside': 23.0,
+        'temperature_trend_1h': "rising",
+        'light_state': False
+    })
 
 
 class BrainPredictionResult(BaseModel):
     brain: BrainInfo
-    preprocessed: Dict[str, Any]
-    prediction: Union[bool, float]
-
-    class Config:  # pylint: disable=too-few-public-methods
-        schema_extra = {
-            'example': {
-                'brain': BrainInfo.Config.schema_extra['example'],
-                'preprocessed': {
-                    'azimuth': 321.4441223144531,
-                    'elevation': -19.691608428955078,
-                    'rain_gauge': 0.0,
-                    'pressure_trend_1h_falling': 1
-                },
-                'prediction': True
-            }
-        }
+    preprocessed: Dict[str, Union[int, float, str, bool]] = Field(None, example={
+        'azimuth': 321.4441223144531,
+        'elevation': -19.691608428955078,
+        'rain_gauge': 0.0,
+        'pressure_trend_1h_falling': 1
+    })
+    prediction: Union[bool, float] = Field(None, example=False)

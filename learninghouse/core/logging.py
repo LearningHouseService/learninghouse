@@ -4,17 +4,20 @@ from typing import cast
 
 from loguru import logger
 
-from learninghouse.core import LearningHouseEnum
+from learninghouse.models.base import EnumModel
 
 
-class LoggingLevelEnum(LearningHouseEnum):
+class LoggingLevelEnum(str, EnumModel):
     DEBUG = 'DEBUG', logging.DEBUG
     INFO = 'INFO', logging.INFO
     WARNING = 'WARNING', logging.WARNING
     ERROR = 'ERROR', logging.ERROR
     CRITICAL = 'CRITICAL', logging.CRITICAL
 
-    def __init__(self, description: str, level: int):
+    def __init__(self,
+                 description: str,
+                 level: int):
+        # pylint: disable=super-init-not-called
         self._description: str = description
         self._level: int = level
 

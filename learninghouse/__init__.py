@@ -1,12 +1,12 @@
 from typing import Optional
 
 from fastapi import __version__ as fastapi_version
-from uvicorn import __version__ as uvicorn_version
-from pydantic.version import VERSION as pydantic_version
 from numpy.version import version as np_version
 from pandas import __version__ as pd_version
 from pydantic import BaseModel
+from pydantic.version import VERSION as pydantic_version
 from sklearn import __version__ as skl_version
+from uvicorn import __version__ as uvicorn_version
 
 from learninghouse.models import LearningHouseVersions
 

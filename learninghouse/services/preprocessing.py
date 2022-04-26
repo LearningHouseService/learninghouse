@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
 
@@ -8,10 +7,10 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from learninghouse.core.settings import service_settings
+from learninghouse.models.configuration import Sensors
 
 if TYPE_CHECKING:
-    from learninghouse.brain import BrainConfiguration
+    from learninghouse.brain import Brain
 
 
 class DatasetPreprocessing():
@@ -20,17 +19,9 @@ class DatasetPreprocessing():
 
     @classmethod
     def sensorsconfig(cls) -> Tuple[List[str], List[str]]:
-        categoricals = []
-        numericals = []
-
-        filename = service_settings().brains_directory / 'sensors.json'
-
-        with open(filename, 'r', encoding='utf-8') as json_file:
-            sensors = json.load(json_file)
-            categoricals = list(map(lambda x: x[0], filter(
-                lambda x: x[1] == cls.CATEGORICAL_KEY, sensors.items())))
-            numericals = list(map(lambda x: x[0], filter(
-                lambda x: x[1] == cls.NUMERICAL_KEY, sensors.items())))
+        sensors = Sensors.load_config()
+        categoricals = sensors.categoricals
+        numericals = sensors.numericals
 
         categoricals.append('month_of_year')
         numericals.append('day_of_month')
@@ -57,7 +48,7 @@ class DatasetPreprocessing():
 
     @classmethod
     def get_x_selected_and_numerical_columns(cls,
-                                             brain: BrainConfiguration,
+                                             brain: Brain,
                                              data: pd.DataFrame,
                                              only_features: bool) \
             -> Tuple[pd.DataFrame, List[str]]:
@@ -93,21 +84,21 @@ class DatasetPreprocessing():
 
     @classmethod
     def prepare_training(cls,
-                         brain: BrainConfiguration,
+                         brain: Brain,
                          data: pd.DataFrame,
                          only_features: bool) \
-            -> Tuple[BrainConfiguration, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+            -> Tuple[Brain, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
             brain, data, only_features)
 
-        y_vector = data[brain.dataset.dependent]
+        y_vector = data[brain.configuration.dependent]
 
-        if brain.dataset.dependent_encode:
+        if brain.configuration.dependent_encode:
             y_vector = brain.dataset.dependent_encoder.fit_transform(
                 y_vector)
 
         x_train, x_test, y_train, y_test = train_test_split(
-            x_vector, y_vector, test_size=brain.dataset.testsize, random_state=0)
+            x_vector, y_vector, test_size=brain.configuration.test_size, random_state=0)
 
         if only_features:
             numericals = cls.columns_intersection(
@@ -127,7 +118,7 @@ class DatasetPreprocessing():
 
     @classmethod
     def prepare_prediction(cls,
-                           brain: BrainConfiguration,
+                           brain: Brain,
                            data: pd.DataFrame) -> pd.DataFrame:
         x_vector, numericals = cls.get_x_selected_and_numerical_columns(
             brain, data, True)

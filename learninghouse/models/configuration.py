@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from learninghouse.api.errors import LearningHouseSecurityException
+from learninghouse.core.logging import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.base import DictModel, EnumModel
 
@@ -198,7 +199,15 @@ class Sensors(DictModel):
     @classmethod
     def load_config(cls) -> Sensors:
         filename = service_settings().brains_directory / 'sensors.json'
-        return Sensors.parse_file(filename, encoding='utf-8')
+        sensors = {}
+
+        if path.exists(filename):
+            with open(filename, 'r', encoding='utf-8') as sensorfile:
+                sensors = json.load(sensorfile)
+        else:
+            logger.warning('No sensors.json found')
+
+        return Sensors.parse_obj(sensors)
 
     def write_config(self) -> None:
         filename = service_settings().brains_directory / 'sensors.json'

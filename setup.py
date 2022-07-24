@@ -7,6 +7,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = fh.readlines()
 
+packages = setuptools.find_packages(exclude=['tests'])
+packages.append('learninghouse.static')
+packages.append('learninghouse.static.docs')
+
 setuptools.setup(
     name='learninghouse',
     version=versioneer.get_version(),
@@ -33,7 +37,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3 :: Only',
     ],
     keywords='smart home, machine learning, house automation',
-    packages=setuptools.find_packages(exclude=['tests']),
+    packages=packages,
     include_package_data=True,
     python_requires='>=3.6, <4',
     install_requires=[req for req in requirements if req[:2] != "# "],

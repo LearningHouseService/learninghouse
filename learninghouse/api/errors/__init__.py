@@ -1,10 +1,12 @@
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
-from fastapi import status, Request
-from fastapi.responses import JSONResponse
+from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
-from learninghouse.models import LearningHouseErrorMessage
+from learninghouse.core.logging import logger
+from learninghouse.models import (LearningHouseErrorMessage,
+                                  LearningHouseValidationErrorMessage)
 
 MIMETYPE_JSON = 'application/json'
 
@@ -77,30 +79,48 @@ class LearningHouseValidationError(LearningHouseException):
     VALIDATION_ERROR = 'VALIDATION_ERROR'
     DESCRIPTION = 'A validation error occurred while handling your request.'
 
-    def __init__(self, description: Optional[str] = None):
+    def __init__(self, error: Optional[RequestValidationError] = None):
         super().__init__(self.STATUS_CODE,
                          self.VALIDATION_ERROR,
-                         description or self.DESCRIPTION)
+                         str(error) or self.DESCRIPTION)
+        self.validations: List[Dict[str, Any]] = error.errors()
 
     @classmethod
     def api_description(cls) -> Dict:
         return {
-            'model': LearningHouseErrorMessage,
+            'model': LearningHouseValidationErrorMessage,
             'description': 'The request didn\'t pass input validation',
             'content': {
                 MIMETYPE_JSON: {
                     'example': {
                         'error': cls.VALIDATION_ERROR,
-                        'description': cls.DESCRIPTION
+                        'description': cls.DESCRIPTION,
+                        'validations': [{
+                            'loc': [
+                                'body',
+                                '...'
+                            ],
+                            'msg': 'example',
+                            'type': 'value...',
+                            'ctx': {}
+                        }]
                     }
                 }
             }
         }
 
+    def response(self) -> JSONResponse:
+        validation_error = LearningHouseValidationErrorMessage.from_error_message(
+            self.error, self.validations)
+        return JSONResponse(content=validation_error.dict(), status_code=self.http_status_code)
+
 
 async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:  # pylint: disable=unused-argument
-    return LearningHouseValidationError(str(exc)).response()
+    return LearningHouseValidationError(exc).response()
 
 
 async def learninghouse_exception_handler(request: Request, exc: LearningHouseException):  # pylint: disable=unused-argument
     return exc.response()
+
+
+

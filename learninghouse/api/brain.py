@@ -11,7 +11,6 @@ from learninghouse.services.brain import Brain, BrainPrediction, BrainTraining
 
 router = APIRouter(
     prefix='/brain',
-    tags=['brain'],
     responses={
         LearningHouseSecurityException.STATUS_CODE:
         LearningHouseSecurityException.api_description()
@@ -23,16 +22,15 @@ router = APIRouter(
             response_model=BrainInfo,
             summary='Retrieve information',
             description='Retrieve all information of a trained brain.',
-            tags=['brain'],
+            tags=['brain', 'information'],
             responses={
                 200: {
                     'description': 'Information of the trained brain'
                 },
-                BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description(),
-                BrainNotActual.STATUS_CODE: BrainNotActual.api_description()
+                BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description()
             })
 async def info_get(name: str):
-    brain_config = Brain.load_trained(name)
+    brain_config = Brain.load_trained(name, False)
     return brain_config.info
 
 

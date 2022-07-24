@@ -1,14 +1,17 @@
-from pydantic import BaseModel
+from __future__ import annotations
+from typing import Any, Dict, List
+
+from pydantic import BaseModel, Field
 
 
 class LearningHouseVersions(BaseModel):
-    service: str
-    fastapi: str
-    pydantic: str
-    uvicorn: str
-    sklearn: str
-    numpy: str
-    pandas: str
+    service: str = Field(None, example='1.0.0')
+    fastapi: str = Field(None, example='1.0.0')
+    pydantic: str = Field(None, example='1.0.0')
+    uvicorn: str = Field(None, example='1.0.0')
+    sklearn: str = Field(None, example='1.0.0')
+    numpy: str = Field(None, example='1.0.0')
+    pandas: str = Field(None, example='1.0.0')
 
     @property
     def libraries_versions(self) -> str:
@@ -20,3 +23,16 @@ class LearningHouseVersions(BaseModel):
 class LearningHouseErrorMessage(BaseModel):
     error: str
     description: str = ''
+
+
+class LearningHouseValidationErrorMessage(LearningHouseErrorMessage):
+    validations: List[Dict[str, Any]]
+
+    @classmethod
+    def from_error_message(cls,
+                           error_message: LearningHouseErrorMessage,
+                           validations: List[Dict[str, Any]]) \
+            -> LearningHouseValidationErrorMessage:
+        return cls(error=error_message.error,
+                   description=error_message.description,
+                   validations=validations)

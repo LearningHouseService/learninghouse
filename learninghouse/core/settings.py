@@ -35,6 +35,7 @@ class ServiceSettings(BaseSettings):
 
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True
+        env_file = '.env'
         env_prefix = 'learninghouse_'
 
     @property

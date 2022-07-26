@@ -1,9 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from learninghouse import versions
 from learninghouse.api import brain, configuration
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.models import LearningHouseVersions
+from learninghouse.services.authorization import protect
 
 api = APIRouter(
     responses={

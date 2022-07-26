@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, Union
+from secrets import token_hex
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -28,6 +29,9 @@ class ServiceSettings(BaseSettings):
     config_directory: DirectoryPath = './brains'
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
+
+    api_key_required: bool = True
+    api_key: str = token_hex(16)
 
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True
@@ -92,16 +96,13 @@ class ServiceSettings(BaseSettings):
     def openapi_url(self) -> str:
         return self.base_url + self.openapi_file
 
-    @property
-    def is_oauth_activated(self) -> bool:
-        return False
-
 
 class DevelopmentSettings(ServiceSettings):
     environment: str = 'development'
     debug: bool = True
     reload: bool = True
     title: str = 'learningHouse Service - Development'
+    api_key_required: bool = False
 
     class Config(ServiceSettings.Config):  # pylint: disable=too-few-public-methods
         env_file = '.env'

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from learninghouse import versions
-from learninghouse.api import brain, configuration, docs
+from learninghouse.api import api, docs
 from learninghouse.api.errors import (LearningHouseException,
                                       learninghouse_exception_handler,
                                       validation_error_handler)
@@ -26,10 +26,10 @@ def get_application() -> FastAPI:
     initialize_logging(settings.logging_level)
 
     application = FastAPI(**settings.fastapi_kwargs)
-    application.include_router(brain.router)
-    application.include_router(configuration.router)
-    application.include_router(docs.router)
-    application.include_router(docs.versions_router)
+    application.include_router(api)
+
+    if settings.docs_url:
+        application.include_router(docs.router)
 
     application.add_exception_handler(
         RequestValidationError, validation_error_handler)

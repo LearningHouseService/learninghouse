@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.api.errors.brain import (BrainNoConfiguration,
                                             BrainNotActual, BrainNotEnoughData,
                                             BrainNotTrained)
@@ -11,10 +10,7 @@ from learninghouse.services.brain import Brain, BrainPrediction, BrainTraining
 
 router = APIRouter(
     prefix='/brain',
-    responses={
-        LearningHouseSecurityException.STATUS_CODE:
-        LearningHouseSecurityException.api_description()
-    }
+    tags=['brain']
 )
 
 
@@ -22,7 +18,6 @@ router = APIRouter(
             response_model=BrainInfo,
             summary='Retrieve information',
             description='Retrieve all information of a trained brain.',
-            tags=['brain', 'information'],
             responses={
                 200: {
                     'description': 'Information of the trained brain'
@@ -38,7 +33,6 @@ async def info_get(name: str):
              response_model=BrainInfo,
              summary='Train the brain again',
              description='After version updates train the brain with existing data.',
-             tags=['brain'],
              responses={
                  200: {
                      'description': 'Information of the trained brain'
@@ -54,7 +48,6 @@ async def training_post(name: str):
             response_model=BrainInfo,
             summary='Train the brain with new data',
             description='Train the brain with additional data.',
-            tags=['brain'],
             responses={
                 200: {
                     'description': 'Information of the trained brain'
@@ -70,7 +63,6 @@ async def training_put(name: str, request_data: BrainTrainingRequest):
              response_model=BrainPredictionResult,
              summary='Prediction',
              description='Predict a new dataset with given brain.',
-             tags=['brain'],
              responses={
                  200: {
                      'description': 'Prediction result'

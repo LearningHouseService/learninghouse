@@ -89,15 +89,6 @@ class ServiceSettings(BaseSettings):
         return documentation_url
 
     @property
-    def oauth2_redirect_url(self) -> Union[str, None]:
-        redirect_url = None
-
-        if self.docs_url is not None and self.is_oauth_activated:
-            redirect_url = self.docs_url + '/oauth2-redirect'
-
-        return redirect_url
-
-    @property
     def openapi_url(self) -> str:
         return self.base_url + self.openapi_file
 

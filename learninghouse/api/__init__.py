@@ -7,6 +7,7 @@ from learninghouse.models import LearningHouseVersions
 from learninghouse.services.authorization import protect
 
 api = APIRouter(
+    prefix='/api',
     responses={
         LearningHouseSecurityException.STATUS_CODE:
         LearningHouseSecurityException.api_description()

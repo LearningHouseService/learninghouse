@@ -15,7 +15,7 @@ If you have any questions please get in contact with us on discord.
 
 [![Discord Banner](https://discordapp.com/api/guilds/997393653758697482/widget.png?style=banner2)](https://discord.gg/U9axHEYqqB)
 
-## Installation
+## Installation amd configuration
 
 Install and update using pip.
 ```
@@ -43,9 +43,11 @@ all data of your sensors and an object dump of the trained model to a file calle
 Download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example) 
 and rename it to .env. You can modify default configuration values to your needs in this file.
 
-### General configuration
+For docker users you can give all those configuration values mentioned there as environment variables as well.
 
-In general send data of all sensors to **learningHouse Service** especially when training your brains. The service will save all data fields even if they are not used as a `feature` at the moment. The service will choose the best feature set each time you train a brain.
+### Sensors configuration
+
+Send data of all sensors to **learningHouse Service** especially when training your brains. The service will save all data fields even if they are not used as a `feature` at the moment. The service will choose the best feature set each time you train a brain.
 
 In general there are two different data types your sensor data can be divided in. `Numerical data` can be processed directly by your models. `Categorical data` has to be preproccesed by the service to be used as a `feature`. `Categorical data` can be identified by a simple rule:
 
@@ -72,6 +74,8 @@ Example content of sensors.json:
     "light_state": "categorical"
 }
 ```
+
+
 
 ### Example brain
 
@@ -126,6 +130,10 @@ The accuracy between 80 % and 90 % between is a good score to gain. Below your b
 
 Training of the brain will start, when there are at least 10 data points.
 
+### Change configuration via RESTful API
+
+You can change the configuration of sensors and brains although via the API. Visit the interactive [API documentation](#api-documentation) when the service is running.
+
 ## Run service 
 
 ### In console
@@ -145,24 +153,29 @@ docker run --name learninghouse --rm -v brains:/learninghouse/brains -p 5000:500
 
 When the service is running, you can reach an interactive API documentation by calling url http://<host>:5000/docs
 
+## Security
+
+In production mode the service will be protected by an api-key mechanism. You can either configure a stable api-key (see [Service Configuration](#service-configuration)) or the service will generate one on each startup. The current used api-key will be logged on startup. If api-key authorization is activated you have to give the api-key for each request either as query parameter `?api_key=YOURSECRETKEY` or as header field `X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY`.
+
 ## Train brain
 
 For training send a PUT request to the service:
 
 ```
-# URL is http://<host>:5000/brain/:name/training
-curl --location --request PUT 'http://localhost:5000/brain/darkness/training' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "azimuth": 321.4441223144531,
-    "elevation": -19.691608428955078,
-    "rain_gauge": 0.0,
-    "pressure": 971.0,
-    "pressure_trend_1h": "falling",
-    "temperature_outside": 23.0,
-    "temperature_trend_1h": "rising",
-    "light_state": false,
-    "darkness": true
+# URL is http://<host>:5000/api/brain/:name/training
+curl --location --request PUT 'http://localhost:5000/api/brain/darkness/training' \
+    --header 'Content-Type: application/json' \
+    --header 'X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY' \
+    --data-raw '{
+        "azimuth": 321.4441223144531,
+        "elevation": -19.691608428955078,
+        "rain_gauge": 0.0,
+        "pressure": 971.0,
+        "pressure_trend_1h": "falling",
+        "temperature_outside": 23.0,
+        "temperature_trend_1h": "rising",
+        "light_state": false,
+        "darkness": true
 }'
 ```
 
@@ -173,15 +186,19 @@ If one of your sensors is not working at the moment and for this not sending a v
 To train the brain with existing data for example after a service update use a POST request without data:
 
 ```
-# URL is http://host:5000/brain/:name/training
-curl --location --request POST 'http://localhost:5000/brain/darkness/training'
+# URL is http://host:5000/api/brain/:name/training
+curl --location \
+    --header 'X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY' \
+    --request POST 'http://localhost:5000/api/brain/darkness/training'
 ```
 
 To get the information about a trained brain use a GET request:
 
 ```
-# URL is http://host:5000/brain/:name/info
-curl --location --request GET 'http://localhost:5000/brain/darkness/info'
+# URL is http://host:5000/api/brain/:name/info
+curl --location \
+    --header 'X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY' \ 
+    --request GET 'http://localhost:5000/brain/darkness/info'
 ```
 
 ## Prediction
@@ -189,15 +206,16 @@ curl --location --request GET 'http://localhost:5000/brain/darkness/info'
 To predict a new data set with your brain send a POST request:
 
 ```
-# URL is http://host:5000/brain/:name/prediction
-curl --location --request POST 'http://localhost:5000/brain/darkness/prediction' \
---header 'Content-Type: application/json' \
---data-raw '{    
-    "azimuth": 321.4441223144531,
-    "elevation": -19.691608428955078,
-    "rain_gauge": 0.0,
-    "pressure_trend_1h": "falling"
-}'
+# URL is http://host:5000/api/brain/:name/prediction
+curl --location --request POST 'http://localhost:5000/api/brain/darkness/prediction' \
+    --header 'Content-Type: application/json' \
+    --header 'X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY' \
+    --data-raw '{    
+        "azimuth": 321.4441223144531,
+        "elevation": -19.691608428955078,
+        "rain_gauge": 0.0,
+        "pressure_trend_1h": "falling"
+    }'
 ```
 
 If one of your sensors used as `feature` in the brain is not working at the moment and for this not sending a value the service will add this by using following rules. For `categorical data` all categorical columns will be set to zero. For `numerical data` the mean of all known training set values (see Test size) for this `feature` will be assumed.

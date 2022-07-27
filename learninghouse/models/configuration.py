@@ -217,12 +217,12 @@ class Sensors(DictModel):
     @property
     def numericals(self) -> List[str]:
         return list(map(lambda x: x[0], filter(
-            lambda x: x[1] == SensorType.NUMERICAL, self.items())))
+            lambda x: x[1] == str(SensorType.NUMERICAL), self.items())))
 
-    @property
+    @ property
     def categoricals(self) -> List[str]:
         return list(map(lambda x: x[0], filter(
-            lambda x: x[1] == SensorType.CATEGORICAL, self.items())))
+            lambda x: x[1] == str(SensorType.CATEGORICAL), self.items())))
 
 
 class BrainDeleteResult(BaseModel):

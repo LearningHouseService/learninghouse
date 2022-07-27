@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from learninghouse import versions
 from learninghouse.models import LearningHouseVersions
+from learninghouse.models.base import DictModel
 from learninghouse.models.configuration import BrainConfiguration
 
 
@@ -23,7 +24,7 @@ class BrainInfo(BaseModel):
     versions: LearningHouseVersions = Field(None, example=versions)
 
 
-class BrainTrainingRequest(BaseModel):
+class BrainTrainingRequest(DictModel):
     """
     For training with data send a PUT request to the service.
 
@@ -41,7 +42,7 @@ class BrainTrainingRequest(BaseModel):
     for this `feature` will be assumed.
     """
 
-    data: Dict[str, Union[int, float, str, bool]] = Field(None, example={
+    __root__: Dict[str, Union[int, float, str, bool, None]] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
@@ -54,8 +55,8 @@ class BrainTrainingRequest(BaseModel):
     })
 
 
-class BrainPredictionRequest(BaseModel):
-    data: Dict[str, Union[int, float, str, bool]] = Field(None, example={
+class BrainPredictionRequest(DictModel):
+    __root__: Dict[str, Union[int, float, str, bool, None]] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,

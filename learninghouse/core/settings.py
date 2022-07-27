@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Union
 from secrets import token_hex
+from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -31,7 +31,8 @@ class ServiceSettings(BaseSettings):
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
     api_key_required: bool = True
-    api_key: str = token_hex(16)
+    api_key: str = token_hex(32)
+    api_key_admin: Optional[str]
 
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True

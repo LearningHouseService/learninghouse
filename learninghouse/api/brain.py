@@ -1,17 +1,24 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from learninghouse.api.errors.brain import (BrainNoConfiguration,
                                             BrainNotActual, BrainNotEnoughData,
                                             BrainNotTrained)
+from learninghouse.core.settings import service_settings
 from learninghouse.models.brain import (BrainInfo, BrainPredictionRequest,
                                         BrainPredictionResult,
                                         BrainTrainingRequest)
 from learninghouse.services.brain import Brain, BrainPrediction, BrainTraining
+from learninghouse.services.authorization import protect_user
 
-router = APIRouter(
-    prefix='/brain',
-    tags=['brain']
-)
+router_kwargs = {
+    'prefix': '/brain',
+    'tags': ['brain'],
+}
+
+if service_settings().api_key_required:
+    router_kwargs['dependencies'] = [Depends(protect_user)]
+
+router = APIRouter(**router_kwargs)
 
 
 @router.get('/{name}/info',

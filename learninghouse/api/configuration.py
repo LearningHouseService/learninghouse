@@ -1,8 +1,9 @@
 
-from fastapi import APIRouter, Body, Path, status
+from fastapi import APIRouter, Body, Path, status, Depends
 
 from learninghouse.api.errors.brain import BrainExists, BrainNoConfiguration
 from learninghouse.api.errors.sensor import NoSensor, SensorExists
+from learninghouse.core.settings import service_settings
 from learninghouse.models.configuration import (BrainConfiguration,
                                                 BrainConfigurationRequest,
                                                 BrainConfigurations,
@@ -12,6 +13,7 @@ from learninghouse.models.configuration import (BrainConfiguration,
                                                 SensorType)
 from learninghouse.services.configuration import (BrainConfigurationService,
                                                   SensorConfigurationService)
+from learninghouse.services.authorization import protect_admin
 
 brain_router = APIRouter(
     prefix='/brain',
@@ -161,8 +163,10 @@ async def sensor_delete(name: str):
     return SensorConfigurationService.delete(name)
 
 router = APIRouter(
-    tags=['configuration']
+    tags=['configuration'],
+    dependencies=[Depends(protect_admin)]
 )
 
-router.include_router(brain_router)
-router.include_router(sensor_router)
+if service_settings().api_key_admin:
+    router.include_router(brain_router)
+    router.include_router(sensor_router)

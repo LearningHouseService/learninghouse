@@ -115,12 +115,14 @@ class LearningHouseValidationError(LearningHouseException):
         return JSONResponse(content=validation_error.dict(), status_code=self.http_status_code)
 
 
-async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:  # pylint: disable=unused-argument
+async def validation_error_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
     return LearningHouseValidationError(exc).response()
 
 
-async def learninghouse_exception_handler(request: Request, exc: LearningHouseException):  # pylint: disable=unused-argument
-    return exc.response()
+async def learninghouse_exception_handler(_: Request, exc: LearningHouseException):
+    response = exc.response()
 
+    if isinstance(exc, LearningHouseSecurityException):
+        logger.warning(exc.error.description)
 
-
+    return response

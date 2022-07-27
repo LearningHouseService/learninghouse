@@ -1,6 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Dict, Union
+from secrets import token_hex
+from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -29,8 +30,13 @@ class ServiceSettings(BaseSettings):
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
+    api_key_required: bool = True
+    api_key: str = token_hex(32)
+    api_key_admin: Optional[str]
+
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True
+        env_file = '.env'
         env_prefix = 'learninghouse_'
 
     @property
@@ -89,21 +95,8 @@ class ServiceSettings(BaseSettings):
         return documentation_url
 
     @property
-    def oauth2_redirect_url(self) -> Union[str, None]:
-        redirect_url = None
-
-        if self.docs_url is not None and self.is_oauth_activated:
-            redirect_url = self.docs_url + '/oauth2-redirect'
-
-        return redirect_url
-
-    @property
     def openapi_url(self) -> str:
         return self.base_url + self.openapi_file
-
-    @property
-    def is_oauth_activated(self) -> bool:
-        return False
 
 
 class DevelopmentSettings(ServiceSettings):
@@ -111,6 +104,7 @@ class DevelopmentSettings(ServiceSettings):
     debug: bool = True
     reload: bool = True
     title: str = 'learningHouse Service - Development'
+    api_key_required: bool = False
 
     class Config(ServiceSettings.Config):  # pylint: disable=too-few-public-methods
         env_file = '.env'

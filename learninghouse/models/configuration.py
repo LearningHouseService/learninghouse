@@ -212,8 +212,7 @@ class Sensors(DictModel):
     def write_config(self) -> None:
         filename = service_settings().brains_directory / 'sensors.json'
         with open(filename, 'w', encoding='utf-8') as sensorfile:
-            sensors = {k: str(v) for k, v in self.dict().items()}
-            json.dump(sensors, sensorfile, indent=4)
+            json.dump(self.dict(), sensorfile, indent=4)
 
     @property
     def numericals(self) -> List[str]:

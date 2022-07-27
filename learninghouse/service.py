@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from learninghouse import versions
-from learninghouse.api import brain, configuration, docs
+from learninghouse.api import api, docs
 from learninghouse.api.errors import (LearningHouseException,
                                       learninghouse_exception_handler,
                                       validation_error_handler)
@@ -19,6 +19,12 @@ APP_REFERENCE = 'learninghouse.service:app'
 
 STATIC_DIRECTORY = str(Path(__file__).parent / 'static')
 
+API_KEY_ADMIN_WARNING = """
+In order to activate configuration endpoints you have to set an admin API key. 
+
+See https://github.com/LearningHouseService/learninghouse-core#service-configuration
+"""
+
 
 def get_application() -> FastAPI:
     settings = service_settings()
@@ -26,10 +32,10 @@ def get_application() -> FastAPI:
     initialize_logging(settings.logging_level)
 
     application = FastAPI(**settings.fastapi_kwargs)
-    application.include_router(brain.router)
-    application.include_router(configuration.router)
-    application.include_router(docs.router)
-    application.include_router(docs.versions_router)
+    application.include_router(api)
+
+    if settings.docs_url:
+        application.include_router(docs.router)
 
     application.add_exception_handler(
         RequestValidationError, validation_error_handler)
@@ -65,7 +71,12 @@ def run():
     logger.info(f'Running in {settings.environment} mode')
     logger.info(f'Listening on {settings.host}:{settings.port}')
     logger.info(f'Configuration directory {settings.brains_directory}')
+    if not settings.api_key_admin:
+        logger.warning(API_KEY_ADMIN_WARNING)
+
     logger.info(f'URL to OpenAPI file {settings.openapi_url}')
+    if settings.api_key_required:
+        logger.info(f'User API key is {settings.api_key}')
 
     if settings.environment == 'production':
         if settings.debug:

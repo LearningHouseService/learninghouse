@@ -63,7 +63,7 @@ async def training_post(name: str):
                 BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description()
             })
 async def training_put(name: str, request_data: BrainTrainingRequest):
-    return BrainTraining.request(name, request_data.data)
+    return BrainTraining.request(name, request_data.dict())
 
 
 @router.post('/{name}/prediction',
@@ -78,4 +78,4 @@ async def training_put(name: str, request_data: BrainTrainingRequest):
                  BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description()
              })
 async def prediction_post(name: str, request_data: BrainPredictionRequest):
-    return BrainPrediction.prediction(name, request_data.data)
+    return BrainPrediction.prediction(name, request_data.dict())

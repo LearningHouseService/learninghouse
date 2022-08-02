@@ -20,16 +20,20 @@ class LearningHouseException(Exception):
     def __init__(self,
                  status_code: Optional[int] = None,
                  key: Optional[str] = None,
-                 description: Optional[str] = None):
+                 description: Optional[str] = None,
+                 headers: Optional[Dict[str, str]] = None):
         super().__init__()
         self.http_status_code: int = status_code or self.STATUS_CODE
         self.error: LearningHouseErrorMessage = LearningHouseErrorMessage(
             error=key or self.UNKNOWN,
             description=description or self.DESCRIPTION
         )
+        self.headers = headers if headers else {}
 
     def response(self) -> JSONResponse:
-        return JSONResponse(content=self.error.dict(), status_code=self.http_status_code)
+        return JSONResponse(content=self.error.dict(),
+                            status_code=self.http_status_code,
+                            headers=self.headers)
 
     @classmethod
     def api_description(cls) -> Dict:
@@ -67,6 +71,33 @@ class LearningHouseSecurityException(LearningHouseException):
                 MIMETYPE_JSON: {
                     'example': {
                         'error': cls.SECURITY_EXCEPTION,
+                        'description': cls.DESCRIPTION
+                    }
+                }
+            }
+        }
+
+
+class LearningHouseUnauthorizedException(LearningHouseException):
+    STATUS_CODE = status.HTTP_401_UNAUTHORIZED
+    UNAUTHORIZED = 'UNAUTHORIZED'
+    DESCRIPTION = 'Could not validate credentials'
+
+    def __init__(self, description: Optional[str] = None):
+        super().__init__(self.STATUS_CODE,
+                         self.UNAUTHORIZED,
+                         description or self.DESCRIPTION,
+                         {'WWW-Authenticate': 'Bearer'})
+
+    @classmethod
+    def api_description(cls) -> Dict:
+        return {
+            'model': LearningHouseErrorMessage,
+            'description': 'The request didn\'t pass security checks.',
+            'content': {
+                MIMETYPE_JSON: {
+                    'example': {
+                        'error': cls.UNAUTHORIZED,
                         'description': cls.DESCRIPTION
                     }
                 }

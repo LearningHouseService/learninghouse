@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 from secrets import token_hex
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -30,9 +30,8 @@ class ServiceSettings(BaseSettings):
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
-    api_key_required: bool = True
-    api_key: str = token_hex(32)
-    api_key_admin: Optional[str]
+    jwt_secret: str = token_hex(16)
+    jwt_expire_minutes: int = 30
 
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True
@@ -86,7 +85,7 @@ class ServiceSettings(BaseSettings):
         return base_url
 
     @property
-    def documentation_url(self) -> Union[str, None]:
+    def documentation_url(self) -> str | None:
         documentation_url = None
 
         if self.docs_url is not None:

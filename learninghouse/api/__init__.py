@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
 
 from learninghouse import versions
-from learninghouse.api import brain, configuration
+from learninghouse.api import brain, configuration, auth
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.models import LearningHouseVersions
+from learninghouse.services.auth import auth_service
 
 api = APIRouter(
     prefix='/api',
@@ -11,8 +12,12 @@ api = APIRouter(
         LearningHouseSecurityException.STATUS_CODE:
         LearningHouseSecurityException.api_description()
     })
-api.include_router(brain.router)
-api.include_router(configuration.router)
+
+if not auth_service().is_initial_admin_password:
+    api.include_router(brain.router)
+    api.include_router(configuration.router)
+
+api.include_router(auth.router)
 
 
 @api.get('/versions',

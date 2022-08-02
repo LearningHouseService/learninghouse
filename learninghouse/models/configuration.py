@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from os import makedirs, path
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Type
 
 from pydantic import BaseModel, Field
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -25,20 +25,20 @@ class BrainEstimatorType(str, EnumModel):
 
     def __init__(self,
                  typed: str,
-                 estimator_class: Union[Type[RandomForestClassifier],
-                                        Type[RandomForestRegressor]]):
+                 estimator_class: Type[RandomForestClassifier] |
+                 Type[RandomForestRegressor]):
         # pylint: disable=super-init-not-called
         self._typed: str = typed
-        self._estimator_class: Union[Type[RandomForestClassifier],
-                                     Type[RandomForestRegressor]] = estimator_class
+        self._estimator_class: Type[RandomForestClassifier] |\
+            Type[RandomForestRegressor] = estimator_class
 
     @property
     def typed(self) -> str:
         return self._typed
 
     @property
-    def estimator_class(self) -> Union[Type[RandomForestClassifier],
-                                       Type[RandomForestRegressor]]:
+    def estimator_class(self) -> Type[RandomForestClassifier] |\
+            Type[RandomForestRegressor]:
         return self._estimator_class
 
 

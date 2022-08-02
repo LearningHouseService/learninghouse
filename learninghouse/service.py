@@ -14,15 +14,16 @@ from learninghouse.api.errors import (LearningHouseException,
 from learninghouse.api.middleware import CatchAllException, CustomHeader
 from learninghouse.core.logging import initialize_logging, logger
 from learninghouse.core.settings import service_settings
+from learninghouse.services.auth import auth_service
 
 APP_REFERENCE = 'learninghouse.service:app'
 
 STATIC_DIRECTORY = str(Path(__file__).parent / 'static')
 
-API_KEY_ADMIN_WARNING = """
-In order to activate configuration endpoints you have to set an admin API key. 
+INITIAL_PASSWORD = """
+In order to activate the service you have to replace the fallback password.
 
-See https://github.com/LearningHouseService/learninghouse-core#service-configuration
+See https://github.com/LearningHouseService/learninghouse-core#security
 """
 
 
@@ -66,17 +67,13 @@ app = get_application()
 
 def run():
     settings = service_settings()
+    auth = auth_service()
     logger.info(f'Running {settings.title} {versions.service}')
     logger.info(versions.libraries_versions)
     logger.info(f'Running in {settings.environment} mode')
     logger.info(f'Listening on {settings.host}:{settings.port}')
     logger.info(f'Configuration directory {settings.brains_directory}')
-    if not settings.api_key_admin:
-        logger.warning(API_KEY_ADMIN_WARNING)
-
     logger.info(f'URL to OpenAPI file {settings.openapi_url}')
-    if settings.api_key_required:
-        logger.info(f'User API key is {settings.api_key}')
 
     if settings.environment == 'production':
         if settings.debug:
@@ -90,6 +87,9 @@ def run():
     if settings.documentation_url is not None:
         logger.info(
             f'See interactive documentation {settings.documentation_url}')
+
+    if auth.is_initial_admin_password:
+        logger.warning(INITIAL_PASSWORD)
 
     uvicorn.run(app=APP_REFERENCE, log_config=None,
                 **settings.uvicorn_kwargs)

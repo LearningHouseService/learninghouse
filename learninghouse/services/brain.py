@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from os import path, stat
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import joblib
 import pandas as pd
@@ -36,8 +36,8 @@ class Brain():
         self.dataset: DatasetConfiguration = DatasetConfiguration(
             self.configuration)
 
-        self._estimator: Optional[Union[RandomForestClassifier,
-                                        RandomForestRegressor]] = None
+        self._estimator: Optional[RandomForestClassifier |
+                                  RandomForestRegressor] = None
 
         self.score: Optional[float] = 0.0
 

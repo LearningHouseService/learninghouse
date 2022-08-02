@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
@@ -42,7 +42,7 @@ class BrainTrainingRequest(DictModel):
     for this `feature` will be assumed.
     """
 
-    __root__: Dict[str, Union[int, float, str, bool, None]] = Field(None, example={
+    __root__: Dict[str, int | float | str | bool | None] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
@@ -56,7 +56,7 @@ class BrainTrainingRequest(DictModel):
 
 
 class BrainPredictionRequest(DictModel):
-    __root__: Dict[str, Union[int, float, str, bool, None]] = Field(None, example={
+    __root__: Dict[str, int | float | str | bool | None] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
@@ -70,10 +70,10 @@ class BrainPredictionRequest(DictModel):
 
 class BrainPredictionResult(BaseModel):
     brain: BrainInfo
-    preprocessed: Dict[str, Union[int, float, str, bool]] = Field(None, example={
+    preprocessed: Dict[str, int | float | str | bool] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
         'pressure_trend_1h_falling': 1
     })
-    prediction: Union[bool, float] = Field(None, example=False)
+    prediction: bool | float = Field(None, example=False)

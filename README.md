@@ -42,26 +42,101 @@ all data of your sensors and an object dump of the trained model to a file calle
 
 The service is configured by environment variables. Following options can be set:
 
-Environment Variable           | default (production/development) | description                                            
------------------------------- | -------------------------------- | ------------------------------------------------------ 
-LEARNINGHOUSE_ENVIRONMENT      | production                       | Choose environment default settings production or development. 
-LEARNINGHOUSE_HOST             | 127.0.0.1                        | Set address the service should bind. (use 0.0.0.0 for all available)
-LEARNINGHOUSE_PORT             | 5000                             | Set the port the service should listen.
-LEARNINGHOUSE_CONFIG_DIRECTORY | ./brains                         | Define directory where all configuration data goes
-LEARNINGHOUSE_OPENAPI_FILE     | /learninghouse_api.json          | File url path to OpenAPI json file
-LEARNINGHOUSE_DOCS_URL         | /docs                            | Define url path for interactive [API documentation](#api-documentation). If you set to empty the documentation will be disabled.
-LEARNINGHOUSE_API_KEY_REQUIRED | (True/False)                     | Activate [API Key authorization](#security)
-LEARNINGHOUSE_API_KEY          | _Generated on startup_           | If [API key authorization](#security) is activated you can specify the required API key. If not defined there is a new own generated on each service restart. The used API key will be logged at service startup.
-LEARNINGHOUSE_API_KEY_ADMIN    | _None_                           | To activate [configuration endpoints](#change-configuration-via-restful-api) you have to set an administration API key. You will get a warning if not set.
-LEARNINGHOUSE_LOGGING_LEVEL    | INFO                             | Set logging level to DEBUG, INFO, WARNING, ERROR, CRITICAL
-LEARNINGHOUSE_DEBUG            | (False/True)                     | Debugger will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
-LEARNINGHOUSE_RELOAD           | (False/True)                     | Reload of source will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
+Environment Variable             | default (production/development) | description                                            
+-------------------------------- | -------------------------------- | ------------------------------------------------------ 
+LEARNINGHOUSE_ENVIRONMENT        | production                       | Choose environment default settings production or development. 
+LEARNINGHOUSE_HOST               | 127.0.0.1                        | Set address the service should bind. (use 0.0.0.0 for all available)
+LEARNINGHOUSE_PORT               | 5000                             | Set the port the service should listen.
+LEARNINGHOUSE_CONFIG_DIRECTORY   | ./brains                         | Define directory where all configuration data goes
+LEARNINGHOUSE_OPENAPI_FILE       | /learninghouse_api.json          | File url path to OpenAPI json file
+LEARNINGHOUSE_DOCS_URL           | /docs                            | Define url path for interactive [API documentation](#api-documentation). If you set to empty the documentation will be disabled.
+LEARNINGHOUSE_JWT_SECRET         | _Generated on startup_           | For administration authentication there is a JWT generated after login. This is signed with this secret. By default it is generated on startup this will invalid existing JWTs on each restart.
+LEARNINGHOUSE_JWT_EXPIRE_MINUTES | 30                               | JWTs will expire after given amount of minutes
+LEARNINGHOUSE_LOGGING_LEVEL      | INFO                             | Set logging level to DEBUG, INFO, WARNING, ERROR, CRITICAL
+LEARNINGHOUSE_DEBUG              | (False/True)                     | Debugger will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
+LEARNINGHOUSE_RELOAD             | (False/True)                     | Reload of source will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
 
-#### Example
+#### Example configuration
 
 You can download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example) 
 and rename it to `.env`. Inside you can modify default configuration values to your needs in this file.
 
+## Run service 
+
+### In console
+
+Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example)
+to .env and modify it to your needs.
+
+Then just run `learninghouse` to run the service. By default the service will listen to http://localhost:5000/
+
+### With docker:
+
+```
+docker run --name learninghouse --rm -v brains:/learninghouse/brains -p 5000:5000 learninghouseservice/learninghouse:latest
+```
+## Security
+
+The service is protected by different authentication and authorization mechanisms. For administration you have to generated a JWT by using `/api/auth/login` endpoint and use the resulting `access_token` as `Authorization: Bearer **access_token**` header to each requests.
+
+### Fallback password
+On first run the service is set to use the fallback password `learninghouse`. Until this is not changed all other endpoints will be deactivated. 
+
+Do following procedure to unlock service for usage:
+
+1) Login using fallback password:
+
+```
+# URL is http://<host>:5000/api/auth/login
+curl --location --request POST 'http://localhost:5000/api/auth/login' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "password": "learninghouse"
+    }'
+```
+
+2) Change password
+Take the returned access_token value for next call to change the fallback password to your own.
+
+```
+# URL is http://<host>:5000/api/auth/password
+curl --location --request PUT 'http://localhost:5000/api/auth/password' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "old_password": "learninghouse",
+        "new_password": "YOURPASSWORD"
+    }'
+```
+
+3) Restart the service.
+
+### API Key
+
+You can use the described JWT mechanism to use training and prediction endpoints as well, but for application access you can use an API key mechanism as well. There are two roles for API key authorization `user` for prediction endpoint and `trainer` for training and prediction endpoints.
+
+Create a new API key like this:
+
+```
+# URL is http://<host>:5000/api/auth/apikey
+curl --location --request POST 'http://localhost:5000/api/auth/apikey' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "description": "my_trainer_app",
+        "role": "trainer"
+    }'
+```
+
+Your API key will only displayed in this response and can not be requested again. So save it for your usage.
+If you forget it you have to delete this API key and recreate.
+
+```
+# URL is http://<host>:5000/api/auth/apikey/{description}
+curl --location --request DELETE 'http://localhost:5000/api/auth/apikey/my_trainer_app'
+```
+
+You have to give this API key to all requests either as query parameter `?api_key=YOURSECRETKEY` or as header field `X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY`.
+
+## Brains and sensors configuration
 
 ### Sensors configuration
 
@@ -154,36 +229,18 @@ Training of the brain will start, when there are at least 10 data points.
 
 You can change the configuration of sensors and brains although via the API. Visit the interactive [API documentation](#api-documentation) when the service is running.
 
-The configuration endpoints are always protected by an API key (see [Security](#security)). If required admin API key is not set in [service configuration](#service-configuration) the endpoints will be deactivated.
+The configuration endpoints are always protected by JWT authentication mechanism (see [Security](#security)).
 
-## Run service 
-
-### In console
-
-Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example)
-to .env and modify it to your needs.
-
-Then just run `learninghouse` to run the service. By default the service will listen to http://localhost:5000/
-
-### With docker:
-
-```
-docker run --name learninghouse --rm -v brains:/learninghouse/brains -p 5000:5000 learninghouseservice/learninghouse:latest
-```
 
 ## API Documentation
 
 When the service is running, you can reach an interactive API documentation by calling url http://localhost:5000/docs
 
-## Security
-
-In production mode the service will be protected by an API key mechanism. You can either configure a stable API Key (see [Service Configuration](#service-configuration)) or the service will generate one on each startup. The current used API key will be logged on startup. If API key authorization is activated you have to give an valid API Key for each request either as query parameter `?api_key=YOURSECRETKEY` or as header field `X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY`.
-
-There are two different API keys for user of brain endpoints and [configuration endpoints](#change-configuration-via-restful-api) (see [Service Configuration](#service-configuration)).  
-
 ## Train brain
 
 For training send a PUT request to the service:
+
+_You need JWT or API key role `trainer` for this request (see [Security](#security))_
 
 ```
 # URL is http://<host>:5000/api/brain/:name/training
@@ -209,6 +266,8 @@ If one of your sensors is not working at the moment and for this not sending a v
 
 To train the brain with existing data for example after a service update use a POST request without data:
 
+_You need JWT or API key role `trainer` for this request (see [Security](#security))_
+
 ```
 # URL is http://host:5000/api/brain/:name/training
 curl --location \
@@ -217,6 +276,9 @@ curl --location \
 ```
 
 To get the information about a trained brain use a GET request:
+
+
+_You need JWT or API key role `trainer` or `user` for this request (see [Security](#security))_
 
 ```
 # URL is http://host:5000/api/brain/:name/info
@@ -228,6 +290,8 @@ curl --location \
 ## Prediction
 
 To predict a new data set with your brain send a POST request:
+
+_You need JWT or API key role `trainer` or `user` for this request (see [Security](#security))_
 
 ```
 # URL is http://host:5000/api/brain/:name/prediction

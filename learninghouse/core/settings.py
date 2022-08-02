@@ -30,7 +30,6 @@ class ServiceSettings(BaseSettings):
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
-    secret_key: str = token_hex(32)
     jwt_secret: str = token_hex(16)
     jwt_expire_minutes: int = 30
 

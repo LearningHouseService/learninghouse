@@ -25,6 +25,8 @@ jwt_bearer = HTTPBearer(bearerFormat='JWT', auto_error=False)
 
 
 class AuthService():
+    JWT_SECRET_CONTENT = 'learninghouse_admin'
+
     def __init__(self):
         self.database = SecurityDatabase.load_or_write_default()
 
@@ -37,7 +39,7 @@ class AuthService():
             raise LearningHouseSecurityException('Invalid password')
 
         expire = datetime.utcnow() + timedelta(minutes=settings.jwt_expire_minutes)
-        payload = TokenPayload(secret=settings.secret_key, exp=expire)
+        payload = TokenPayload(secret=self.JWT_SECRET_CONTENT, exp=expire)
         access_token = jwt.encode(payload.dict(), settings.jwt_secret, 'HS256')
 
         logger.info('Admin user logged in sucessfully')
@@ -152,14 +154,14 @@ class AuthService():
         if auto_error:
             raise LearningHouseSecurityException(description)
 
-    @staticmethod
-    def verify_jwt(access_token: str) -> bool:
+    @classmethod
+    def verify_jwt(cls, access_token: str) -> bool:
         verified = False
         try:
             payload_data = jwt.decode(
                 access_token, settings.jwt_secret, 'HS256')
             payload = TokenPayload.parse_obj(payload_data)
-            verified = payload.secret == settings.secret_key
+            verified = payload.secret == cls.JWT_SECRET_CONTENT
         except JWTError as exc:
             logger.error(exc)
 

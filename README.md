@@ -84,6 +84,8 @@ On first run the service is set to use the fallback password `learninghouse`. Un
 
 Do following procedure to unlock service for usage:
 
+**Security notice: Unless you use a proxy setup for SSL security of your connection, only use a seperate password for your learninghouse.**
+
 1) Login using fallback password:
 
 ```

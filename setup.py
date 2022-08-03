@@ -28,9 +28,12 @@ setuptools.setup(
 
         'License :: OSI Approved :: MIT License',
 
-        'Programming Language :: Python :: 3',
+        'Framework:: FastAPI',
+
+        'Natural Language :: English',
+
+        'Programming Language:: Python:: 3:: Only',
         'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.10 :: Only',
     ],
     keywords='smart home, machine learning, house automation',
     packages=packages,

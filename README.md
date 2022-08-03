@@ -7,13 +7,13 @@
 
 **learningHouse Service** provides machine learning algorithms based on scikit-learn python library as a RESTful API, with the purpose to give smart home fans an easy possibility to teach their homes.
 
-*At this moment the project is in an early state. Please share your ideas what you want to teach your home by opening an [issue](https://github.com/LearningHouseService/learninghouse-core/issues). Really looking forward for your feedback.*
-
-## Contact.
+## Contact and Feedback.
 
 If you have any questions please get in contact with us on discord.
 
 [![Discord Banner](https://discordapp.com/api/guilds/997393653758697482/widget.png?style=banner2)](https://discord.gg/U9axHEYqqB)
+
+Please share your ideas what you want to teach your home, suggestions or problems by opening an [issue](https://github.com/LearningHouseService/learninghouse-core/issues). Really looking forward for your feedback.
 
 ## Installation and configuration
 

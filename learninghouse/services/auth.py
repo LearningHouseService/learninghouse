@@ -100,7 +100,7 @@ class AuthService():
                               header: str = Security(api_key_header)) -> str:
         unlocked_by = self.is_admin_user_or_trainer(credentials, query, header)
 
-        if unlocked_by not in ['jwt', APIKeyRole.TRAINER.role]:
+        if unlocked_by not in ['admin', APIKeyRole.TRAINER.role]:
             raise LearningHouseUnauthorizedException()
 
         return unlocked_by

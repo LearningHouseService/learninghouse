@@ -1,0 +1,18 @@
+mat-sidenav {
+    padding: 16px;
+    border-right: none;
+
+    .full_width {
+        width: 100%;
+    }
+
+}
+
+mat-sidenav-content {
+    height: calc(100vh - 98px);
+    padding: 16px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

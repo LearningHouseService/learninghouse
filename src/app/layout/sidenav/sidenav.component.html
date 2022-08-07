@@ -1,0 +1,22 @@
+<mat-sidenav-container autosize>
+    <mat-sidenav mode="side" opened="true" role="navigation" class="mat-elevation-z8">
+        <button *ngIf="!isExpanded" mat-icon-button class="footer" (click)="isExpanded=true">
+            <mat-icon>keyboard_double_arrow_right</mat-icon>
+        </button>
+        <button *ngIf="isExpanded" mat-icon-button class="footer" (click)="isExpanded=false">
+            <mat-icon>keyboard_double_arrow_left</mat-icon>
+        </button>
+        <mat-nav-list>
+            <a mat-list-item>
+                <mat-icon matListIcon>home</mat-icon>
+                <h3 matLine *ngIf="isExpanded">Dashboard</h3>
+                <p matLine *ngIf="isExpanded">Get an overview</p>
+            </a>
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <main>
+            <ng-content></ng-content>
+        </main>
+    </mat-sidenav-content>
+</mat-sidenav-container>

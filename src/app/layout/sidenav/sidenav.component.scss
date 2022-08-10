@@ -2,10 +2,14 @@ mat-sidenav {
     padding: 16px;
     border-right: none;
 
-    .full_width {
-        width: 100%;
-    }
+    .flex-height-container {
+        height: 100%;
 
+
+        mat-nav-list {
+            width: 100%;
+        }
+    }
 }
 
 mat-sidenav-content {

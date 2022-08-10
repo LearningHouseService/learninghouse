@@ -1,18 +1,27 @@
-<mat-sidenav-container autosize>
-    <mat-sidenav mode="side" opened="true" role="navigation" class="mat-elevation-z8">
-        <button *ngIf="!isExpanded" mat-icon-button class="footer" (click)="isExpanded=true">
-            <mat-icon>keyboard_double_arrow_right</mat-icon>
-        </button>
-        <button *ngIf="isExpanded" mat-icon-button class="footer" (click)="isExpanded=false">
-            <mat-icon>keyboard_double_arrow_left</mat-icon>
-        </button>
-        <mat-nav-list>
-            <a mat-list-item>
-                <mat-icon matListIcon>home</mat-icon>
-                <h3 matLine *ngIf="isExpanded">Dashboard</h3>
-                <p matLine *ngIf="isExpanded">Get an overview</p>
-            </a>
-        </mat-nav-list>
+<mat-sidenav-container>
+    <mat-sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="isOpened" [fixedInViewport]="isMobile" fixedTopGap="56"
+        role="navigation" class="mat-elevation-z8">
+        <div fxLayout="column" fxLayoutAlign="space-between center" class="flex-height-container">
+            <mat-nav-list>
+                <a mat-list-item>
+                    <mat-icon matListIcon>home</mat-icon>
+                    <h3 matLine *ngIf="isExpanded">Dashboard</h3>
+                    <p matLine *ngIf="isExpanded">Get an overview</p>
+                </a>
+                <a mat-list-item>
+                    <mat-icon matListIcon>settings</mat-icon>
+                    <h3 matLine *ngIf="isExpanded">Configuration</h3>
+                    <p matLine *ngIf="isExpanded">Configure the service</p>
+                </a>
+            </mat-nav-list>
+            <mat-nav-list>
+                <a mat-list-item class="expand" *ngIf="!isMobile" [ngSwitch]="isExpanded" (click)="toggle()">
+                    <mat-icon matListIcon *ngSwitchCase="false">keyboard_double_arrow_right</mat-icon>
+                    <mat-icon matListIcon *ngSwitchCase="true">keyboard_double_arrow_left</mat-icon>
+                    <h3 matLine *ngSwitchCase="true">Collapse</h3>
+                </a>
+            </mat-nav-list>
+        </div>
     </mat-sidenav>
     <mat-sidenav-content>
         <main>

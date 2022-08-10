@@ -5,11 +5,15 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material.module';
-import { LayoutModule } from './layout/layout.module';
+import { SidenavComponent } from './layout/sidenav/sidenav.component';
+import { ToolbarComponent } from './layout/toolbar/toolbar.component';
+import { LayoutModule } from '@angular/cdk/layout';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    SidenavComponent,
+    ToolbarComponent
   ],
   imports: [
     BrowserModule,

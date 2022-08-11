@@ -97,6 +97,13 @@ class ServiceSettings(BaseSettings):
     def openapi_url(self) -> str:
         return self.base_url + self.openapi_file
 
+    @property
+    def jwt_payload_claims(self) -> Dict[str, str]:
+        return {
+            'audience': 'LearningHouseAPI',
+            'issuer': 'LearningHouse Service'
+        }
+
 
 class DevelopmentSettings(ServiceSettings):
     environment: str = 'development'

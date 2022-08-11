@@ -3,7 +3,8 @@ from typing import List
 from fastapi import APIRouter, Depends, Path
 
 from learninghouse.models.auth import (APIKey, APIKeyInfo, APIKeyRequest,
-                                       LoginRequest, PasswordRequest, Token)
+                                       LoginRequest, PasswordRequest, Token,
+                                       UserRole)
 from learninghouse.services.auth import auth_service
 
 auth = auth_service()
@@ -14,14 +15,32 @@ router = APIRouter(
 )
 
 
-@router.post('/login',
+@router.post('/token',
              response_model=Token)
-async def login(request: LoginRequest):
-    return auth.login(request.password)
+async def post_token(request: LoginRequest):
+    return auth.create_token(request.password)
+
+
+@router.put('/token',
+            response_model=Token)
+async def put_token(refresh_token_jti: str = Depends(auth.protect_refresh)):
+    return auth.refresh_token(refresh_token_jti)
+
+
+@router.delete('/token',
+               response_model=bool)
+async def delete_token(refresh_token_jti: str = Depends(auth.protect_refresh)):
+    return auth.revoke_refresh_token(refresh_token_jti)
+
 
 router_protected = APIRouter(
     dependencies=[Depends(auth.protect_admin)]
 )
+
+
+@router_protected.delete('/tokens', response_model=bool)
+async def delete_tokens():
+    return auth.revoke_all_refresh_tokens()
 
 
 @router_protected.put('/password', response_model=bool)
@@ -46,3 +65,8 @@ if not auth.is_initial_admin_password:
         return auth.delete_apikey(description)
 
 router.include_router(router_protected)
+
+
+@router.get('/role', response_model=UserRole)
+def role(user_role: UserRole = Depends(auth.protect_user)):
+    return user_role

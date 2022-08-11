@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 from os import path
-from secrets import token_hex
-from typing import Dict, List, Optional
 from random import randint
+from secrets import token_hex
+from typing import Dict, List
 
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
@@ -29,17 +29,49 @@ class PasswordRequest(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = Field('Bearer')
 
 
 class TokenPayload(BaseModel):
-    secret: str
-    exp: Optional[datetime]
+    sub: str
+    iss: str
+    aud: str
+    jti: str
+    exp: datetime
+    iat: datetime
+
+    @classmethod
+    def create(cls, subject: str, expire: datetime, issue_time: datetime) -> TokenPayload:
+        payload_args = settings.jwt_payload_claims
+
+        return cls(
+            sub=subject,
+            iss=payload_args['issuer'],
+            aud=payload_args['audience'],
+            jti=token_hex(16),
+            exp=expire,
+            iat=issue_time
+        )
 
 
 class APIKeyRole(str, EnumModel):
     USER = 'user'
     TRAINER = 'trainer'
+
+    def __init__(self, role: str):
+        # pylint: disable=super-init-not-called
+        self._role: str = role
+
+    @property
+    def role(self) -> str:
+        return self._role
+
+
+class UserRole(str, EnumModel):
+    USER = 'user'
+    TRAINER = 'trainer'
+    ADMIN = 'admin'
 
     def __init__(self, role: str):
         # pylint: disable=super-init-not-called

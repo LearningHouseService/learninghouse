@@ -1,6 +1,6 @@
 <mat-toolbar color="primary" class="toolbar">
     <div>
-        <button mat-icon-button (click)="layoutService.toggleNavigation.emit()" *ngIf="isMobile">
+        <button mat-icon-button (click)="layoutService.toggleNavigation()" *ngIf="layoutService.isMobile$|async">
             <mat-icon>menu</mat-icon>
         </button>
         LearningHouse Service

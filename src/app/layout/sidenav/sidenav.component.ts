@@ -1,60 +1,28 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component } from '@angular/core';
 import { LayoutService } from '../layout.service';
+
+export interface SiteNavItem {
+  icon?: string;
+  svg?: string;
+  title: string;
+  subtitle: string;
+  minimum_role: string;
+}
 
 @Component({
   selector: 'app-sidenav',
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss']
 })
-export class SidenavComponent implements OnInit, OnDestroy {
+export class SidenavComponent {
 
-  isMobile: boolean = false;
-  isOpened: boolean = false;
-  isExpanded: boolean = false;
+  navItems: SiteNavItem[] = [
+    { icon: 'dashboard', title: 'Dashboard', subtitle: 'Get a overview', minimum_role: 'user' },
+    { svg: 'learninghouse', title: 'Prediction', subtitle: 'Use a brain', minimum_role: 'user' },
+    { icon: 'model_training', title: 'Training', subtitle: 'Train a brain', minimum_role: 'trainer' },
+    { icon: 'settings', title: 'Configuration', subtitle: 'Configure the service', minimum_role: 'admin' }
+  ]
 
-  subscriptionMobile?: Subscription;
-  subscriptionToggle?: Subscription;
-
-  constructor(private layoutService: LayoutService) { }
-
-  ngOnInit(): void {
-    this.changeMobileNavbarStates(this.layoutService.isMobile);
-    this.subscriptionMobile = this.layoutService.mobileChanged.subscribe(
-      isMobile => {
-        this.changeMobileNavbarStates(isMobile);
-      }
-    );
-    this.subscriptionToggle = this.layoutService.toggleNavigation.subscribe(() => this.toggle())
-  }
-
-  changeMobileNavbarStates(isMobile: boolean): void {
-    this.isMobile = isMobile
-    if (isMobile) {
-      this.isOpened = this.isExpanded;
-      this.isExpanded = true;
-    } else {
-      this.isExpanded = this.isOpened;
-      this.isOpened = true;
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.subscriptionMobile) {
-      this.subscriptionMobile.unsubscribe();
-    }
-
-    if (this.subscriptionToggle) {
-      this.subscriptionToggle.unsubscribe();
-    }
-  }
-
-  toggle() {
-    if (this.isMobile) {
-      this.isOpened = !this.isOpened;
-    } else {
-      this.isExpanded = !this.isExpanded;
-    }
-  }
+  constructor(public layoutService: LayoutService) { }
 
 }

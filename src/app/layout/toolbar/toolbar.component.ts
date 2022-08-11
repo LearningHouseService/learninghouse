@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component } from '@angular/core';
 import { LayoutService } from '../layout.service';
 
 @Component({
@@ -7,23 +6,8 @@ import { LayoutService } from '../layout.service';
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.scss']
 })
-export class ToolbarComponent implements OnInit, OnDestroy {
-
-  isMobile: boolean = false;
-  subscriptionMobile?: Subscription;
+export class ToolbarComponent {
 
   constructor(public layoutService: LayoutService) { }
 
-  ngOnInit(): void {
-    this.isMobile = this.layoutService.isMobile;
-    this.subscriptionMobile = this.layoutService.mobileChanged.subscribe(isMobile => {
-      this.isMobile = isMobile;
-    });
-  }
-
-  ngOnDestroy(): void {
-    if (this.subscriptionMobile) {
-      this.subscriptionMobile.unsubscribe();
-    }
-  }
 }

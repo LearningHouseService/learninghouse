@@ -1,21 +1,23 @@
 <mat-sidenav-container>
-    <mat-sidenav [mode]="isMobile ? 'over' : 'side'" [opened]="isOpened" [fixedInViewport]="isMobile" fixedTopGap="56"
-        role="navigation" class="mat-elevation-z8">
+    <mat-sidenav [mode]="(layoutService.isMobile$|async) ? 'over' : 'side'"
+        [opened]="!(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)"
+        [fixedInViewport]="(layoutService.isMobile$|async)" fixedTopGap="56" role="navigation" class="mat-elevation-z8">
         <div fxLayout="column" fxLayoutAlign="space-between center" class="flex-height-container">
             <mat-nav-list>
-                <a mat-list-item>
-                    <mat-icon matListIcon>home</mat-icon>
-                    <h3 matLine *ngIf="isExpanded">Dashboard</h3>
-                    <p matLine *ngIf="isExpanded">Get an overview</p>
-                </a>
-                <a mat-list-item>
-                    <mat-icon matListIcon>settings</mat-icon>
-                    <h3 matLine *ngIf="isExpanded">Configuration</h3>
-                    <p matLine *ngIf="isExpanded">Configure the service</p>
+                <a mat-list-item *ngFor="let navItem of navItems">
+                    <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon: ''}}
+                    </mat-icon>
+                    <h3 matLine
+                        [class.cdk-visually-hidden]="!((layoutService.isMobile$ | async) || (layoutService.isOpened$ | async))">
+                        {{navItem.title}}
+                    </h3>
+                    <p matLine *ngIf="(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)">
+                        {{navItem.subtitle}}</p>
                 </a>
             </mat-nav-list>
-            <mat-nav-list>
-                <a mat-list-item class="expand" *ngIf="!isMobile" [ngSwitch]="isExpanded" (click)="toggle()">
+            <mat-nav-list *ngIf="!(layoutService.isMobile$ | async)">
+                <a mat-list-item class="expand" [ngSwitch]="(layoutService.isOpened$ | async)"
+                    (click)="layoutService.toggleNavigation()">
                     <mat-icon matListIcon *ngSwitchCase="false">keyboard_double_arrow_right</mat-icon>
                     <mat-icon matListIcon *ngSwitchCase="true">keyboard_double_arrow_left</mat-icon>
                     <h3 matLine *ngSwitchCase="true">Collapse</h3>

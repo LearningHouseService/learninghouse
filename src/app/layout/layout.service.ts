@@ -1,23 +1,27 @@
-import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { EventEmitter, Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LayoutService {
 
-  isMobile: boolean = false;
-  mobileChanged = new Subject<boolean>();
-  toggleNavigation = new EventEmitter<void>();
+  isMobile$ = new BehaviorSubject<boolean>(false);
+  isOpened$ = new BehaviorSubject<boolean>(false);
+  isExpanded$ = new BehaviorSubject<boolean>(false);
+
 
   constructor(public breakpointObserver: BreakpointObserver) {
     this.breakpointObserver
-      .observe(['(min-width: 600px)'])
+      .observe([Breakpoints.XSmall])
       .subscribe((state: BreakpointState) => {
-        this.isMobile = state.matches ? false : true
-        this.mobileChanged.next(this.isMobile);
+        this.isMobile$.next(state.matches);
       });
+  }
+
+  toggleNavigation(): void {
+    this.isOpened$.next(!this.isOpened$.getValue());
   }
 
 }

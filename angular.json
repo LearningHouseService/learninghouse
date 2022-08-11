@@ -28,7 +28,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/learninghouse.scss",
+              "src/styles/theme.scss",
               "src/styles.scss"
             ],
             "scripts": []
@@ -97,7 +97,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/learninghouse.scss",
+              "src/styles/theme.scss",
               "src/styles.scss"
             ],
             "scripts": []

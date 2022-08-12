@@ -24,6 +24,13 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 jwt_bearer = HTTPBearer(bearerFormat='JWT', auto_error=False)
 
 
+INITIAL_PASSWORD_WARNING = """
+In order to activate the service you have to replace the fallback password.
+
+See https://github.com/LearningHouseService/learninghouse-core#security
+"""
+
+
 class AuthService():
     def __init__(self):
         self.database = SecurityDatabase.load_or_write_default()

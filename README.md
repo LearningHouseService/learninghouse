@@ -104,13 +104,12 @@ Take the returned access_token value for next call to change the fallback passwo
 # URL is http://<host>:5000/api/auth/password
 curl --location --request PUT 'http://localhost:5000/api/auth/password' \
     --header 'Content-Type: application/json' \
+    --header 'Authorization: Bearer <access_token>' \
     --data-raw '{
         "old_password": "learninghouse",
         "new_password": "YOURPASSWORD"
     }'
 ```
-
-3) Restart the service.
 
 ### API Key
 

@@ -14,9 +14,8 @@ api = APIRouter(
         LearningHouseSecurityException.api_description()
     })
 
-if not auth_service().is_initial_admin_password:
-    api.include_router(brain.router)
-    api.include_router(configuration.router)
+api.include_router(brain.router)
+api.include_router(configuration.router)
 
 api.include_router(auth.router)
 

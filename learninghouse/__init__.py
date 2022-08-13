@@ -7,6 +7,9 @@ from pydantic import BaseModel
 from pydantic.version import VERSION as pydantic_version
 from sklearn import __version__ as skl_version
 from uvicorn import __version__ as uvicorn_version
+from jose import __version__ as jose_version
+from passlib import __version__ as passlib_version
+from loguru import __version__ as loguru_version
 
 from learninghouse.models import LearningHouseVersions
 
@@ -22,5 +25,8 @@ versions = LearningHouseVersions(
     pydantic=pydantic_version,
     sklearn=skl_version,
     numpy=np_version,
-    pandas=pd_version
+    pandas=pd_version,
+    jose=jose_version,
+    passlib=passlib_version,
+    loguru=loguru_version
 )

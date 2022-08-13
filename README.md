@@ -51,7 +51,7 @@ LEARNINGHOUSE_CONFIG_DIRECTORY   | ./brains                         | Define dir
 LEARNINGHOUSE_OPENAPI_FILE       | /learninghouse_api.json          | File url path to OpenAPI json file
 LEARNINGHOUSE_DOCS_URL           | /docs                            | Define url path for interactive [API documentation](#api-documentation). If you set to empty the documentation will be disabled.
 LEARNINGHOUSE_JWT_SECRET         | _Generated on startup_           | For administration authentication there is a JWT generated after login. This is signed with this secret. By default it is generated on startup this will invalid existing JWTs on each restart.
-LEARNINGHOUSE_JWT_EXPIRE_MINUTES | 30                               | JWTs will expire after given amount of minutes
+LEARNINGHOUSE_JWT_EXPIRE_MINUTES | 5                               | JWTs refresh token will expire after given amount of minutes
 LEARNINGHOUSE_LOGGING_LEVEL      | INFO                             | Set logging level to DEBUG, INFO, WARNING, ERROR, CRITICAL
 LEARNINGHOUSE_DEBUG              | (False/True)                     | Debugger will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
 LEARNINGHOUSE_RELOAD             | (False/True)                     | Reload of source will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
@@ -77,7 +77,7 @@ docker run --name learninghouse --rm -v brains:/learninghouse/brains -p 5000:500
 ```
 ## Security
 
-The service is protected by different authentication and authorization mechanisms. For administration you have to generated a JWT by using `/api/auth/login` endpoint and use the resulting `access_token` as `Authorization: Bearer **access_token**` header to each requests.
+The service is protected by different authentication and authorization mechanisms. For administration you have to generated a JWT by using POST request to `/api/auth/token` endpoint and use the resulting `access_token` as `Authorization: Bearer **access_token**` header to each requests. Access token will expire after 1 minute and can be refreshed by sending a PUT request to `/api/auth/token` using the `request_token` of the POST result within the expire time configured above as `LEARNINGHOUSE_JWT_EXPIRE_MINUTES`.
 
 ### Fallback password
 On first run the service is set to use the fallback password `learninghouse`. Until this is not changed all other endpoints will be deactivated. 
@@ -89,7 +89,7 @@ Do following procedure to unlock service for usage:
 1) Login using fallback password:
 
 ```
-# URL is http://<host>:5000/api/auth/login
+# URL is http://<host>:5000/api/auth/token
 curl --location --request POST 'http://localhost:5000/api/auth/login' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -104,13 +104,12 @@ Take the returned access_token value for next call to change the fallback passwo
 # URL is http://<host>:5000/api/auth/password
 curl --location --request PUT 'http://localhost:5000/api/auth/password' \
     --header 'Content-Type: application/json' \
+    --header 'Authorization: Bearer <access_token>' \
     --data-raw '{
         "old_password": "learninghouse",
         "new_password": "YOURPASSWORD"
     }'
 ```
-
-3) Restart the service.
 
 ### API Key
 

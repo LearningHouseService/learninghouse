@@ -11,20 +11,15 @@ from learninghouse.api import api, docs
 from learninghouse.api.errors import (LearningHouseException,
                                       learninghouse_exception_handler,
                                       validation_error_handler)
-from learninghouse.api.middleware import CatchAllException, CustomHeader
+from learninghouse.api.middleware import (CatchAllException, CustomHeader,
+                                          EnforceInitialPasswordChange)
 from learninghouse.core.logging import initialize_logging, logger
 from learninghouse.core.settings import service_settings
-from learninghouse.services.auth import auth_service
+from learninghouse.services.auth import auth_service, INITIAL_PASSWORD_WARNING
 
 APP_REFERENCE = 'learninghouse.service:app'
 
 STATIC_DIRECTORY = str(Path(__file__).parent / 'static')
-
-INITIAL_PASSWORD = """
-In order to activate the service you have to replace the fallback password.
-
-See https://github.com/LearningHouseService/learninghouse-core#security
-"""
 
 
 def get_application() -> FastAPI:
@@ -51,10 +46,14 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    application.add_middleware(CatchAllException)
-    application.add_middleware(CustomHeader)
     application.add_middleware(
         uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware)
+
+    if auth_service().is_initial_admin_password:
+        application.add_middleware(EnforceInitialPasswordChange)
+
+    application.add_middleware(CatchAllException)
+    application.add_middleware(CustomHeader)
 
     application.mount(
         '/static', StaticFiles(directory=STATIC_DIRECTORY), name='static')
@@ -89,7 +88,7 @@ def run():
             f'See interactive documentation {settings.documentation_url}')
 
     if auth.is_initial_admin_password:
-        logger.warning(INITIAL_PASSWORD)
+        logger.warning(INITIAL_PASSWORD_WARNING)
 
     uvicorn.run(app=APP_REFERENCE, log_config=None,
                 **settings.uvicorn_kwargs)

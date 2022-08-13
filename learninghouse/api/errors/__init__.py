@@ -153,7 +153,7 @@ async def validation_error_handler(_: Request, exc: RequestValidationError) -> J
 async def learninghouse_exception_handler(_: Request, exc: LearningHouseException):
     response = exc.response()
 
-    if isinstance(exc, LearningHouseSecurityException):
+    if isinstance(exc, (LearningHouseSecurityException, LearningHouseUnauthorizedException)):
         logger.warning(exc.error.description)
 
     return response

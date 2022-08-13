@@ -165,7 +165,7 @@ class AuthService():
                               header: str = Security(api_key_header)) -> UserRole:
         role = self.is_admin_user_or_trainer(credentials, query, header)
 
-        if role not in ['admin', APIKeyRole.TRAINER.role]:
+        if role.role not in ['admin', APIKeyRole.TRAINER.role]:
             raise LearningHouseUnauthorizedException()
 
         return role

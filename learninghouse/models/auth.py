@@ -6,16 +6,15 @@ from random import randint
 from secrets import token_hex
 from typing import Dict, List
 
-from passlib.context import CryptContext
+from passlib.hash import sha512_crypt
 from pydantic import BaseModel, Field
 
 from learninghouse.api.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.core.settings import service_settings
+from learninghouse.core.logging import logger
 from learninghouse.models.base import EnumModel
 
 settings = service_settings()
-
-pwd_context = CryptContext(schemes=['sha512_crypt'])
 
 
 class LoginRequest(BaseModel):
@@ -131,7 +130,7 @@ class SecurityDatabase(BaseModel):
         if path.exists(SECURITY_FILENAME):
             database = cls.parse_file(SECURITY_FILENAME, encoding='utf-8')
         else:
-            database = cls(admin_password=pwd_context.hash('learninghouse'))
+            database = cls(admin_password=sha512_crypt.hash('learninghouse'))
             database.write()
 
         return database
@@ -141,10 +140,10 @@ class SecurityDatabase(BaseModel):
             securityfile.write(self.json(indent=4))
 
     def authenticate_password(self, password: str) -> bool:
-        return pwd_context.verify(password, self.admin_password)
+        return sha512_crypt.verify(password, self.admin_password)
 
     def update_password(self, new_password) -> None:
-        self.admin_password = pwd_context.hash(new_password)
+        self.admin_password = sha512_crypt.hash(new_password)
         self.initial_password = False
 
     def create_apikey(self, create: APIKeyRequest) -> APIKey:
@@ -152,7 +151,7 @@ class SecurityDatabase(BaseModel):
             raise APIKeyExists(create.description)
 
         key = token_hex(16)
-        hashed_key = pwd_context.hash(key, salt=self.salt, rounds=self.rounds)
+        hashed_key = sha512_crypt.hash(key, salt=self.salt, rounds=self.rounds)
         new_api_key = APIKey.from_api_key_request(create, hashed_key)
         self.api_keys[hashed_key] = new_api_key
 
@@ -172,7 +171,9 @@ class SecurityDatabase(BaseModel):
 
     def find_apikey_by_key(self, key: str) -> APIKeyInfo | None:
         api_key_info = None
-        hashed_key = pwd_context.hash(key, salt=self.salt, rounds=self.rounds)
+        hashed_key = sha512_crypt.hash(key, salt=self.salt, rounds=self.rounds)
+
+        logger.info(hashed_key)
 
         if hashed_key in self.api_keys:
             api_key_info = APIKeyInfo.from_api_key(self.api_keys[hashed_key])

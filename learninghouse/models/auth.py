@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 
 from learninghouse.api.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.core.settings import service_settings
-from learninghouse.core.logging import logger
 from learninghouse.models.base import EnumModel
 
 settings = service_settings()
@@ -172,8 +171,6 @@ class SecurityDatabase(BaseModel):
     def find_apikey_by_key(self, key: str) -> APIKeyInfo | None:
         api_key_info = None
         hashed_key = sha512_crypt.hash(key, salt=self.salt, rounds=self.rounds)
-
-        logger.info(hashed_key)
 
         if hashed_key in self.api_keys:
             api_key_info = APIKeyInfo.from_api_key(self.api_keys[hashed_key])

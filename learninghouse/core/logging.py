@@ -1,8 +1,11 @@
 import logging
+import sys
+from pprint import pformat
 from types import FrameType
 from typing import cast
 
 from loguru import logger
+from loguru._defaults import LOGURU_FORMAT
 
 from learninghouse.models.base import EnumModel
 
@@ -49,6 +52,19 @@ class LoggingHandler(logging.Handler):
         )
 
 
+def format_record(record: dict) -> str:
+
+    format_string = LOGURU_FORMAT
+    if record["extra"].get("payload") is not None:
+        record["extra"]["payload"] = pformat(
+            record["extra"]["payload"], indent=4, compact=True, width=88
+        )
+        format_string += "\n<level>{extra[payload]}</level>"
+
+    format_string += "{exception}\n"
+    return format_string
+
+
 def initialize_logging(logging_level: LoggingLevelEnum) -> None:
     logging_handler = LoggingHandler(level=logging_level.level)
 
@@ -61,3 +77,8 @@ def initialize_logging(logging_level: LoggingLevelEnum) -> None:
         logging.getLogger(uvicorn_logger_name).handlers = [logging_handler]
 
     logger.bind(request_id=None, method=None)
+
+    logger.configure(
+        handlers=[{"sink": sys.stdout,
+                   "level": logging_level.level, "format": format_record}]
+    )

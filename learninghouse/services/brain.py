@@ -123,7 +123,8 @@ class BrainTraining():
                 request_data)
             if path.exists(filename):
                 data_temp = pd.read_csv(filename)
-                data = data_temp.append([request_data], ignore_index=True)
+                df_new_row = pd.DataFrame([request_data])
+                data = pd.concat([data_temp, df_new_row], ignore_index=True)
             else:
                 data = pd.DataFrame([request_data])
 
@@ -207,7 +208,7 @@ class BrainPrediction():
             name, BrainFileType.TRAINED_FILE)
         stamp = stat(filename).st_mtime
 
-        if not(name in cls.brains and cls.brains[name]['stamp'] == stamp):
+        if not (name in cls.brains and cls.brains[name]['stamp'] == stamp):
             cls.brains[name] = {
                 'stamp': stamp,
                 'brain': Brain.load_trained(name)

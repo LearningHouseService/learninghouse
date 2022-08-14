@@ -31,7 +31,7 @@ class ServiceSettings(BaseSettings):
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
     jwt_secret: str = token_hex(16)
-    jwt_expire_minutes: int = 30
+    jwt_expire_minutes: int = 10
 
     class Config:  # pylint: disable=too-few-public-methods
         validate_assignment = True

@@ -51,7 +51,7 @@ LEARNINGHOUSE_CONFIG_DIRECTORY   | ./brains                         | Define dir
 LEARNINGHOUSE_OPENAPI_FILE       | /learninghouse_api.json          | File url path to OpenAPI json file
 LEARNINGHOUSE_DOCS_URL           | /docs                            | Define url path for interactive [API documentation](#api-documentation). If you set to empty the documentation will be disabled.
 LEARNINGHOUSE_JWT_SECRET         | _Generated on startup_           | For administration authentication there is a JWT generated after login. This is signed with this secret. By default it is generated on startup this will invalid existing JWTs on each restart.
-LEARNINGHOUSE_JWT_EXPIRE_MINUTES | 5                               | JWTs refresh token will expire after given amount of minutes
+LEARNINGHOUSE_JWT_EXPIRE_MINUTES | 10                               | JWTs refresh token will expire after given amount of minutes
 LEARNINGHOUSE_LOGGING_LEVEL      | INFO                             | Set logging level to DEBUG, INFO, WARNING, ERROR, CRITICAL
 LEARNINGHOUSE_DEBUG              | (False/True)                     | Debugger will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 
 LEARNINGHOUSE_RELOAD             | (False/True)                     | Reload of source will be automatically activated in development environment. For security reasons it is recommended not to activate in production. 

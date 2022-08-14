@@ -55,6 +55,7 @@ class CatchAllException(BaseHTTPMiddleware):
             return await call_next(request)
         except Exception as exc:  # pylint: disable=broad-except
             logger.error(UNKNOWN_EXCEPTION_MESSAGE.format(exception=exc))
+            logger.debug(exc)
             return LearningHouseException().response()
 
 

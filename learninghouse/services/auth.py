@@ -248,7 +248,7 @@ class AuthService():
 
             jti = payload.jti
         except JWTError as exc:
-            logger.error(exc)
+            logger.info(exc)
 
         return verified, jti
 

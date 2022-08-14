@@ -207,8 +207,6 @@ class AuthService():
 
             verified, jti = self.verify_jwt(credentials.credentials, subject)
 
-            logger.info(jti)
-
             if not verified:
                 is_valid = False
                 if auto_error:

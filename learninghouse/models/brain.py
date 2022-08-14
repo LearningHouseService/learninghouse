@@ -42,7 +42,7 @@ class BrainTrainingRequest(DictModel):
     for this `feature` will be assumed.
     """
 
-    __root__: Dict[str, int | float | str | bool | None] = Field(None, example={
+    __root__: Dict[str, bool | int | float | str | None] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
@@ -56,7 +56,7 @@ class BrainTrainingRequest(DictModel):
 
 
 class BrainPredictionRequest(DictModel):
-    __root__: Dict[str, int | float | str | bool | None] = Field(None, example={
+    __root__: Dict[str,  bool | int | float | str | None] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,

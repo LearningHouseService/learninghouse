@@ -118,6 +118,7 @@ class BrainTraining():
             else:
                 raise BrainNotEnoughData()
         else:
+            logger.debug(request_data)
             request_data = DatasetPreprocessing.add_time_information(
                 request_data)
             if path.exists(filename):

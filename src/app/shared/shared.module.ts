@@ -1,14 +1,16 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../material.module';
 import { InputComponent } from './components/input/input.component';
+import { PasswordComponent } from './components/password/password.component';
 
 
 
 @NgModule({
   declarations: [
-    InputComponent
+    InputComponent,
+    PasswordComponent
   ],
   imports: [
     CommonModule,
@@ -18,6 +20,7 @@ import { InputComponent } from './components/input/input.component';
   ],
   exports: [
     InputComponent,
+    PasswordComponent,
     FormsModule,
     ReactiveFormsModule
   ]

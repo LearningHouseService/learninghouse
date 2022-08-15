@@ -1,5 +1,5 @@
 import { Input, OnInit, Directive } from '@angular/core';
-import { AbstractControl, FormControl } from '@angular/forms';
+import { AbstractControl, FormControl, Validators } from '@angular/forms';
 
 @Directive()
 export class FormFieldDirective implements OnInit {
@@ -12,13 +12,10 @@ export class FormFieldDirective implements OnInit {
     @Input()
     name = '';
 
-    @Input()
-    maxlength?: number;
 
     ngOnInit(): void {
         if (this.control.validator) {
-            const validator = this.control.validator({} as AbstractControl);
-            this.required = validator !== null && validator['required'] === true;
+            this.required = this.control.hasValidator(Validators.required);
         }
     }
 

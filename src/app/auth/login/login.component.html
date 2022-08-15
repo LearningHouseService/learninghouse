@@ -2,12 +2,12 @@
     <mat-card>
         <mat-card-title>Log in</mat-card-title>
         <mat-card-content>
-            <learninghouse-input name="Admin password or API key" [control]="password">
-            </learninghouse-input>
+            <learninghouse-password name="Admin password or API key" [control]="password">
+            </learninghouse-password>
         </mat-card-content>
         <mat-card-actions align="end">
-            <button mat-stroked-button>API Key</button>
-            <button mat-stroked-button color="primary">Admin login</button>
+            <button mat-stroked-button [disabled]="!form.valid">API Key</button>
+            <button mat-stroked-button color="primary" [disabled]="!form.valid">Admin login</button>
         </mat-card-actions>
     </mat-card>
 </div>

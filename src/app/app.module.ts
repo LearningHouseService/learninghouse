@@ -9,10 +9,12 @@ import { SidenavComponent } from './layout/sidenav/sidenav.component';
 import { ToolbarComponent } from './layout/toolbar/toolbar.component';
 import { MaterialModule } from './material.module';
 import { HttpClientModule } from "@angular/common/http";
+import { DashboardComponent } from './layout/dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+    DashboardComponent,
     SidenavComponent,
     ToolbarComponent
   ],

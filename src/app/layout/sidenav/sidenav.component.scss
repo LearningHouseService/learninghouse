@@ -16,7 +16,7 @@ mat-sidenav-content {
     height: calc(100vh - 98px);
     padding: 16px;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    main {
+        height: 100%;
+    }
 }

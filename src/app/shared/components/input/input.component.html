@@ -1,0 +1,5 @@
+<mat-form-field floatLabel="always" [hideRequiredMarker]="required">
+    <mat-label>{{name}}<span *ngIf="!required"> (Optional)</span></mat-label>
+    <input matInput [required]="required" [formControl]="control" [type]="type">
+    <mat-error>{{showErrors()}}</mat-error>
+</mat-form-field>

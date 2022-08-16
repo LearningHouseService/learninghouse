@@ -1,23 +1,82 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NonNullableFormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { ServiceMode } from 'src/app/shared/services/api.model';
+import { APIService } from 'src/app/shared/services/api.service';
+import { AlertType } from 'src/app/shared/components/alert/alert.component';
+import { AuthService } from '../auth.service';
+import { BehaviorSubject, catchError, map, of } from 'rxjs';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
 
   form: FormGroup;
 
-  constructor(private formBuilder: NonNullableFormBuilder) {
+  loginError$ = new BehaviorSubject<string | null>(null);
+
+  constructor(private formBuilder: NonNullableFormBuilder, public api: APIService, private authService: AuthService) {
     this.form = this.formBuilder.group({
-      password: ['', [Validators.required]]
+      normal: this.formBuilder.group({
+        password: ['', [Validators.required]]
+      }),
+      initial: this.formBuilder.group({
+        old_password: ['', [Validators.required]],
+        new_password: ['', [Validators.required]]
+      })
+
     });
   }
 
+  ngOnInit(): void {
+    this.api.update_mode()
+  }
+
+  get normal(): FormGroup {
+    return <FormGroup>this.form.get('normal');
+  }
+
   get password(): FormControl {
-    return (<FormControl>this.form.get('password'));
+    return <FormControl>this.form.get('normal.password');
+  }
+
+  get initial(): FormGroup {
+    return <FormGroup>this.form.get('initial');
+  }
+
+  get old_password(): FormControl {
+    return <FormControl>this.form.get('initial.old_password');
+  }
+
+  get new_password(): FormControl {
+    return <FormControl>this.form.get('initial.new_password');
+  }
+
+  submitInitial() {
+    this.authService.loginAdmin({ password: this.old_password.value })
+      .pipe(
+        map(() => {
+          this.api.put<boolean>('/auth/password', this.initial.value)
+            .pipe(catchError(this.handleError))
+            .subscribe()
+        }),
+        catchError(this.handleError))
+      .subscribe();
+  }
+
+  handleError(error: string) {
+    this.loginError$.next(error);
+    return of(false);
+  }
+
+  get ServiceMode() {
+    return ServiceMode;
+  }
+
+  get AlertType() {
+    return AlertType;
   }
 
 }

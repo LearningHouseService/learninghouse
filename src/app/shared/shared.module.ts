@@ -4,13 +4,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../material.module';
 import { InputComponent } from './components/input/input.component';
 import { PasswordComponent } from './components/password/password.component';
+import { AlertComponent } from './components/alert/alert.component';
 
 
 
 @NgModule({
   declarations: [
     InputComponent,
-    PasswordComponent
+    PasswordComponent,
+    AlertComponent
   ],
   imports: [
     CommonModule,
@@ -22,7 +24,8 @@ import { PasswordComponent } from './components/password/password.component';
     InputComponent,
     PasswordComponent,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    AlertComponent
   ]
 })
 export class SharedModule { }

@@ -10,31 +10,57 @@ import { LoginRequestModel, TokenModel, TokenPayloadModel } from './auth.model';
 })
 export class AuthService {
 
-  access_token = new BehaviorSubject<TokenPayloadModel | null>(null);
+  access_token$ = new BehaviorSubject<TokenPayloadModel | null>(null);
+  role$ = new BehaviorSubject<string | null>(null);
 
-  constructor(private api: APIService, private jwtService: JwtHelperService) { }
+  private jwtService = new JwtHelperService();
 
-  login(loginPayload: LoginRequestModel) {
+  constructor(private api: APIService) { }
+
+  loginAdmin(loginPayload: LoginRequestModel) {
     return this.api
-      .post('/auth/token', loginPayload)
+      .post<TokenModel>('/auth/token', loginPayload)
       .pipe(
-        map((data) => {
-          const tokens = data as TokenModel;
+        map((tokens) => {
           sessionStorage.setItem('tokens', JSON.stringify(tokens))
 
           const tokenPayload = this.jwtService.decodeToken(
             tokens.access_token
           );
 
-          this.access_token.next(tokenPayload);
+          this.access_token$.next(tokenPayload);
+          this.role$.next('admin')
 
           return true;
-        }),
-        catchError((error) => {
-          console.log(error);
-          return of(false);
         })
       )
   }
+
+  getAccessToken(): string {
+    let accessToken = '';
+    let sessionStorageTokens = sessionStorage.getItem('tokens');
+    if (sessionStorageTokens) {
+      let tokens = JSON.parse(sessionStorageTokens) as TokenModel;
+      let isTokenExpired = this.jwtService.isTokenExpired(tokens?.access_token);
+      if (isTokenExpired) {
+        this.access_token$.next(null);
+        this.role$.next(null);
+      } else {
+        const tokenPayload = this.jwtService.decodeToken(
+          tokens.access_token
+        );
+        this.access_token$.next(tokenPayload);
+        this.role$.next('admin');
+        accessToken = tokens.access_token;
+      }
+    }
+
+    return accessToken;
+  }
+
+  isAdmin(): boolean {
+    return this.role$.getValue() === 'admin';
+  }
+
 }
 

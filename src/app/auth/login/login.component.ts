@@ -5,6 +5,7 @@ import { APIService } from 'src/app/shared/services/api.service';
 import { AlertType } from 'src/app/shared/components/alert/alert.component';
 import { AuthService } from '../auth.service';
 import { BehaviorSubject, catchError, map, of } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,8 @@ export class LoginComponent implements OnInit {
 
   loginError$ = new BehaviorSubject<string | null>(null);
 
-  constructor(private formBuilder: NonNullableFormBuilder, public api: APIService, private authService: AuthService) {
+  constructor(private formBuilder: NonNullableFormBuilder, public api: APIService, private authService: AuthService,
+    private router: Router) {
     this.form = this.formBuilder.group({
       normal: this.formBuilder.group({
         password: ['', [Validators.required]]
@@ -54,16 +56,54 @@ export class LoginComponent implements OnInit {
     return <FormControl>this.form.get('initial.new_password');
   }
 
+  submitLoginAdmin() {
+    this.authService.loginAdmin(this.normal.value)
+      .pipe(
+        map(() => {
+          this.router.navigate(['/dashboard']);
+        }),
+        catchError(this.handleError)
+      )
+      .subscribe(() => {
+        this.loginError$.next(null);
+      });
+  }
+
+  submitLoginAPIKey() {
+    this.authService.loginAPIKey(this.password.value)
+      .pipe(
+        map(() => {
+          this.router.navigate(['/dashboard']);
+        }),
+        catchError(this.handleError)
+      )
+      .subscribe(() => {
+        this.loginError$.next(null);
+      });
+  }
+
   submitInitial() {
     this.authService.loginAdmin({ password: this.old_password.value })
       .pipe(
         map(() => {
           this.api.put<boolean>('/auth/password', this.initial.value)
-            .pipe(catchError(this.handleError))
+            .pipe(
+              map(() => {
+                this.authService.loginAdmin({ password: this.new_password.value })
+                  .pipe(
+                    map(() => {
+                      this.router.navigate(['/dashboard']);
+                    }),
+                    catchError(this.handleError))
+                  .subscribe();
+              }),
+              catchError(this.handleError))
             .subscribe()
         }),
         catchError(this.handleError))
-      .subscribe();
+      .subscribe(() => {
+        this.loginError$.next(null);
+      });
   }
 
   handleError(error: string) {

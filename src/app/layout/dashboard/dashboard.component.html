@@ -1,1 +1,7 @@
-<p>dashboard works!</p>
+<button mat-button (click)="test()">test</button>
+<mat-list>
+    <mat-list-item>Role: {{authService.role$ | async}}</mat-list-item>
+    <mat-list-item>User: {{authService.user$ | async}}</mat-list-item>
+    <mat-list-item>Trainer: {{authService.trainer$ | async}}</mat-list-item>
+    <mat-list-item>Admin: {{authService.admin$ | async}}</mat-list-item>
+</mat-list>

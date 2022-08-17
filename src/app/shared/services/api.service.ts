@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { LearningHouseErrorMessage, ServiceMode } from './api.model';
@@ -13,22 +13,77 @@ export class APIService {
 
   constructor(private httpClient: HttpClient) { }
 
-  get<T>(endpoint: string): Observable<T> {
-    return this.httpClient.get<T>(this.endpoint_host + endpoint)
+  get<T>(endpoint: string, options?: {
+    headers?: HttpHeaders | {
+      [header: string]: string | string[];
+    };
+    context?: HttpContext;
+    observe?: 'body';
+    params?: HttpParams | {
+      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+    };
+    reportProgress?: boolean;
+    responseType?: 'json';
+    withCredentials?: boolean;
+  }): Observable<T> {
+    return this.httpClient.get<T>(this.endpoint_host + endpoint, options)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  post<T>(endpoint: string, payload: any): Observable<T> {
-    return this.httpClient.post<T>(this.endpoint_host + endpoint, payload)
+  post<T>(endpoint: string, payload: any | null, options?: {
+    headers?: HttpHeaders | {
+      [header: string]: string | string[];
+    };
+    context?: HttpContext;
+    observe?: 'body';
+    params?: HttpParams | {
+      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+    };
+    reportProgress?: boolean;
+    responseType?: 'json';
+    withCredentials?: boolean;
+  }): Observable<T> {
+    return this.httpClient.post<T>(this.endpoint_host + endpoint, payload, options)
       .pipe(
         catchError(this.handleError)
       );
   }
 
-  put<T>(endpoint: string, payload: any): Observable<T> {
-    return this.httpClient.put<T>(this.endpoint_host + endpoint, payload)
+  put<T>(endpoint: string, payload: any | null, options?: {
+    headers?: HttpHeaders | {
+      [header: string]: string | string[];
+    };
+    context?: HttpContext;
+    observe?: 'body';
+    params?: HttpParams | {
+      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+    };
+    reportProgress?: boolean;
+    responseType?: 'json';
+    withCredentials?: boolean;
+  }): Observable<T> {
+    return this.httpClient.put<T>(this.endpoint_host + endpoint, payload, options)
+      .pipe(
+        catchError(this.handleError)
+      );
+  }
+
+  delete<T>(endpoint: string, options?: {
+    headers?: HttpHeaders | {
+      [header: string]: string | string[];
+    };
+    context?: HttpContext;
+    observe?: 'body';
+    params?: HttpParams | {
+      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+    };
+    reportProgress?: boolean;
+    responseType?: 'json';
+    withCredentials?: boolean;
+  }): Observable<T> {
+    return this.httpClient.delete<T>(this.endpoint_host + endpoint, options)
       .pipe(
         catchError(this.handleError)
       );

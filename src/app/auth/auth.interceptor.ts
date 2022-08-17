@@ -3,10 +3,12 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor
+  HttpInterceptor,
+  HttpSentEvent
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 import { AuthService } from './auth.service';
+import { TokenModel } from './auth.model';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -20,23 +22,56 @@ export class AuthInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    for (const element of this.unprotected_endpoints) {
-      if (request.url.endsWith(element)) {
-        console.log('Protected url');
-        return next.handle(request);
-      }
-    }
-
-    if (this.authService.isAdmin()) {
-      let accessToken = this.authService.getAccessToken();
-      if (accessToken) {
-        let modifiedRequest = request.clone({
-          headers: request.headers.set('Authorization', 'Bearer ' + accessToken)
-        });
-        return next.handle(modifiedRequest);
+    if (!this.isUnprotectedEndpoint(request.url)) {
+      if (this.authService.isAdmin()) {
+        let requestWithAccessToken = this.handleAccessToken(request, next);
+        if (requestWithAccessToken) {
+          return requestWithAccessToken;
+        }
+      } else if (this.authService.isAPIKey()) {
+        let apikey = this.authService.getAPIKey();
+        if (apikey) {
+          return next.handle(request.clone({
+            headers: request.headers.set('X-LEARNINGHOUSE-API-KEY', apikey)
+          }));
+        }
       }
     }
 
     return next.handle(request);
+  }
+
+  private isUnprotectedEndpoint(url: string): boolean {
+    let unprotected_endpoint = false;
+    for (const endpoint of this.unprotected_endpoints) {
+      if (url.endsWith(endpoint)) {
+        unprotected_endpoint = true;
+        break;
+      }
+    }
+
+    return unprotected_endpoint;
+  }
+
+  private handleAccessToken(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> | null {
+    let accessToken = this.authService.getAccessToken();
+    if (accessToken) {
+      return next.handle(request.clone({
+        headers: request.headers.set('Authorization', 'Bearer ' + accessToken)
+      }));
+    } else {
+      let refreshRequest = this.authService.refreshToken();
+      if (refreshRequest) {
+        return refreshRequest.pipe(
+          switchMap((tokens: TokenModel) => {
+            return next.handle(request.clone({
+              headers: request.headers.set('Authorization', 'Bearer ' + tokens.access_token)
+            }))
+          })
+        );
+      }
+    }
+
+    return null;
   }
 }

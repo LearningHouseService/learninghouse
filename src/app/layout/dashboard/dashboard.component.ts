@@ -1,15 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { AuthService } from 'src/app/auth/auth.service';
+import { APIService } from 'src/app/shared/services/api.service';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
 
-  constructor() { }
+  constructor(private api: APIService, public authService: AuthService) { }
 
-  ngOnInit(): void {
+
+  test() {
+    this.api.get('/brain/darkness/info').subscribe();
   }
 
 }

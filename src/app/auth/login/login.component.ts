@@ -62,11 +62,9 @@ export class LoginComponent implements OnInit {
         map(() => {
           this.router.navigate(['/dashboard']);
         }),
-        catchError(this.handleError)
+        catchError((error) => this.handleError(error))
       )
-      .subscribe(() => {
-        this.loginError$.next(null);
-      });
+      .subscribe();
   }
 
   submitLoginAPIKey() {
@@ -75,11 +73,9 @@ export class LoginComponent implements OnInit {
         map(() => {
           this.router.navigate(['/dashboard']);
         }),
-        catchError(this.handleError)
+        catchError((error) => this.handleError(error))
       )
-      .subscribe(() => {
-        this.loginError$.next(null);
-      });
+      .subscribe();
   }
 
   submitInitial() {
@@ -94,16 +90,14 @@ export class LoginComponent implements OnInit {
                     map(() => {
                       this.router.navigate(['/dashboard']);
                     }),
-                    catchError(this.handleError))
+                    catchError((error) => this.handleError(error)))
                   .subscribe();
               }),
-              catchError(this.handleError))
+              catchError((error) => this.handleError(error)))
             .subscribe()
         }),
-        catchError(this.handleError))
-      .subscribe(() => {
-        this.loginError$.next(null);
-      });
+        catchError((error) => this.handleError(error)))
+      .subscribe();
   }
 
   handleError(error: string) {

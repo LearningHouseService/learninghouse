@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { APIService } from '../shared/services/api.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
-import { LoginRequestModel, TokenModel, TokenPayloadModel } from './auth.model';
+import { LoginRequestModel, Role, TokenModel, TokenPayloadModel } from './auth.model';
 import { HttpHeaders } from '@angular/common/http';
 
 
@@ -10,19 +10,12 @@ import { HttpHeaders } from '@angular/common/http';
   providedIn: 'root'
 })
 export class AuthService {
-  role$ = new BehaviorSubject<string | null>(null);
-  user$ = new BehaviorSubject<boolean>(false);
-  trainer$ = new BehaviorSubject<boolean>(false);
-  admin$ = new BehaviorSubject<boolean>(false);
+  role$ = new BehaviorSubject<Role | null>(null);
+  refreshTokenExpireDate$ = new BehaviorSubject<Date | null>(null);
 
   private jwtService = new JwtHelperService();
 
   constructor(private api: APIService) {
-    this.role$.subscribe((role) => {
-      this.user$.next(role !== null);
-      this.trainer$.next(role === 'admin' || role === 'trainer');
-      this.admin$.next(role === 'admin');
-    })
   }
 
   loginAdmin(loginPayload: LoginRequestModel) {
@@ -34,30 +27,24 @@ export class AuthService {
       )
   }
 
+  restoreSession() {
+    let tokens = this.getTokens();
+    if (!tokens) {
+      this.getAPIKey()
+    }
+  }
+
   getAccessToken(): string {
     let accessToken = '';
     const tokens = this.getTokens();
     if (tokens) {
-      this.role$.next('admin');
+      this.changeRole(Role.ADMIN);
       if (!this.jwtService.isTokenExpired(tokens?.access_token)) {
         accessToken = tokens.access_token;
       }
     }
 
     return accessToken;
-  }
-
-  isAdmin(): boolean {
-    this.getTokens();
-    return this.role$.getValue() === 'admin';
-  }
-
-  isTrainer(): boolean {
-    return this.isAdmin() || this.role$.getValue() === 'trainer';
-  }
-
-  isUser(): boolean {
-    return this.isTrainer() || this.role$.getValue() === 'user';
   }
 
   loginAPIKey(apikey: string) {
@@ -70,7 +57,12 @@ export class AuthService {
       .pipe(
         map((role) => {
           sessionStorage.setItem('apikey_role', role);
-          this.role$.next(role);
+          this.changeRole(Role.fromString(role));
+        }),
+        catchError((error) => {
+          sessionStorage.removeItem('apikey');
+          sessionStorage.removeItem('apikey_role');
+          throw error;
         })
       );
   }
@@ -91,23 +83,26 @@ export class AuthService {
       sessionStorage.removeItem('apikey_role');
     }
 
-    this.role$.next(null);
+    this.unsetRole();
   }
 
   getAPIKey(): string {
     let apikey = sessionStorage.getItem('apikey');
     if (apikey) {
-      this.role$.next(sessionStorage.getItem('apikey_role'));
+      let role = sessionStorage.getItem('apikey_role');
+      if (role) {
+        this.changeRole(Role.fromString(role));
+      }
     } else {
       apikey = '';
-      this.role$.next(null);
+      this.unsetRole();
     }
 
     return apikey;
   }
 
   isAPIKey(): boolean {
-    return this.role$.getValue() === 'trainer' || this.role$.getValue() === 'user';
+    return this.role$.getValue() === Role.TRAINER || this.role$.getValue() === Role.USER;
   }
 
   refreshToken(): Observable<TokenModel> | null {
@@ -130,7 +125,8 @@ export class AuthService {
 
   private handleTokens(tokens: TokenModel): TokenModel {
     sessionStorage.setItem('tokens', JSON.stringify(tokens));
-    this.role$.next('admin')
+    this.changeRole(Role.ADMIN)
+    this.refreshTokenExpireDate$.next(this.jwtService.getTokenExpirationDate(tokens.refresh_token));
 
     return tokens;
   }
@@ -143,13 +139,24 @@ export class AuthService {
       if (this.jwtService.isTokenExpired(tokens?.refresh_token)) {
         tokens = null;
         sessionStorage.removeItem('tokens');
-        this.role$.next(null);
+        this.unsetRole();
       } else {
-        this.role$.next('admin');
+        this.changeRole(Role.ADMIN);
+        this.refreshTokenExpireDate$.next(this.jwtService.getTokenExpirationDate(tokens.refresh_token));
       }
     }
     return tokens
   }
 
+  unsetRole(): void {
+    this.changeRole(null);
+  }
+
+  private changeRole(role: Role | null): void {
+    this.role$.next(role)
+    if (!role) {
+      this.refreshTokenExpireDate$.next(null);
+    }
+  }
 }
 

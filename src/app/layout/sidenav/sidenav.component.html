@@ -1,19 +1,23 @@
 <mat-sidenav-container>
-    <mat-sidenav [mode]="(layoutService.isMobile$|async) ? 'over' : 'side'"
+    <mat-sidenav *ngIf="authService.role$ | async" [mode]="(layoutService.isMobile$|async) ? 'over' : 'side'"
         [opened]="!(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)"
         [fixedInViewport]="(layoutService.isMobile$|async)" fixedTopGap="56" role="navigation" class="mat-elevation-z8">
         <div fxLayout="column" fxLayoutAlign="space-between center" class="flex-height-container">
             <mat-nav-list>
-                <a mat-list-item *ngFor="let navItem of navItems">
-                    <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon: ''}}
-                    </mat-icon>
-                    <h3 matLine
-                        [class.cdk-visually-hidden]="!((layoutService.isMobile$ | async) || (layoutService.isOpened$ | async))">
-                        {{navItem.title}}
-                    </h3>
-                    <p matLine *ngIf="(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)">
-                        {{navItem.subtitle}}</p>
-                </a>
+                <ng-container *ngFor="let navItem of navItems">
+                    <a mat-list-item *ngIf="(authService.role$ | async)?.isMinimumRole(navItem.minimumRole)"
+                        [routerLink]="navItem.route">
+                        <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
+                            ''}}
+                        </mat-icon>
+                        <h3 matLine
+                            [class.cdk-visually-hidden]="!((layoutService.isMobile$ | async) || (layoutService.isOpened$ | async))">
+                            {{navItem.title}}
+                        </h3>
+                        <p matLine *ngIf="(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)">
+                            {{navItem.subtitle}}</p>
+                    </a>
+                </ng-container>
             </mat-nav-list>
             <mat-nav-list *ngIf="!(layoutService.isMobile$ | async)">
                 <a mat-list-item class="expand" [ngSwitch]="(layoutService.isOpened$ | async)"

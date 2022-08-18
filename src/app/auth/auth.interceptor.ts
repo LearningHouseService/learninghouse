@@ -8,7 +8,7 @@ import {
 } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { AuthService } from './auth.service';
-import { TokenModel } from './auth.model';
+import { Role, TokenModel } from './auth.model';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -23,12 +23,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (!this.isUnprotectedEndpoint(request.url)) {
-      if (this.authService.isAdmin()) {
+      const role = this.authService.role$.getValue();
+      if (role === Role.ADMIN) {
         let requestWithAccessToken = this.handleAccessToken(request, next);
         if (requestWithAccessToken) {
           return requestWithAccessToken;
         }
-      } else if (this.authService.isAPIKey()) {
+      } else if (role === Role.TRAINER || role === Role.USER) {
         let apikey = this.authService.getAPIKey();
         if (apikey) {
           return next.handle(request.clone({

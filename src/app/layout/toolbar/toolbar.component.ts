@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { LayoutService } from '../layout.service';
 
@@ -9,6 +10,10 @@ import { LayoutService } from '../layout.service';
 })
 export class ToolbarComponent {
 
-  constructor(public layoutService: LayoutService, public authService: AuthService) { }
+  constructor(public layoutService: LayoutService, public authService: AuthService, private router: Router) { }
 
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/auth']);
+  }
 }

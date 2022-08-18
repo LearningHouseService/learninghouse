@@ -6,7 +6,8 @@
         LearningHouse Service
     </div>
     <div>
-        <a mat-button *ngIf="(authService.role$ | async)" (click)="authService.logout()">Logout</a>
+        <a mat-button *ngIf="(authService.role$ | async)" (click)="logout()">Logout ({{authService.role$ |
+            async}})</a>
         <a mat-button routerLink="/auth" *ngIf="!(authService.role$ | async)">Login</a>
         <button mat-icon-button>
             <mat-icon>help</mat-icon>

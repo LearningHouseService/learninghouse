@@ -5,8 +5,8 @@ from dateutil import tz
 from_zone = tz.tzutc()
 to_zone = tz.tzlocal()
 
-with open('./training_data.csv', 'r') as csvfile:
-    with open('./training_data_new.csv', 'w') as csvfile2:
+with open('./training_data.csv', 'r', encoding='utf-8') as csvfile:
+    with open('./training_data_new.csv', 'w', encoding='utf-8') as csvfile2:
         reader = csv.DictReader(csvfile)
         writer = csv.DictWriter(csvfile2, fieldnames=reader.fieldnames)
         writer.writeheader()
@@ -28,4 +28,3 @@ with open('./training_data.csv', 'r') as csvfile:
                 row['minute_of_hour'] = date.minute
 
             writer.writerow(row)
-        

@@ -1,5 +1,14 @@
-<button mat-button (click)="test()">test</button>
-<mat-list>
-    <mat-list-item>Role: {{authService.role$ | async}}</mat-list-item>
-    <mat-list-item>Admin: {{authService.refreshTokenExpireDate$ | async}}</mat-list-item>
-</mat-list>
+<h1>Dashboard</h1>
+<div fxLayout="row wrap" fxLayout.lt-md="column" fxLayoutAlign="flex-start">
+    <ng-container *ngFor="let i of [1,2,3,4,5,6]">
+        <mat-card class="card" fxFlex="0 1 calc(25% - 32px)" fxFlex.lt-xl="0 1 calc(33.3% - 32px)"
+            fxFlex.lt-lg="0 1 calc(50% - 32px)" fxFlex.lt-md="0 1 calc(100%-32px)">
+            <mat-card-title>Card</mat-card-title>
+            <mat-card-content>
+                <div>Das ist ein schöner Test</div>
+                <div>Und noch einer</div>
+                <div *ngIf="i%3 == 0">Und noch einer</div>
+            </mat-card-content>
+        </mat-card>
+    </ng-container>
+</div>

@@ -1,14 +1,14 @@
-<mat-toolbar color="primary" class="toolbar">
+<mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="space-between center">
     <div>
         <button mat-icon-button (click)="layoutService.toggleNavigation()" *ngIf="layoutService.isMobile$|async">
             <mat-icon>menu</mat-icon>
         </button>
         LearningHouse Service
     </div>
-    <div>
-        <a mat-button *ngIf="(authService.role$ | async)" (click)="logout()">Logout ({{authService.role$ |
-            async}})</a>
-        <a mat-button routerLink="/auth" *ngIf="!(authService.role$ | async)">Login</a>
+    <div fxLayoutAlign="end center">
+        <learninghouse-session-timer *ngIf="(this.authService.refreshTokenExpireDate$| async)"
+            [expires]="(this.authService.refreshTokenExpireDate$| async)" (refresh)="refresh()" (finished)="logout()">
+        </learninghouse-session-timer>
         <button mat-icon-button>
             <mat-icon>help</mat-icon>
         </button>

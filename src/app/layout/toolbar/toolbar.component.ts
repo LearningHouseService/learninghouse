@@ -16,4 +16,13 @@ export class ToolbarComponent {
     this.authService.logout();
     this.router.navigate(['/auth']);
   }
+
+  refresh() {
+    let refresh_request = this.authService.refreshToken();
+    if (refresh_request) {
+      refresh_request.subscribe();
+    } else {
+      this.logout();
+    }
+  }
 }

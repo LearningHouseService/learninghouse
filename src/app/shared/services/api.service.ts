@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
-import { LearningHouseErrorMessage, ServiceMode } from './api.model';
+import { LearningHouseErrorMessage, ServiceMode, LearningHouseError } from './api.model';
 
 @Injectable({
   providedIn: 'root'
@@ -90,16 +90,19 @@ export class APIService {
   }
 
   private handleError(error: HttpErrorResponse) {
+    let key = '';
     let message = '';
     if (error.status === 0) {
+      key = 'CLIENT_SIDE'
       message = 'Client side or network error occured.';
     } else {
       const learninghouse_error = error.error as LearningHouseErrorMessage;
+      key = learninghouse_error.error
       message = learninghouse_error.description;
     }
 
     console.log(message);
-    return throwError(() => new Error(message))
+    return throwError(() => new LearningHouseError(error.status, key, message));
 
   }
 
@@ -111,3 +114,4 @@ export class APIService {
   }
 
 }
+

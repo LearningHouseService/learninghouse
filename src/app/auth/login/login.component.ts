@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NonNullableFormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { ServiceMode } from 'src/app/shared/services/api.model';
+import { LearningHouseError, ServiceMode } from 'src/app/shared/services/api.model';
 import { APIService } from 'src/app/shared/services/api.service';
 import { AlertType } from 'src/app/shared/components/alert/alert.component';
 import { AuthService } from '../auth.service';
@@ -88,20 +88,21 @@ export class LoginComponent implements OnInit {
                 this.authService.loginAdmin({ password: this.new_password.value })
                   .pipe(
                     map(() => {
+                      this.loginError$.next(null);
                       this.router.navigate(['/dashboard']);
                     }),
                     catchError((error) => this.handleError(error)))
                   .subscribe();
               }),
               catchError((error) => this.handleError(error)))
-            .subscribe()
+            .subscribe();
         }),
         catchError((error) => this.handleError(error)))
       .subscribe();
   }
 
-  handleError(error: string) {
-    this.loginError$.next(error);
+  handleError(error: LearningHouseError) {
+    this.loginError$.next(error.message);
     return of(false);
   }
 

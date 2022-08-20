@@ -3,8 +3,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
@@ -16,7 +15,6 @@ const material = [
   MatCardModule,
   MatDividerModule,
   MatFormFieldModule,
-  MatExpansionModule,
   MatInputModule,
   MatIconModule,
   MatListModule,
@@ -32,6 +30,14 @@ const material = [
   ],
   exports: [
     material
+  ], providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: {
+        floatLabel: 'always',
+        hideRequiredMarker: true
+      }
+    }
   ]
 })
 export class MaterialModule { }

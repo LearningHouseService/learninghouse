@@ -1,7 +1,7 @@
 <mat-sidenav-container autosize>
-    <mat-sidenav [mode]="(layoutService.isMobile$|async) ? 'over' : 'side'"
-        [opened]="!(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)"
-        [fixedInViewport]="(layoutService.isMobile$|async)" fixedTopGap="56" role="navigation" class="mat-elevation-z8">
+    <mat-sidenav [mode]="media$.isActive('lt-md') ? 'over' : 'side'"
+        [opened]="!media$.isActive('lt-md') || (layoutService.isOpened$ | async)"
+        [fixedInViewport]="media$.isActive('lt-md')" fixedTopGap="56" role="navigation" class="mat-elevation-z8">
         <div fxLayout="column" fxLayoutAlign="space-between center" class="flex-height-container">
             <mat-nav-list>
                 <ng-container *ngFor="let navItem of navItems">
@@ -11,10 +11,10 @@
                             ''}}
                         </mat-icon>
                         <h3 matLine
-                            [class.cdk-visually-hidden]="!((layoutService.isMobile$ | async) || (layoutService.isOpened$ | async))">
+                            [class.cdk-visually-hidden]="!(media$.isActive('lt-md') || (layoutService.isOpened$ | async))">
                             {{navItem.title}}
                         </h3>
-                        <p matLine *ngIf="(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)">
+                        <p matLine *ngIf="media$.isActive('lt-md') || (layoutService.isOpened$ | async)">
                             {{navItem.subtitle}}</p>
                     </a>
                 </ng-container>
@@ -23,21 +23,21 @@
                 <a mat-list-item *ngIf="!(authService.role$ | async)" routerLink="/auth">
                     <mat-icon matListIcon>login</mat-icon>
                     <h3 matLine
-                        [class.cdk-visually-hidden]="!((layoutService.isMobile$ | async) || (layoutService.isOpened$ | async))">
+                        [class.cdk-visually-hidden]="!(media$.isActive('lt-md') || (layoutService.isOpened$ | async))">
                         Login
                     </h3>
                 </a>
                 <a mat-list-item *ngIf="authService.role$ | async" (click)="logout()">
                     <mat-icon matListIcon>logout</mat-icon>
                     <h3 matLine
-                        [class.cdk-visually-hidden]="!((layoutService.isMobile$ | async) || (layoutService.isOpened$ | async))">
+                        [class.cdk-visually-hidden]="!(media$.isActive('lt-md') || (layoutService.isOpened$ | async))">
                         Logout
                     </h3>
-                    <p matLine *ngIf="(layoutService.isMobile$ | async) || (layoutService.isOpened$ | async)">
+                    <p matLine *ngIf="media$.isActive('lt-md') || (layoutService.isOpened$ | async)">
                         {{authService.role$ | async}}</p>
                 </a>
-                <a mat-list-item *ngIf="!(layoutService.isMobile$ | async)"
-                    [ngSwitch]="(layoutService.isOpened$ | async)" (click)="layoutService.toggleNavigation()">
+                <a mat-list-item *ngIf="!media$.isActive('lt-md')" [ngSwitch]="(layoutService.isOpened$ | async)"
+                    (click)="layoutService.toggleNavigation()">
                     <mat-icon matListIcon *ngSwitchCase="false">keyboard_double_arrow_right</mat-icon>
                     <mat-icon matListIcon *ngSwitchCase="true">keyboard_double_arrow_left</mat-icon>
                     <h3 matLine *ngSwitchCase="true">Collapse</h3>

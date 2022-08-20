@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { MediaObserver } from '@angular/flex-layout';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
 import { LayoutService } from '../layout.service';
@@ -10,7 +11,7 @@ import { LayoutService } from '../layout.service';
 })
 export class ToolbarComponent {
 
-  constructor(public layoutService: LayoutService, public authService: AuthService, private router: Router) { }
+  constructor(public layoutService: LayoutService, public authService: AuthService, private router: Router, public media$: MediaObserver) { }
 
   logout() {
     this.authService.logout();

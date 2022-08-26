@@ -18,8 +18,7 @@
                 </learninghouse-password>
             </mat-card-content>
             <mat-card-actions align="end">
-                <button type="submit" mat-raised-button color="primary" [disabled]="!initial.valid"
-                    (click)="submitInitial()">Change
+                <button type="submit" mat-raised-button color="primary" [disabled]="!initial.valid">Change
                     password</button>
             </mat-card-actions>
         </form>
@@ -34,8 +33,7 @@
             <mat-card-actions align="end" fxLayout="row" fxLayoutAlign="space-between center">
                 <button type="button" mat-stroked-button [disabled]="!normal.valid" (click)="submitLoginAPIKey()">API
                     Key</button>
-                <button type="submit" mat-raised-button color="primary" [disabled]="!normal.valid"
-                    (click)="submitLoginAdmin()">Admin
+                <button type="submit" mat-raised-button color="primary" [disabled]="!normal.valid">Admin
                     login</button>
             </mat-card-actions>
         </form>

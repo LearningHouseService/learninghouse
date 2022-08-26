@@ -103,8 +103,10 @@ export class APIService {
       message = learninghouse_error.description;
     }
 
-    console.log(message);
-    return throwError(() => new LearningHouseError(error.status, key, message));
+    const lhError = new LearningHouseError(error.status, key, message)
+
+    console.error(lhError);
+    return throwError(() => lhError);
 
   }
 

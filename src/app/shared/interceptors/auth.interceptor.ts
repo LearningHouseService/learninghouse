@@ -7,8 +7,8 @@ import {
   HttpSentEvent
 } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
-import { AuthService } from './auth.service';
-import { Role, TokenModel } from './auth.model';
+import { AuthService } from '../../modules/auth/auth.service';
+import { Role, TokenModel } from '../models/auth.model';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {

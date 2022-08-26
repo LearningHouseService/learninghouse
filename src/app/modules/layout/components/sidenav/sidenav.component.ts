@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { MediaObserver } from '@angular/flex-layout';
 import { Router } from '@angular/router';
-import { Role } from 'src/app/auth/auth.model';
-import { AuthService } from 'src/app/auth/auth.service';
-import { LayoutService } from '../layout.service';
+import { Role } from 'src/app/shared/models/auth.model';
+import { AuthService } from 'src/app/modules/auth/auth.service';
+import { SidenavService } from './sidenav.service';
 
 export interface SiteNavItem {
   icon?: string;
@@ -52,7 +52,7 @@ export class SidenavComponent {
     }
   ]
 
-  constructor(public layoutService: LayoutService, public authService: AuthService, private router: Router, public media$: MediaObserver) { }
+  constructor(public sidenavService: SidenavService, public authService: AuthService, private router: Router, public media$: MediaObserver) { }
 
   logout() {
     this.authService.logout();

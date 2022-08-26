@@ -1,24 +1,19 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AuthGuard } from './auth/auth.guard';
-import { Role } from './auth/auth.model';
-import { DashboardComponent } from './dashboard/dashboard.component';
 
 const routes: Routes = [
   { path: "", redirectTo: "/dashboard", pathMatch: "full" },
   {
     path: 'dashboard',
-    component: DashboardComponent,
-    canActivate: [AuthGuard],
-    data: { minimumRole: Role.USER }
+    loadChildren: () => import('./modules/layout/layout.module').then((m) => m.LayoutModule)
   },
   {
     path: 'auth',
-    loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule)
+    loadChildren: () => import('./modules/auth/auth.module').then((m) => m.AuthModule)
   },
   {
     path: 'brains',
-    loadChildren: () => import('./brains/brains.module').then((m) => m.BrainsModule)
+    loadChildren: () => import('./modules/brains/brains.module').then((m) => m.BrainsModule)
   }
 ];
 

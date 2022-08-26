@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class LayoutService {
+export class SidenavService {
   isOpened$ = new BehaviorSubject<boolean>(false);
 
   toggleNavigation(): void {

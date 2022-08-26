@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { APIService } from '../shared/services/api.service';
+import { APIService } from '../../shared/services/api.service';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
-import { LoginRequestModel, Role, TokenModel, TokenPayloadModel } from './auth.model';
+import { LoginRequestModel, Role, TokenModel, TokenPayloadModel } from '../../shared/models/auth.model';
 import { HttpHeaders } from '@angular/common/http';
 
 

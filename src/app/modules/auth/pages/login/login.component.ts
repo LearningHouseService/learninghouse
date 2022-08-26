@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NonNullableFormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { LearningHouseError, ServiceMode } from 'src/app/shared/services/api.model';
+import { LearningHouseError, ServiceMode } from 'src/app/shared/models/api.model';
 import { APIService } from 'src/app/shared/services/api.service';
 import { AlertType } from 'src/app/shared/components/alert/alert.component';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../auth.service';
 import { BehaviorSubject, catchError, map, of } from 'rxjs';
 import { Router } from '@angular/router';
 

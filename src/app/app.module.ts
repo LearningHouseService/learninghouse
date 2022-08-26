@@ -5,25 +5,19 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AuthInterceptor } from './auth/auth.interceptor';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { SidenavComponent } from './layout/sidenav/sidenav.component';
-import { ToolbarComponent } from './layout/toolbar/toolbar.component';
-import { SharedModule } from './shared/shared.module';
+import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
+import { LayoutModule } from './modules/layout/layout.module';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    DashboardComponent,
-    SidenavComponent,
-    ToolbarComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    LayoutModule,
     HttpClientModule,
-    SharedModule
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

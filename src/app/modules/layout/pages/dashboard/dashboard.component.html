@@ -1,8 +1,8 @@
 <h1>Dashboard</h1>
-<div fxLayout="row wrap" fxLayout.lt-md="column" fxLayoutAlign="flex-start">
+<div gdGap="16px" gdColumns="auto auto auto auto" gdColumns.lt-lg="auto auto auto" gdColumns.lt-md="auto auto"
+    gdColumns.xs="auto">
     <ng-container *ngFor="let i of [1,2,3,4,5,6]">
-        <mat-card class="card" fxFlex="0 1 calc(25% - 32px)" fxFlex.lt-xl="0 1 calc(33.3% - 32px)"
-            fxFlex.lt-lg="0 1 calc(50% - 32px)" fxFlex.lt-md="0 1 calc(100%-32px)">
+        <mat-card class="mat-elevation-z4">
             <mat-card-title>Card</mat-card-title>
             <mat-card-content>
                 <div>Das ist ein schöner Test</div>

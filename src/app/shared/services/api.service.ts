@@ -1,7 +1,9 @@
 import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
-import { LearningHouseErrorMessage, ServiceMode, LearningHouseError } from './api.model';
+import { LearningHouseErrorMessage, ServiceMode, LearningHouseError } from '../models/api.model';
+
+type HttpsParamsType = string | number | boolean | ReadonlyArray<string | number | boolean>;
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +22,7 @@ export class APIService {
     context?: HttpContext;
     observe?: 'body';
     params?: HttpParams | {
-      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+      [param: string]: HttpsParamsType;
     };
     reportProgress?: boolean;
     responseType?: 'json';
@@ -39,7 +41,7 @@ export class APIService {
     context?: HttpContext;
     observe?: 'body';
     params?: HttpParams | {
-      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+      [param: string]: HttpsParamsType;
     };
     reportProgress?: boolean;
     responseType?: 'json';
@@ -58,7 +60,7 @@ export class APIService {
     context?: HttpContext;
     observe?: 'body';
     params?: HttpParams | {
-      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+      [param: string]: HttpsParamsType;
     };
     reportProgress?: boolean;
     responseType?: 'json';
@@ -77,7 +79,7 @@ export class APIService {
     context?: HttpContext;
     observe?: 'body';
     params?: HttpParams | {
-      [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>;
+      [param: string]: HttpsParamsType;
     };
     reportProgress?: boolean;
     responseType?: 'json';

@@ -82,9 +82,13 @@ class AuthService():
         return True
 
     def cleanup_refresh_tokens(self):
+        del_tokens = []
         for jti, expire in self.refresh_tokens.items():
             if expire < datetime.utcnow():
-                del self.refresh_tokens[jti]
+                del_tokens.append(jti)
+
+        for jti in del_tokens:
+            del self.refresh_tokens[jti]
 
     def create_new_token(self) -> Token:
         issuetime = datetime.utcnow()

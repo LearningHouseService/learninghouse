@@ -1,7 +1,7 @@
 import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
-import { LearningHouseErrorMessage, ServiceMode, LearningHouseError } from '../models/api.model';
+import { BehaviorSubject, catchError, map, Observable, of, throwError } from 'rxjs';
+import { LearningHouseErrorMessage, ServiceMode, LearningHouseError, LearningHouseVersions, VersionItem } from '../models/api.model';
 
 type HttpsParamsType = string | number | boolean | ReadonlyArray<string | number | boolean>;
 
@@ -11,7 +11,7 @@ type HttpsParamsType = string | number | boolean | ReadonlyArray<string | number
 export class APIService {
   private endpoint_host: string = 'http://localhost:5000/api'
 
-  mode$ = new BehaviorSubject<ServiceMode | null>(null);
+  mode$ = new BehaviorSubject<ServiceMode>(ServiceMode.UNKNOWN);
 
   constructor(private httpClient: HttpClient) { }
 
@@ -112,9 +112,30 @@ export class APIService {
 
   update_mode(): void {
     this.get<ServiceMode>('/mode')
-      .subscribe((result) => {
-        this.mode$.next(result)
-      });
+      .pipe(
+        map((mode: ServiceMode) => {
+          this.mode$.next(mode);
+          return mode;
+        }),
+        catchError(() => {
+          this.mode$.next(ServiceMode.UNKNOWN);
+          return of(false);
+        })
+      )
+      .subscribe();
+  }
+
+  versions(): Observable<VersionItem[]> {
+    return this.get<LearningHouseVersions>('/versions')
+      .pipe(
+        map((versions: LearningHouseVersions) => {
+          return [
+            { label: 'LearningHouse Service', version: versions.service },
+            { label: 'FastAPI', version: versions.fastapi },
+            { label: 'Uvicorn', version: versions.uvicorn }
+          ]
+        })
+      );
   }
 
 }

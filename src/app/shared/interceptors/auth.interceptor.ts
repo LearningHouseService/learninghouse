@@ -3,8 +3,7 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor,
-  HttpSentEvent
+  HttpInterceptor
 } from '@angular/common/http';
 import { Observable, switchMap } from 'rxjs';
 import { AuthService } from '../../modules/auth/auth.service';
@@ -16,7 +15,7 @@ export class AuthInterceptor implements HttpInterceptor {
   unprotected_endpoints = [
     '/auth/token',
     '/mode',
-    '/version'
+    '/versions'
   ]
 
   constructor(private authService: AuthService) { }

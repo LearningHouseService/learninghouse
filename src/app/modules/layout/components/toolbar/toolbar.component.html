@@ -9,8 +9,8 @@
         <learninghouse-session-timer *ngIf="(this.authService.refreshTokenExpireDate$| async)"
             [expires]="(this.authService.refreshTokenExpireDate$| async)" (refresh)="refresh()" (finished)="logout()">
         </learninghouse-session-timer>
-        <button mat-icon-button>
-            <mat-icon>help</mat-icon>
+        <button mat-icon-button (click)="openVersionsDialog()">
+            <mat-icon>information</mat-icon>
         </button>
     </div>
 </mat-toolbar>

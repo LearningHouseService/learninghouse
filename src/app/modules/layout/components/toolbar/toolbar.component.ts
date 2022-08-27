@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { MediaObserver } from '@angular/flex-layout';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { SidenavService } from '../sidenav/sidenav.service';
+import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
 
 @Component({
   selector: 'app-toolbar',
@@ -11,7 +13,12 @@ import { SidenavService } from '../sidenav/sidenav.service';
 })
 export class ToolbarComponent {
 
-  constructor(public sidenavService: SidenavService, public authService: AuthService, private router: Router, public media$: MediaObserver) { }
+  constructor(
+    public sidenavService: SidenavService,
+    public authService: AuthService,
+    public dialog: MatDialog,
+    private router: Router,
+    public media$: MediaObserver) { }
 
   logout() {
     this.authService.logout();
@@ -25,5 +32,9 @@ export class ToolbarComponent {
     } else {
       this.logout();
     }
+  }
+
+  openVersionsDialog() {
+    this.dialog.open(InfoDialogComponent);
   }
 }

@@ -6,6 +6,7 @@ import { SidenavComponent } from './components/sidenav/sidenav.component';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { LayoutRoutingModule } from './layout.routes';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { InfoDialogComponent } from './components/info-dialog/info-dialog.component';
 
 
 
@@ -13,7 +14,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
   declarations: [
     DashboardComponent,
     SidenavComponent,
-    ToolbarComponent
+    ToolbarComponent,
+    InfoDialogComponent
   ],
   imports: [
     CommonModule,
@@ -23,7 +25,8 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
   ],
   exports: [
     SidenavComponent,
-    ToolbarComponent
+    ToolbarComponent,
+    InfoDialogComponent
   ]
 })
 export class LayoutModule { }

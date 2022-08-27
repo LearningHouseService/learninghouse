@@ -6,7 +6,7 @@ from learninghouse.api.errors.brain import (BrainNoConfiguration,
 from learninghouse.models.brain import (BrainInfo, BrainPredictionRequest,
                                         BrainPredictionResult,
                                         BrainTrainingRequest)
-from learninghouse.services.brain import Brain, BrainPrediction, BrainTraining
+from learninghouse.services.brain import Brain, BrainService
 from learninghouse.services.auth import auth_service
 
 auth = auth_service()
@@ -36,7 +36,7 @@ router_training = APIRouter(
                       BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description()
                   })
 async def info_get(name: str):
-    brain_config = Brain.load_trained(name, False)
+    brain_config = Brain.load_trained(name)
     return brain_config.info
 
 
@@ -52,7 +52,7 @@ async def info_get(name: str):
                           BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description()
                       })
 async def training_post(name: str):
-    return BrainTraining.request(name)
+    return BrainService.request(name)
 
 
 @router_training.put('/{name}/training',
@@ -67,7 +67,7 @@ async def training_post(name: str):
                          BrainNoConfiguration.STATUS_CODE: BrainNoConfiguration.api_description()
                      })
 async def training_put(name: str, request_data: BrainTrainingRequest):
-    return BrainTraining.request(name, request_data.dict())
+    return BrainService.request(name, request_data.dict())
 
 
 @router_usage.post('/{name}/prediction',
@@ -82,7 +82,7 @@ async def training_put(name: str, request_data: BrainTrainingRequest):
                        BrainNotTrained.STATUS_CODE: BrainNotTrained.api_description()
                    })
 async def prediction_post(name: str, request_data: BrainPredictionRequest):
-    return BrainPrediction.prediction(name, request_data.dict())
+    return BrainService.prediction(name, request_data.dict())
 
 router.include_router(router_usage)
 router.include_router(router_training)

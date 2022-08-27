@@ -22,6 +22,7 @@ class BrainInfo(BaseModel):
     trained_at: datetime = Field(
         None, example=datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
     versions: LearningHouseVersions = Field(None, example=versions)
+    actual_versions: bool = Field(True)
 
 
 class BrainTrainingRequest(DictModel):

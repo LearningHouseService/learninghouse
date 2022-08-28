@@ -15,7 +15,9 @@
     </mat-divider>
     <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">
         <dt class="mat-caption" color="accent">LearningHouse UI</dt>
-        <dd class="mat-body-2">{{appService.get_version()}}</dd>
+        <dd class="mat-body-2">{{appService.get_app_version()}}</dd>
+        <dt class="mat-caption" color="accent">Angular</dt>
+        <dd class="mat-body-2">{{appService.get_angular_version()}}</dd>
     </dl>
     <mat-divider></mat-divider>
     <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">

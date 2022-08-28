@@ -131,8 +131,10 @@ export class APIService {
         map((versions: LearningHouseVersions) => {
           return [
             { label: 'LearningHouse Service', version: versions.service },
+            { label: 'scikit-learn', version: versions.sklearn },
             { label: 'FastAPI', version: versions.fastapi },
-            { label: 'Uvicorn', version: versions.uvicorn }
+            { label: 'Uvicorn', version: versions.uvicorn },
+            { label: 'Pydantic', version: versions.pydantic }
           ]
         })
       );

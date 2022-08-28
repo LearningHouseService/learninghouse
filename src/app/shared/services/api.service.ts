@@ -1,6 +1,7 @@
 import { HttpClient, HttpContext, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, of, throwError } from 'rxjs';
+import { environment } from 'src/environments/environment';
 import { LearningHouseErrorMessage, ServiceMode, LearningHouseError, LearningHouseVersions, VersionItem } from '../models/api.model';
 
 type HttpsParamsType = string | number | boolean | ReadonlyArray<string | number | boolean>;
@@ -9,7 +10,6 @@ type HttpsParamsType = string | number | boolean | ReadonlyArray<string | number
   providedIn: 'root'
 })
 export class APIService {
-  private endpoint_host: string = 'http://localhost:5000/api'
 
   mode$ = new BehaviorSubject<ServiceMode>(ServiceMode.UNKNOWN);
 
@@ -28,7 +28,7 @@ export class APIService {
     responseType?: 'json';
     withCredentials?: boolean;
   }): Observable<T> {
-    return this.httpClient.get<T>(this.endpoint_host + endpoint, options)
+    return this.httpClient.get<T>(environment.learninghouseApiUrl + endpoint, options)
       .pipe(
         catchError(this.handleError)
       );
@@ -47,7 +47,7 @@ export class APIService {
     responseType?: 'json';
     withCredentials?: boolean;
   }): Observable<T> {
-    return this.httpClient.post<T>(this.endpoint_host + endpoint, payload, options)
+    return this.httpClient.post<T>(environment.learninghouseApiUrl + endpoint, payload, options)
       .pipe(
         catchError(this.handleError)
       );
@@ -66,7 +66,7 @@ export class APIService {
     responseType?: 'json';
     withCredentials?: boolean;
   }): Observable<T> {
-    return this.httpClient.put<T>(this.endpoint_host + endpoint, payload, options)
+    return this.httpClient.put<T>(environment.learninghouseApiUrl + endpoint, payload, options)
       .pipe(
         catchError(this.handleError)
       );
@@ -85,7 +85,7 @@ export class APIService {
     responseType?: 'json';
     withCredentials?: boolean;
   }): Observable<T> {
-    return this.httpClient.delete<T>(this.endpoint_host + endpoint, options)
+    return this.httpClient.delete<T>(environment.learninghouseApiUrl + endpoint, options)
       .pipe(
         catchError(this.handleError)
       );

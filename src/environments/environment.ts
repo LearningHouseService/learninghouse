@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  learninghouse_api_endpoint: 'http://localhost:5000/api'
+  learninghouseApiUrl: window.__env?.apiURL || 'http://localhost:5000/api'
 };
 
 /*

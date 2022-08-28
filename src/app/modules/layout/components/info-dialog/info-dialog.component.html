@@ -1,0 +1,25 @@
+<div mat-dialog-title>
+    Information
+</div>
+<mat-dialog-content>
+    <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">
+        <dt class="mat-caption" color="accent">Service mode</dt>
+        <dd class="mat-body-2">{{api.mode$ | async}}</dd>
+        <ng-container *ngIf="(auth.role$ | async)">
+            <dt class="mat-caption" color="accent">User role</dt>
+            <dd class="mat-body-2">{{auth.role$ | async}}</dd>
+        </ng-container>
+
+    </dl>
+    <mat-divider>
+    </mat-divider>
+    <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">
+        <ng-container *ngFor="let versionItem of (versions$ | async)">
+            <dt class="mat-caption" color="accent">{{versionItem.label}}</dt>
+            <dd class="mat-body-2">{{versionItem.version}}</dd>
+        </ng-container>
+    </dl>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button mat-dialog-close color="primary">OK</button>
+</mat-dialog-actions>

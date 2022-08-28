@@ -1,0 +1,16 @@
+<mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="space-between center">
+    <div>
+        <button mat-icon-button (click)="sidenavService.toggleNavigation()" *ngIf="media$.isActive('lt-md')">
+            <mat-icon>menu</mat-icon>
+        </button>
+        LearningHouse Service
+    </div>
+    <div fxLayoutAlign="end center">
+        <learninghouse-session-timer *ngIf="(this.authService.refreshTokenExpireDate$| async)"
+            [expires]="(this.authService.refreshTokenExpireDate$| async)" (refresh)="refresh()" (finished)="logout()">
+        </learninghouse-session-timer>
+        <button mat-icon-button (click)="openVersionsDialog()">
+            <mat-icon>information</mat-icon>
+        </button>
+    </div>
+</mat-toolbar>

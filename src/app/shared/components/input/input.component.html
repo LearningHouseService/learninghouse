@@ -1,0 +1,7 @@
+<mat-form-field fxFlex>
+    <mat-label>{{name}}<span *ngIf="!required"> (Optional)</span></mat-label>
+    <input matInput #input [type]="type" [required]="required" [formControl]="control" [maxlength]="maxlength!">
+    <mat-icon matSuffix *ngIf="clickableSuffixIcon" (click)="clickSuffix.emit()">{{clickableSuffixIcon}}</mat-icon>
+    <mat-error>{{showErrors()}}</mat-error>
+    <mat-hint align="end" *ngIf="maxlength">{{input.value.length}}/{{maxlength}}</mat-hint>
+</mat-form-field>

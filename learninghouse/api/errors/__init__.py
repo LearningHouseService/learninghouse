@@ -57,9 +57,11 @@ class LearningHouseSecurityException(LearningHouseException):
     SECURITY_EXCEPTION = 'SECURITY_EXCEPTION'
     DESCRIPTION = 'A security violation occured while handling your request.'
 
-    def __init__(self, description: str):
+    def __init__(self, description: str, key: Optional[str] = None):
+        key = key or self.SECURITY_EXCEPTION
+
         super().__init__(self.STATUS_CODE,
-                         self.SECURITY_EXCEPTION,
+                         key,
                          description or self.DESCRIPTION)
 
     @classmethod

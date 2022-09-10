@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 
 from learninghouse.api.errors import (LearningHouseSecurityException,
                                       LearningHouseUnauthorizedException)
+from learninghouse.api.errors.auth import InvalidPassword
 from learninghouse.core.logging import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.auth import (APIKey, APIKeyInfo, APIKeyRequest,
@@ -42,7 +43,7 @@ class AuthService():
 
     def create_token(self, password: str) -> Token:
         if not self.database.authenticate_password(password):
-            raise LearningHouseSecurityException('Invalid password')
+            raise InvalidPassword()
 
         self.cleanup_refresh_tokens()
         token = self.create_new_token()

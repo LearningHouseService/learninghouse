@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Path
 
+from learninghouse.api.errors.auth import InvalidPassword
 from learninghouse.models.auth import (APIKey, APIKeyInfo, APIKeyRequest,
                                        LoginRequest, PasswordRequest, Token,
                                        UserRole)
@@ -16,7 +17,13 @@ router = APIRouter(
 
 
 @router.post('/token',
-             response_model=Token)
+             response_model=Token,
+             responses={
+                 200: {
+                     'description': 'Successfully retrieve token'
+                 },
+                 InvalidPassword.STATUS_CODE: InvalidPassword.api_description()
+             })
 async def post_token(request: LoginRequest):
     return auth.create_token(request.password)
 

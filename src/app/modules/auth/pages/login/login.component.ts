@@ -102,7 +102,7 @@ export class LoginComponent implements OnInit {
   }
 
   handleError(error: LearningHouseError) {
-    this.loginError$.next(error.message);
+    this.loginError$.next(error.key);
     return of(false);
   }
 

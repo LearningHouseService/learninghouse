@@ -2,9 +2,9 @@
 
 
 export class Role {
-    static readonly USER = new Role(0, 'User');
-    static readonly TRAINER = new Role(1, 'Trainer');
-    static readonly ADMIN = new Role(2, 'Administrator');
+    static readonly USER = new Role(0, 'user');
+    static readonly TRAINER = new Role(1, 'trainer');
+    static readonly ADMIN = new Role(2, 'administrator');
 
     private constructor(private readonly userlevel: number, public readonly label: string) { }
 

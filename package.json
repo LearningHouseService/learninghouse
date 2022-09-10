@@ -24,6 +24,8 @@
     "@angular/platform-browser-dynamic": "^14.1.0",
     "@angular/router": "^14.1.0",
     "@auth0/angular-jwt": "^5.0.2",
+    "@ngx-translate/core": "^14.0.0",
+    "@ngx-translate/http-loader": "^7.0.0",
     "@w11k/git-info": "^1.1.2",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",

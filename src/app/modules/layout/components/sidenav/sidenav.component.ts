@@ -5,7 +5,8 @@ import { Role } from 'src/app/shared/models/auth.model';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { SidenavService } from './sidenav.service';
 
-export interface SiteNavItem {
+export interface SidenavItem {
+  key: string;
   icon?: string;
   svg?: string;
   title: string;
@@ -21,8 +22,9 @@ export interface SiteNavItem {
 })
 export class SidenavComponent {
 
-  navItems: SiteNavItem[] = [
+  navItems: SidenavItem[] = [
     {
+      key: 'dashboard',
       icon: 'dashboard',
       title: 'Dashboard',
       subtitle: 'Get a overview',
@@ -30,6 +32,7 @@ export class SidenavComponent {
       minimumRole: Role.USER
     },
     {
+      key: 'prediction',
       svg: 'learninghouse',
       title: 'Prediction',
       subtitle: 'Use a brain',
@@ -37,6 +40,7 @@ export class SidenavComponent {
       minimumRole: Role.USER
     },
     {
+      key: 'training',
       icon: 'model_training',
       title: 'Training',
       subtitle: 'Train a brain',
@@ -44,6 +48,7 @@ export class SidenavComponent {
       minimumRole: Role.TRAINER
     },
     {
+      key: 'configuration',
       icon: 'settings',
       title: 'Configuration',
       subtitle: 'Configure the service',

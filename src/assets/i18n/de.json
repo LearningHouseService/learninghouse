@@ -1,0 +1,84 @@
+{
+	"common": {
+		"errors": {
+			"INVALID_PASSWORD": "Ungültiges Passwort",
+			"UNAUTHORIZED": "Nicht autorisiert"
+		},
+		"mode": {
+			"development": "Entwicklung",
+			"initial": "Initialisierung",
+			"production": "Produktion"
+		},
+		"role": {
+			"administrator": "Administrator",
+			"trainer": "Trainer",
+			"user": "Benutzer"
+		}
+	},
+	"components": {
+		"infodialog": {
+			"mode": "Servicemodus",
+			"okay_button": "OK",
+			"role": "Benutzerrolle",
+			"title": "Informationen"
+		},
+		"sessiontimer": {
+			"label": "Abmelden in",
+			"refresh": "Sitzung aktualisieren"
+		},
+		"sidenav": {
+			"buttons": {
+				"collapse": "Einklappen",
+				"expand": "Erweitern",
+				"login": "Anmelden",
+				"logout": "Abmelden"
+			},
+			"common": {
+				"actions": "Aktionen",
+				"main": "Hauptmenü"
+			},
+			"navigation": {
+				"configuration": {
+					"subtitle": "Konfiguriere den Service",
+					"title": "Konfiguration"
+				},
+				"dashboard": {
+					"subtitle": "Verschaffen Sie sich einen Überblick",
+					"title": "Dashboard"
+				},
+				"prediction": {
+					"subtitle": "Benutze ein Gehirn",
+					"title": "Prognose"
+				},
+				"training": {
+					"subtitle": "Trainiere ein Gehirn",
+					"title": "Ausbildung"
+				}
+			}
+		},
+		"toolbar": {
+			"buttons": {
+				"information": "Dialog für Serviceinformationen öffnen",
+				"menu": "Navigationsmenü öffnen"
+			}
+		}
+	},
+	"pages": {
+		"login": {
+			"buttons": {
+				"admin": "Administrator",
+				"apikey": "API-Schlüssel",
+				"change": "Ändere das Passwort"
+			},
+			"common": {
+				"fallback_warning": "\n                    Sie müssen das <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">Fallbackpasswort</a> ändern um den Service zu entsperren.",
+				"title": "Anmeldung"
+			},
+			"fields": {
+				"new_password": "Neues Kennwort",
+				"old_password": "Fallbackpasswort",
+				"password": "Passwort oder API-Schlüssel"
+			}
+		}
+	}
+}

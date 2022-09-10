@@ -1,6 +1,7 @@
 <mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="space-between center">
     <div>
-        <button mat-icon-button (click)="sidenavService.toggleNavigation()" *ngIf="media$.isActive('lt-md')">
+        <button mat-icon-button (click)="sidenavService.toggleNavigation()" *ngIf="media$.isActive('lt-md')"
+            [attr.aria-label]="'components.toolbar.buttons.menu' | translate">
             <mat-icon>menu</mat-icon>
         </button>
         LearningHouse Service
@@ -9,7 +10,8 @@
         <learninghouse-session-timer *ngIf="(this.authService.refreshTokenExpireDate$| async)"
             [expires]="(this.authService.refreshTokenExpireDate$| async)" (refresh)="refresh()" (finished)="logout()">
         </learninghouse-session-timer>
-        <button mat-icon-button (click)="openVersionsDialog()">
+        <button mat-icon-button (click)="openVersionsDialog()"
+            [attr.aria-label]="'components.toolbar.buttons.information' | translate">
             <mat-icon>information</mat-icon>
         </button>
     </div>

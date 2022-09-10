@@ -1,9 +1,9 @@
 <div fxLayout="row" fxLayoutAlign="center center">
     <div fxLayout="column" fxLayoutAlign="start center" fxLayoutGap="0px">
-        <span class="label" fxFlex>Auto logout</span>
-        <span class="time" fxFlex>{{display$ | async}}</span>
+        <span class="label" fxFlex>{{'components.sessiontimer.label' | translate}}</span>
+        <span class="time" fxFlex role="timer">{{display$ | async}}</span>
     </div>
-    <button mat-icon-button (click)="refresh.emit()">
+    <button mat-icon-button (click)="refresh.emit()" [attr.aria-label]="'components.sessiontimer.refresh' | translate">
         <mat-icon>refresh</mat-icon>
     </button>
 </div>

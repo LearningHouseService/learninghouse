@@ -5,18 +5,21 @@ mat-sidenav {
     .flex-height-container {
         height: 100%;
 
-
-        mat-nav-list {
+        mat-nav-list,
+        mat-action-list {
             width: 100%;
+
         }
     }
+
+
+}
+
+.mat-nav-list a.active {
+    background: #dedede;
 }
 
 mat-sidenav-content {
     height: calc(100vh - 98px);
     padding: 16px;
-
-    main {
-        height: 100%;
-    }
 }

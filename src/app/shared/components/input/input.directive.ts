@@ -7,9 +7,9 @@ export class InputDirective extends FormFieldDirective {
     maxlength?: number;
 
     @Input()
-    clickableSuffixIcon?: string
+    clickableSuffixIcon?: string;
 
     @Output()
-    clickSuffix = new EventEmitter<void>()
+    clickSuffix = new EventEmitter<void>();
 
 }

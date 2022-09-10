@@ -1,0 +1,84 @@
+{
+	"common": {
+		"errors": {
+			"INVALID_PASSWORD": "Invalid password",
+			"UNAUTHORIZED": "Unauthorized"
+		},
+		"mode": {
+			"development": "Development",
+			"initial": "Initialization",
+			"production": "Production"
+		},
+		"role": {
+			"administrator": "Administrator",
+			"trainer": "Trainer",
+			"user": "User"
+		}
+	},
+	"components": {
+		"infodialog": {
+			"mode": "Service mode",
+			"okay_button": "OK",
+			"role": "User role",
+			"title": "Information"
+		},
+		"sessiontimer": {
+			"label": "Logout in",
+			"refresh": "Refresh session"
+		},
+		"sidenav": {
+			"buttons": {
+				"collapse": "Collapse",
+				"expand": "Expand",
+				"login": "Login",
+				"logout": "Logout"
+			},
+			"common": {
+				"actions": "Actions",
+				"main": "Main menu"
+			},
+			"navigation": {
+				"configuration": {
+					"subtitle": "Configure the service",
+					"title": "Configuration"
+				},
+				"dashboard": {
+					"subtitle": "Get an overview",
+					"title": "Dashboard"
+				},
+				"prediction": {
+					"subtitle": "Use a brain",
+					"title": "Prediction"
+				},
+				"training": {
+					"subtitle": "Train a brain",
+					"title": "Training"
+				}
+			}
+		},
+		"toolbar": {
+			"buttons": {
+				"information": "Open service information dialog",
+				"menu": "Open navigation menu"
+			}
+		}
+	},
+	"pages": {
+		"login": {
+			"buttons": {
+				"admin": "Administrator",
+				"apikey": "API Key",
+				"change": "Change password"
+			},
+			"common": {
+				"fallback_warning": "\n                    You have to change <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">fallback\n                        password</a> to\n                    unlock.",
+				"title": "Login"
+			},
+			"fields": {
+				"new_password": "New password",
+				"old_password": "Fallback password",
+				"password": "Password or API key"
+			}
+		}
+	}
+}

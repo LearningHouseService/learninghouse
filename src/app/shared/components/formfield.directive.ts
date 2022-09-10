@@ -19,16 +19,9 @@ export class FormFieldDirective implements OnInit {
         }
     }
 
-    showErrors(): string {
-        let error = '';
-
-        if (this.control.errors) {
-            if (this.control.errors['required']) {
-                error = 'Fill required field';
-            }
-        }
-
-        return error;
+    errorTranslationKeys(): string[] {
+        return Object.keys(this.control.errors || {})
+            .map(key => 'components.input.errors.' + key);
     }
 
 }

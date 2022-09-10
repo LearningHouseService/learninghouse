@@ -11,7 +11,7 @@
             [expires]="(this.authService.refreshTokenExpireDate$| async)" (refresh)="refresh()" (finished)="logout()">
         </learninghouse-session-timer>
         <button mat-icon-button (click)="openVersionsDialog()"
-            [attr.aria-label]="'components.toolbar.buttons.information' | translate">
+            [matTooltip]="'components.toolbar.buttons.information' | translate">
             <mat-icon>information</mat-icon>
         </button>
     </div>

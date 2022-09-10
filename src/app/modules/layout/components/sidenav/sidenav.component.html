@@ -6,31 +6,34 @@
             <mat-nav-list role="navigation" [attr.aria-label]="'components.sidenav.common.main' | translate">
                 <ng-container *ngFor="let navItem of navItems">
                     <a mat-list-item *ngIf="(authService.role$ | async)?.isMinimumRole(navItem.minimumRole)"
+                        [matTooltip]="'components.sidenav.navigation.' + navItem.key + '.title' | translate"
+                        matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)"
                         [routerLink]="navItem.route">
                         <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
                             ''}}
                         </mat-icon>
-                        <h3 matLine
-                            [class.cdk-visually-hidden]="!(media$.isActive('lt-md') || (sidenavService.isOpened$ | async))">
+                        <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
                             {{'components.sidenav.navigation.' + navItem.key + '.title' | translate}}
                         </h3>
                         <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
                             {{'components.sidenav.navigation.' + navItem.key + '.subtitle' | translate}}</p>
                     </a>
                 </ng-container>
-                <a mat-list-item *ngIf="!(authService.role$ | async)" routerLink="/auth">
+                <a mat-list-item *ngIf="!(authService.role$ | async)" routerLink="/auth"
+                    [matTooltip]="'components.sidenav.buttons.login' | translate" matTooltipPosition="right"
+                    [matTooltipDisabled]="(sidenavService.isOpened$ | async)">
                     <mat-icon matListIcon>login</mat-icon>
-                    <h3 matLine
-                        [class.cdk-visually-hidden]="!(media$.isActive('lt-md') || (sidenavService.isOpened$ | async))">
+                    <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
                         {{'components.sidenav.buttons.login' | translate}}
                     </h3>
                 </a>
             </mat-nav-list>
             <mat-action-list [attr.aria-label]="'components.sidenav.common.actions' | translate">
-                <button mat-list-item *ngIf="authService.role$ | async" (click)="logout()">
+                <button mat-list-item *ngIf="authService.role$ | async" (click)="logout()"
+                    [matTooltip]="'components.sidenav.buttons.logout' | translate" matTooltipPosition="right"
+                    [matTooltipDisabled]="(sidenavService.isOpened$ | async)">
                     <mat-icon matListIcon>logout</mat-icon>
-                    <h3 matLine
-                        [class.cdk-visually-hidden]="!(media$.isActive('lt-md') || (sidenavService.isOpened$ | async))">
+                    <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
                         {{'components.sidenav.buttons.logout' | translate}}
                     </h3>
                     <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
@@ -43,7 +46,7 @@
                         <h3 matLine>{{'components.sidenav.buttons.collapse' | translate}}</h3>
                     </button>
                     <button mat-list-item *ngIf="!(sidenavService.isOpened$ | async)"
-                        [attr.aria-label]="'components.sidenav.buttons.expand' | translate"
+                        [matTooltip]="'components.sidenav.buttons.expand' | translate" matTooltipPosition="right"
                         (click)="sidenavService.toggleNavigation()">
                         <mat-icon matListIcon>
                             keyboard_double_arrow_right</mat-icon>

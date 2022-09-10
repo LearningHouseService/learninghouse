@@ -7,7 +7,8 @@
 		"mode": {
 			"development": "Development",
 			"initial": "Initialization",
-			"production": "Production"
+			"production": "Production",
+			"unknown": "Unknown"
 		},
 		"role": {
 			"administrator": "Administrator",
@@ -21,6 +22,11 @@
 			"okay_button": "OK",
 			"role": "User role",
 			"title": "Information"
+		},
+		"input": {
+			"errors": {
+				"required": "Fill required field"
+			}
 		},
 		"sessiontimer": {
 			"label": "Logout in",

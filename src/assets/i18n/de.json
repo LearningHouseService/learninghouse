@@ -45,20 +45,43 @@
 			},
 			"navigation": {
 				"configuration": {
-					"subtitle": "Konfiguriere den Service",
-					"title": "Konfiguration"
+					"apikeys": {
+						"subtitle": "Erstellen oder löschen",
+						"title": "API-Schlüssel",
+						"tooltip": "API-Schlüssel: erstellen oder löschen"
+					},
+					"brains": {
+						"subtitle": "Erstellen oder bearbeiten",
+						"title": "Gehirne",
+						"tooltip": "Gehirne: Erstellen oder bearbeiten"
+					},
+					"password": {
+						"subtitle": "Ändere das Passwort",
+						"title": "Administrator-Passwort",
+						"tooltip": "Adminpasswort ändern"
+					},
+					"sensors": {
+						"subtitle": "Hinzufügen und konfigurieren",
+						"title": "Sensoren",
+						"tooltip": "Sensorkonfiguration"
+					},
+					"title": "Konfiguration",
+					"tooltip": "Untermenü Konfiguration"
 				},
 				"dashboard": {
 					"subtitle": "Verschaffen Sie sich einen Überblick",
-					"title": "Dashboard"
+					"title": "Dashboard",
+					"tooltip": "Dashboard"
 				},
 				"prediction": {
 					"subtitle": "Benutze ein Gehirn",
-					"title": "Prognose"
+					"title": "Prognose",
+					"tooltip": "Prognose"
 				},
 				"training": {
 					"subtitle": "Trainiere ein Gehirn",
-					"title": "Ausbildung"
+					"title": "Ausbildung",
+					"tooltip": "Ausbildung"
 				}
 			}
 		},

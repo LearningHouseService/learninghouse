@@ -5,19 +5,9 @@
         <div fxLayout="column" fxLayoutAlign="space-between center" class="flex-height-container">
             <mat-nav-list role="navigation" [attr.aria-label]="'components.sidenav.common.main' | translate">
                 <ng-container *ngFor="let navItem of navItems">
-                    <a mat-list-item *ngIf="(authService.role$ | async)?.isMinimumRole(navItem.minimumRole)"
-                        [matTooltip]="'components.sidenav.navigation.' + navItem.key + '.title' | translate"
-                        matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)"
-                        [routerLink]="navItem.route">
-                        <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
-                            ''}}
-                        </mat-icon>
-                        <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
-                            {{'components.sidenav.navigation.' + navItem.key + '.title' | translate}}
-                        </h3>
-                        <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
-                            {{'components.sidenav.navigation.' + navItem.key + '.subtitle' | translate}}</p>
-                    </a>
+                    <ng-container [ngTemplateOutlet]="navItem.children ? subMenu : menuLink"
+                        [ngTemplateOutletContext]="{navItem:navItem}"></ng-container>
+
                 </ng-container>
                 <a mat-list-item *ngIf="!(authService.role$ | async)" routerLink="/auth"
                     [matTooltip]="'components.sidenav.buttons.login' | translate" matTooltipPosition="right"
@@ -59,3 +49,56 @@
         <ng-content></ng-content>
     </mat-sidenav-content>
 </mat-sidenav-container>
+
+<ng-template #menuLink let-navItem="navItem">
+    <mat-list-item *ngIf="(authService.role$ | async)?.isMinimumRole(navItem.minimumRole)"
+        [matTooltip]="'components.sidenav.navigation.' + navItem.key + '.tooltip' | translate"
+        matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)"
+        [routerLink]="navItem.route">
+        <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
+            ''}}
+        </mat-icon>
+        <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+            {{'components.sidenav.navigation.' + navItem.key + '.title' | translate}}
+        </h3>
+        <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+            {{'components.sidenav.navigation.' + navItem.key + '.subtitle' | translate}}</p>
+    </mat-list-item>
+</ng-template>
+
+<ng-template #subMenu let-navItem="navItem">
+    <mat-expansion-panel [ngClass]="(sidenavService.isOpened$ | async) ? 'mat-elevation-z0' : 'mat-elevation-z1'"
+        *ngIf="(authService.role$ | async)?.isMinimumRole(navItem.minimumRole)">
+        <mat-expansion-panel-header fxLayout="row" fxLayoutAlign="start center"
+            [matTooltip]="'components.sidenav.navigation.' + navItem.key +  '.tooltip' | translate"
+            matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)">
+            <mat-panel-title>
+                <mat-icon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
+                    ''}}
+                </mat-icon>
+                <h3 *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                    {{'components.sidenav.navigation.' + navItem.key + '.title' | translate}}
+                </h3>
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-nav-list>
+            <ng-container *ngFor="let subItem of navItem.children">
+                <mat-list-item
+                    *ngIf="(authService.role$ | async)?.isMinimumRole(subItem.minimumRole || navItem.minimumRole)"
+                    [matTooltip]="'components.sidenav.navigation.' + navItem.key + '.' + subItem.key + '.tooltip' | translate"
+                    matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)"
+                    [routerLink]="subItem.route">
+                    <mat-icon matListIcon [svgIcon]="subItem.svg ? subItem.svg : ''">{{subItem.icon ? subItem.icon:
+                        ''}}
+                    </mat-icon>
+                    <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                        {{'components.sidenav.navigation.' + navItem.key + '.' + subItem.key + '.title' | translate}}
+                    </h3>
+                    <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                        {{'components.sidenav.navigation.' + navItem.key + '.' + subItem.key + '.subtitle' | translate}}
+                    </p>
+                </mat-list-item>
+            </ng-container>
+        </mat-nav-list>
+    </mat-expansion-panel>
+</ng-template>

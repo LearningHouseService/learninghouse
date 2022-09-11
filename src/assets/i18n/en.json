@@ -45,20 +45,43 @@
 			},
 			"navigation": {
 				"configuration": {
-					"subtitle": "Configure the service",
-					"title": "Configuration"
+					"apikeys": {
+						"subtitle": "Create or delete",
+						"title": "API keys",
+						"tooltip": "API keys: create or delete"
+					},
+					"brains": {
+						"subtitle": "Create or edit",
+						"title": "Brains",
+						"tooltip": "Brains: Create or edit"
+					},
+					"password": {
+						"subtitle": "Change the password",
+						"title": "Admin password",
+						"tooltip": "Change admin password"
+					},
+					"sensors": {
+						"subtitle": "Add and configure",
+						"title": "Sensors",
+						"tooltip": "Sensor configuration"
+					},
+					"title": "Configuration",
+					"tooltip": "Configuration submenu"
 				},
 				"dashboard": {
 					"subtitle": "Get an overview",
-					"title": "Dashboard"
+					"title": "Dashboard",
+					"tooltip": "Dashboard"
 				},
 				"prediction": {
 					"subtitle": "Use a brain",
-					"title": "Prediction"
+					"title": "Prediction",
+					"tooltip": "Prediction"
 				},
 				"training": {
 					"subtitle": "Train a brain",
-					"title": "Training"
+					"title": "Training",
+					"tooltip": "Training"
 				}
 			}
 		},

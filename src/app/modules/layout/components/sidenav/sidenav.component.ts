@@ -1,18 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { MediaObserver } from '@angular/flex-layout';
 import { Router } from '@angular/router';
-import { Role } from 'src/app/shared/models/auth.model';
+import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from 'src/app/modules/auth/auth.service';
+import { Role } from 'src/app/shared/models/auth.model';
 import { SidenavService } from './sidenav.service';
 
 export interface SidenavItem {
   key: string;
+  minimumRole?: Role;
   icon?: string;
   svg?: string;
-  title: string;
-  subtitle: string;
-  route: string;
-  minimumRole: Role;
+  route?: string;
+  children?: SidenavItem[];
 }
 
 @Component({
@@ -26,38 +26,55 @@ export class SidenavComponent {
     {
       key: 'dashboard',
       icon: 'dashboard',
-      title: 'Dashboard',
-      subtitle: 'Get a overview',
       route: '/dashboard',
       minimumRole: Role.USER
     },
     {
       key: 'prediction',
       svg: 'learninghouse',
-      title: 'Prediction',
-      subtitle: 'Use a brain',
       route: '/brains/prediction',
       minimumRole: Role.USER
     },
     {
       key: 'training',
       icon: 'model_training',
-      title: 'Training',
-      subtitle: 'Train a brain',
       route: '/brains/training',
       minimumRole: Role.TRAINER
     },
     {
       key: 'configuration',
       icon: 'settings',
-      title: 'Configuration',
-      subtitle: 'Configure the service',
-      route: '/configuration',
-      minimumRole: Role.ADMIN
+      minimumRole: Role.ADMIN,
+      children: [
+        {
+          key: 'brains',
+          svg: 'learninghouse',
+          route: '/configuration/brains'
+        },
+        {
+          key: 'sensors',
+          icon: 'device_hub',
+          route: '/configuration/sensors'
+        },
+        {
+          key: 'apikeys',
+          icon: 'key',
+          route: '/auth/apikeys',
+        },
+        {
+          key: 'password',
+          icon: 'password',
+          route: '/auth/change_password'
+        }
+      ]
     }
   ]
 
-  constructor(public sidenavService: SidenavService, public authService: AuthService, private router: Router, public media$: MediaObserver) { }
+  constructor(public sidenavService: SidenavService,
+    public authService: AuthService,
+    public media$: MediaObserver,
+    private router: Router,
+    private translateService: TranslateService) { }
 
   logout() {
     this.authService.logout();

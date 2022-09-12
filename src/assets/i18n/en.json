@@ -2,7 +2,8 @@
 	"common": {
 		"errors": {
 			"INVALID_PASSWORD": "Invalid password",
-			"UNAUTHORIZED": "Unauthorized"
+			"UNAUTHORIZED": "Unauthorized",
+			"not_implemented": "This is page is not implemented yet."
 		},
 		"mode": {
 			"development": "Development",

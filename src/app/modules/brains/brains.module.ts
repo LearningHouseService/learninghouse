@@ -4,6 +4,7 @@ import { TrainingComponent } from './pages/training/training.component';
 import { PredictionComponent } from './pages/prediction/prediction.component';
 import { BrainsRoutingModule } from './brains.routes';
 import { RouterModule } from '@angular/router';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 
 
@@ -14,8 +15,8 @@ import { RouterModule } from '@angular/router';
   ],
   imports: [
     CommonModule,
-    BrainsRoutingModule,
-    RouterModule,
+    SharedModule,
+    BrainsRoutingModule
   ]
 })
 export class BrainsModule { }

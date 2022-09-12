@@ -2,7 +2,8 @@
 	"common": {
 		"errors": {
 			"INVALID_PASSWORD": "Ungültiges Passwort",
-			"UNAUTHORIZED": "Nicht autorisiert"
+			"UNAUTHORIZED": "Nicht autorisiert",
+			"not_implemented": "Diese Seite ist noch nicht implementiert."
 		},
 		"mode": {
 			"development": "Entwicklung",

@@ -1,25 +1,29 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NonNullableFormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { LearningHouseError, ServiceMode } from 'src/app/shared/models/api.model';
-import { APIService } from 'src/app/shared/services/api.service';
-import { AlertType } from 'src/app/shared/components/alert/alert.component';
-import { AuthService } from '../../auth.service';
-import { BehaviorSubject, catchError, map, of } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { catchError, map } from 'rxjs';
+import { AlertType } from 'src/app/shared/components/alert/alert.component';
+import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
+import { ServiceMode } from 'src/app/shared/models/api.model';
+import { APIService } from 'src/app/shared/services/api.service';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent extends AbstractFormResponse implements OnInit {
 
-  form: FormGroup;
+  public AlertType = AlertType;
 
-  loginError$ = new BehaviorSubject<string | null>(null);
+  public ServiceMode = ServiceMode;
+
+  private form: FormGroup;
 
   constructor(private formBuilder: NonNullableFormBuilder, public api: APIService, private authService: AuthService,
     private router: Router) {
+    super('pages.auth.login.common.success');
     this.form = this.formBuilder.group({
       normal: this.formBuilder.group({
         password: ['', [Validators.required]]
@@ -82,13 +86,13 @@ export class LoginComponent implements OnInit {
     this.authService.loginAdmin({ password: this.old_password.value })
       .pipe(
         map(() => {
-          this.api.put<boolean>('/auth/password', this.initial.value)
+          this.authService.changePassword(this.initial.value)
             .pipe(
               map(() => {
                 this.authService.loginAdmin({ password: this.new_password.value })
                   .pipe(
                     map(() => {
-                      this.loginError$.next(null);
+                      this.handleSuccess();
                       this.router.navigate(['/dashboard']);
                     }),
                     catchError((error) => this.handleError(error)))
@@ -99,19 +103,6 @@ export class LoginComponent implements OnInit {
         }),
         catchError((error) => this.handleError(error)))
       .subscribe();
-  }
-
-  handleError(error: LearningHouseError) {
-    this.loginError$.next(error.key);
-    return of(false);
-  }
-
-  get ServiceMode() {
-    return ServiceMode;
-  }
-
-  get AlertType() {
-    return AlertType;
   }
 
 }

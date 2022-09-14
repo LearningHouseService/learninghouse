@@ -50,3 +50,8 @@ export interface TokenPayloadModel {
 export interface LoginRequestModel {
     password: string;
 }
+
+export interface ChangePasswordRequestModel {
+    old_password: string;
+    new_password: string;
+}

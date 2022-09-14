@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { AlertComponent } from './components/alert/alert.component';
+import { FormResponseComponent } from './components/form-response/form-response.component';
 import { InputComponent } from './components/input/input.component';
 import { MaterialModule } from './components/material.module';
 import { PasswordComponent } from './components/password/password.component';
@@ -10,6 +11,7 @@ import { SessionTimerComponent } from './components/session-timer/session-timer.
 
 const components = [
   AlertComponent,
+  FormResponseComponent,
   InputComponent,
   PasswordComponent,
   SessionTimerComponent

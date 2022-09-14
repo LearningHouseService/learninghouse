@@ -1,9 +1,17 @@
 import { Component, Input } from '@angular/core';
 
-export enum AlertType {
-  success = 'success',
-  error = 'error',
-  warning = 'warning'
+export class AlertType {
+  static readonly success = new AlertType('success', 'check');
+
+  static readonly error = new AlertType('error', 'error');
+
+  static readonly warning = new AlertType('warning', 'warning');
+
+  private constructor(public readonly css_class: string, public readonly icon: string) { }
+
+  public toString(): string {
+    return this.css_class
+  }
 }
 
 @Component({
@@ -13,7 +21,6 @@ export enum AlertType {
 })
 export class AlertComponent {
   @Input()
-  alertType = AlertType.warning
-
+  alertType = AlertType.warning;
 
 }

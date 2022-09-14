@@ -26,6 +26,7 @@
 		},
 		"input": {
 			"errors": {
+				"confirmMismatch": "Die Passwörter müssen übereinstimmen",
 				"required": "Pflichtfeld ausfüllen"
 			}
 		},
@@ -57,8 +58,8 @@
 						"tooltip": "Gehirne: Erstellen oder bearbeiten"
 					},
 					"password": {
-						"subtitle": "Ändere das Passwort",
-						"title": "Administrator-Passwort",
+						"subtitle": "Ändere das Kennwort",
+						"title": "Administratorkennwort",
 						"tooltip": "Adminpasswort ändern"
 					},
 					"sensors": {
@@ -94,20 +95,37 @@
 		}
 	},
 	"pages": {
-		"login": {
-			"buttons": {
-				"admin": "Administrator",
-				"apikey": "API-Schlüssel",
-				"change": "Ändere das Passwort"
+		"auth": {
+			"login": {
+				"buttons": {
+					"admin": "Administrator",
+					"apikey": "API-Schlüssel",
+					"change": "Ändere das Kennwort"
+				},
+				"common": {
+					"fallback_warning": "\n                    Sie müssen das <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">Fallbackkennwort</a> ändern um den Service zu entsperren.",
+					"success": "Erfolgreich",
+					"title": "Anmeldung"
+				},
+				"fields": {
+					"new_password": "Neues Kennwort",
+					"old_password": "Fallbackkennwort",
+					"password": "Kennwort oder API-Schlüssel"
+				}
 			},
-			"common": {
-				"fallback_warning": "\n                    Sie müssen das <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">Fallbackpasswort</a> ändern um den Service zu entsperren.",
-				"title": "Anmeldung"
-			},
-			"fields": {
-				"new_password": "Neues Kennwort",
-				"old_password": "Fallbackpasswort",
-				"password": "Passwort oder API-Schlüssel"
+			"password": {
+				"buttons": {
+					"change": "Ändere das Passwort"
+				},
+				"common": {
+					"success": "Passwort erfolgreich geändert",
+					"title": "Administratorkennwort ändern"
+				},
+				"fields": {
+					"confirm_password": "Kennwort bestätigen",
+					"new_password": "Neues Kennwort",
+					"old_password": "Altes Kennwort"
+				}
 			}
 		}
 	}

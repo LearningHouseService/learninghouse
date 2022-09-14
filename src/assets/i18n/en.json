@@ -26,6 +26,7 @@
 		},
 		"input": {
 			"errors": {
+				"confirmMismatch": "Passwords must match",
 				"required": "Fill required field"
 			}
 		},
@@ -94,20 +95,37 @@
 		}
 	},
 	"pages": {
-		"login": {
-			"buttons": {
-				"admin": "Administrator",
-				"apikey": "API Key",
-				"change": "Change password"
+		"auth": {
+			"login": {
+				"buttons": {
+					"admin": "Administrator",
+					"apikey": "API Key",
+					"change": "Change password"
+				},
+				"common": {
+					"fallback_warning": "\n                    You have to change <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">fallback\n                        password</a> to\n                    unlock.",
+					"success": "Successful",
+					"title": "Login"
+				},
+				"fields": {
+					"new_password": "New password",
+					"old_password": "Fallback password",
+					"password": "Password or API key"
+				}
 			},
-			"common": {
-				"fallback_warning": "\n                    You have to change <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">fallback\n                        password</a> to\n                    unlock.",
-				"title": "Login"
-			},
-			"fields": {
-				"new_password": "New password",
-				"old_password": "Fallback password",
-				"password": "Password or API key"
+			"password": {
+				"buttons": {
+					"change": "Change Password"
+				},
+				"common": {
+					"success": "Successfully changed password",
+					"title": "Change administrator password"
+				},
+				"fields": {
+					"confirm_password": "Confirm password",
+					"new_password": "New password",
+					"old_password": "Old password"
+				}
 			}
 		}
 	}

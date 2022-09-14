@@ -1,0 +1,4 @@
+<learninghouse-alert *ngIf="success" [alertType]="AlertType.success">{{successMessage | translate}}
+</learninghouse-alert>
+<learninghouse-alert *ngIf="error" [alertType]="AlertType.error">{{errorPrefix + '.' + error | translate}}
+</learninghouse-alert>

@@ -1,5 +1,5 @@
-import { Input, OnInit, Directive } from '@angular/core';
-import { AbstractControl, FormControl, Validators } from '@angular/forms';
+import { Directive, Input, OnInit } from '@angular/core';
+import { FormControl, Validators } from '@angular/forms';
 
 @Directive()
 export class FormFieldDirective implements OnInit {

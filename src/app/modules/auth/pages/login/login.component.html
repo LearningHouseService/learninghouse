@@ -1,37 +1,37 @@
 <div class="login-wrapper" fxLayout="row" fxLayoutAlign="center center">
     <mat-card>
-        <mat-card-title>{{'pages.login.common.title' | translate}}</mat-card-title>
+        <mat-card-title>{{'pages.auth.login.common.title' | translate}}</mat-card-title>
         <form *ngIf="((api.mode$ | async) === ServiceMode.INITIAL)" (ngSubmit)="submitInitial()">
             <mat-card-content fxLayout="column" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
                 <learninghouse-alert [alertType]="AlertType.warning">
-                    <span [innerHtml]="'pages.login.common.fallback_warning' | translate"></span>
+                    <span [innerHtml]="'pages.auth.login.common.fallback_warning' | translate"></span>
                 </learninghouse-alert>
-                <learninghouse-alert [alertType]="AlertType.error" *ngIf="loginError$ | async">
-                    {{'errors.' + (loginError$ |async) | translate}}
-                </learninghouse-alert>
-                <learninghouse-password [name]="'pages.login.fields.old_password' | translate" [control]="old_password">
+                <learninghouse-form-response [success]="(success$ | async)" [successMessage]="successMessage"
+                    [error]="(error$ | async)"></learninghouse-form-response>
+                <learninghouse-password [name]="'pages.auth.login.fields.old_password' | translate"
+                    [control]="old_password">
                 </learninghouse-password>
-                <learninghouse-password [name]="'pages.login.fields.new_password' | translate" [control]="new_password">
+                <learninghouse-password [name]="'pages.auth.login.fields.new_password' | translate"
+                    [control]="new_password">
                 </learninghouse-password>
             </mat-card-content>
             <mat-card-actions align="end">
                 <button type="submit" mat-raised-button color="primary"
-                    [disabled]="!initial.valid">{{'pages.login.buttons.change' | translate}}</button>
+                    [disabled]="!initial.valid">{{'pages.auth.login.buttons.change' | translate}}</button>
             </mat-card-actions>
         </form>
         <form *ngIf="((api.mode$ | async) !== ServiceMode.INITIAL)" (ngSubmit)="submitLoginAdmin()">
             <mat-card-content fxLayout="column" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
-                <learninghouse-alert [alertType]="AlertType.error" *ngIf="loginError$ | async">
-                    {{'errors.' + (loginError$ |async) | translate}}
-                </learninghouse-alert>
-                <learninghouse-password [name]="'pages.login.fields.password' | translate" [control]="password">
+                <learninghouse-form-response [success]="(success$ | async)" [successMessage]="successMessage"
+                    [error]="(error$ | async)"></learninghouse-form-response>
+                <learninghouse-password [name]="'pages.auth.login.fields.password' | translate" [control]="password">
                 </learninghouse-password>
             </mat-card-content>
             <mat-card-actions align="end" fxLayout="row" fxLayoutAlign="space-between center">
                 <button type="button" mat-stroked-button [disabled]="!normal.valid"
-                    (click)="submitLoginAPIKey()">{{'pages.login.buttons.apikey' | translate}}</button>
+                    (click)="submitLoginAPIKey()">{{'pages.auth.login.buttons.apikey' | translate}}</button>
                 <button type="submit" mat-raised-button color="primary"
-                    [disabled]="!normal.valid">{{'pages.login.buttons.admin' | translate}}</button>
+                    [disabled]="!normal.valid">{{'pages.auth.login.buttons.admin' | translate}}</button>
             </mat-card-actions>
         </form>
     </mat-card>

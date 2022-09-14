@@ -36,7 +36,7 @@ async def put_token(refresh_token_jti: str = Depends(auth.protect_refresh)):
 
 @router.delete('/token',
                response_model=bool)
-async def delete_token(refresh_token_jti: str = Depends(auth.protect_refresh)):
+async def delete_token(refresh_token_jti: str | None = Depends(auth.get_refresh)):
     return auth.revoke_refresh_token(refresh_token_jti)
 
 

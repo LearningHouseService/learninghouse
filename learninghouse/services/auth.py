@@ -64,14 +64,15 @@ class AuthService():
 
         return token
 
-    def revoke_refresh_token(self, refresh_token_jti: str) -> bool:
+    def revoke_refresh_token(self, refresh_token_jti: str | None) -> bool:
 
         self.cleanup_refresh_tokens()
 
-        if refresh_token_jti in self.refresh_tokens:
-            del self.refresh_tokens[refresh_token_jti]
+        if refresh_token_jti:
+            if refresh_token_jti in self.refresh_tokens:
+                del self.refresh_tokens[refresh_token_jti]
 
-        logger.info('Logout admininstrator refresh token')
+            logger.info('Logout admininstrator refresh token')
 
         return True
 
@@ -153,6 +154,14 @@ class AuthService():
         _, jti = self.validate_credentials(credentials, True, 'refresh')
 
         return jti
+
+    async def get_refresh(self,
+                          credentials: HTTPAuthorizationCredentials = Security(
+                              jwt_bearer)) -> str | None:
+        is_valid, jti = self.validate_credentials(
+            credentials, False, 'refresh')
+
+        return jti if is_valid else None
 
     async def protect_user(self,
                            credentials: HTTPAuthorizationCredentials = Security(

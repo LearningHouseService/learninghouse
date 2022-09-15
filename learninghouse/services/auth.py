@@ -112,7 +112,7 @@ class AuthService():
 
     def update_password(self, old_password: str, new_password: str) -> bool:
         if not self.database.authenticate_password(old_password):
-            raise LearningHouseSecurityException('Invalid old password')
+            raise InvalidPassword()
 
         self.database.update_password(new_password)
         self.database.write()

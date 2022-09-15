@@ -9,7 +9,7 @@ import { APIService } from 'src/app/shared/services/api.service';
 import { AuthService } from '../../auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'learninghouse-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

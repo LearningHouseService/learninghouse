@@ -6,7 +6,7 @@ import { AuthService } from '../../auth.service';
 import { AuthValidators } from '../../auth.validators';
 
 @Component({
-  selector: 'app-change-password',
+  selector: 'learninghouse-change-password',
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })

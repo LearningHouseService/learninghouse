@@ -55,3 +55,14 @@ export interface ChangePasswordRequestModel {
     old_password: string;
     new_password: string;
 }
+
+export enum APIKeyRole {
+    user,
+    trainer
+}
+
+export interface APIKeyModel {
+    description: string;
+    role: APIKeyRole;
+    key?: string;
+}

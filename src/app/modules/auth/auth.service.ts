@@ -2,7 +2,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, catchError, map, Observable } from 'rxjs';
-import { ChangePasswordRequestModel, LoginRequestModel, Role, TokenModel } from '../../shared/models/auth.model';
+import { APIKeyModel, ChangePasswordRequestModel, LoginRequestModel, Role, TokenModel } from '../../shared/models/auth.model';
 import { APIService } from '../../shared/services/api.service';
 
 
@@ -14,6 +14,8 @@ export class AuthService {
   refreshTokenExpireDate$ = new BehaviorSubject<Date | null>(null);
 
   private jwtService = new JwtHelperService();
+
+  private _apikeys = new BehaviorSubject<APIKeyModel[]>([]);
 
   constructor(private api: APIService) {
   }
@@ -161,6 +163,18 @@ export class AuthService {
     if (!role) {
       this.refreshTokenExpireDate$.next(null);
     }
+  }
+
+  get apikeys(): Observable<APIKeyModel[]> {
+    return this._apikeys.asObservable();
+  }
+
+  public getAPIKeys(): void {
+    this.api.get<APIKeyModel[]>('/auth/apikeys')
+      .pipe(
+        map((apikeys) => this._apikeys.next(apikeys))
+      )
+      .subscribe()
   }
 }
 

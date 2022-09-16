@@ -1,3 +1,10 @@
-table {
-    width: 100%;
+mat-card {
+    padding: 32px;
+
+    mat-card-content {
+        table {
+            width: 100%;
+        }
+    }
+
 }

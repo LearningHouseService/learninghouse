@@ -15,8 +15,6 @@ export class AuthService {
 
   private jwtService = new JwtHelperService();
 
-  private _apikeys = new BehaviorSubject<APIKeyModel[]>([]);
-
   constructor(private api: APIService) {
   }
 
@@ -165,16 +163,8 @@ export class AuthService {
     }
   }
 
-  get apikeys(): Observable<APIKeyModel[]> {
-    return this._apikeys.asObservable();
+  public getAPIKeys(): Observable<APIKeyModel[]> {
+    return this.api.get<APIKeyModel[]>('/auth/apikeys')
   }
 
-  public getAPIKeys(): void {
-    this.api.get<APIKeyModel[]>('/auth/apikeys')
-      .pipe(
-        map((apikeys) => this._apikeys.next(apikeys))
-      )
-      .subscribe()
-  }
 }
-

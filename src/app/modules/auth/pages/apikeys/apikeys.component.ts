@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { TranslateService } from '@ngx-translate/core';
 import { map, Observable } from 'rxjs';
 import { APIKeyModel } from 'src/app/shared/models/auth.model';
 import { AuthService } from '../../auth.service';
@@ -9,25 +12,49 @@ import { AuthService } from '../../auth.service';
   templateUrl: './apikeys.component.html',
   styleUrls: ['./apikeys.component.scss']
 })
-export class APIKeysComponent {
+export class APIKeysComponent implements OnInit, AfterViewInit {
 
-  private dataSource = new MatTableDataSource<APIKeyModel>();
-
-  apikeysDataSource$: Observable<MatTableDataSource<APIKeyModel>> =
-    this.authService.apikeys.
-      pipe(
-        map((apikeys) => {
-          const dataSource = this.dataSource;
-          dataSource.data = apikeys;
-          return dataSource;
-        })
-      )
+  apikeys: APIKeyModel[] = [];
+  dataSource = new MatTableDataSource<APIKeyModel>();
 
   displayedColumns = ['description', 'role'];
 
-  constructor(private authService: AuthService) {
-    this.authService.getAPIKeys();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(private authService: AuthService, private translateService: TranslateService) {
   }
 
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  loadData(): void {
+    this.authService.getAPIKeys()
+      .pipe(
+        map((apikeys) => {
+          this.apikeys = apikeys;
+          const translatedAPIKeys: APIKeyModel[] = [];
+          apikeys.forEach((apikey) => {
+            translatedAPIKeys.push({
+              description: apikey.description,
+              role: this.translateService.instant('common.role.' + apikey.role)
+            });
+          })
+          this.dataSource.data = translatedAPIKeys;
+        })
+      )
+      .subscribe()
+  }
+
+  doFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLocaleLowerCase();
+  }
 
 }

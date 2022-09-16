@@ -5,7 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AlertComponent } from './components/alert/alert.component';
 import { FormResponseComponent } from './components/form-response/form-response.component';
 import { InputComponent } from './components/input/input.component';
-import { MaterialModule } from './components/material.module';
+import { MaterialModule } from './material/material.module';
 import { PasswordComponent } from './components/password/password.component';
 import { SessionTimerComponent } from './components/session-timer/session-timer.component';
 

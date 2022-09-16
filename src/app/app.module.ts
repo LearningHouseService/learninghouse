@@ -11,6 +11,8 @@ import { LayoutModule } from './modules/layout/layout.module';
 // import ngx-translate and the http loader
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-paginator-intl';
 
 @NgModule({
   declarations: [
@@ -34,7 +36,12 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
     provide: HTTP_INTERCEPTORS,
     useClass: AuthInterceptor,
     multi: true
-  }],
+  },
+  {
+    provide: MatPaginatorIntl,
+    useClass: TranslateMatPaginatorIntl,
+  }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

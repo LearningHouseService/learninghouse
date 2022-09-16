@@ -11,6 +11,12 @@
 			"production": "Production",
 			"unknown": "Unknown"
 		},
+		"paginator": {
+			"items_per_page": "Items per page",
+			"next_page": "Next page",
+			"of_label": "of",
+			"previous_page": "Previous page"
+		},
 		"role": {
 			"administrator": "Administrator",
 			"trainer": "Trainer",
@@ -96,6 +102,15 @@
 	},
 	"pages": {
 		"auth": {
+			"apikeys": {
+				"columns": {
+					"description": "Description",
+					"role": "User role"
+				},
+				"common": {
+					"title": "API keys"
+				}
+			},
 			"login": {
 				"buttons": {
 					"admin": "Administrator",

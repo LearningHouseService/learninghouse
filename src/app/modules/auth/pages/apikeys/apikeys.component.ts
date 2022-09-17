@@ -1,11 +1,12 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { APIKeyModel } from 'src/app/shared/models/auth.model';
 import { AuthService } from '../../auth.service';
+import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.component';
 
 @Component({
   selector: 'learninghouse-apikeys',
@@ -21,7 +22,7 @@ export class APIKeysComponent implements AfterViewInit {
 
   @ViewChild('sort') sort!: MatSort;
 
-  constructor(private authService: AuthService, private translateService: TranslateService) {
+  constructor(public dialog: MatDialog, private authService: AuthService, private translateService: TranslateService) {
   }
 
   ngAfterViewInit(): void {
@@ -47,4 +48,7 @@ export class APIKeysComponent implements AfterViewInit {
       .subscribe()
   }
 
+  onAdd(): void {
+    const dialogRef = this.dialog.open(AddAPIKeyDialogComponent);
+  }
 }

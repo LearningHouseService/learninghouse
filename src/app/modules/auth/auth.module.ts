@@ -7,6 +7,7 @@ import { AuthRoutingModule } from './auth.routes';
 import { LoginComponent } from './pages/login/login.component';
 import { ChangePasswordComponent } from './pages/change-password/change-password.component';
 import { APIKeysComponent } from './pages/apikeys/apikeys.component';
+import { AddAPIKeyDialogComponent } from './pages/apikeys/add-apikey-dialog/add-apikey-dialog.component';
 
 
 
@@ -15,7 +16,8 @@ import { APIKeysComponent } from './pages/apikeys/apikeys.component';
   declarations: [
     LoginComponent,
     ChangePasswordComponent,
-    APIKeysComponent
+    APIKeysComponent,
+    AddAPIKeyDialogComponent
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,15 @@
+<div mat-dialog-title>title</div>
+<form>
+    <mat-dialog-content>
+        <learninghouse-form-response [success]="(success$ | async)" [successMessage]="successMessage"
+            [error]="(error$ | async)"></learninghouse-form-response>
+        <learninghouse-input [name]="'pages.auth.apikeys.columns.description' | translate" [control]="description">
+        </learninghouse-input>
+        <learninghouse-select [name]="'pages.auth.apikeys.columns.role' | translate" [control]="role"
+            [options]="roleOptions">
+        </learninghouse-select>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-button>Ok</button>
+    </mat-dialog-actions>
+</form>

@@ -94,11 +94,18 @@
 			}
 		},
 		"table": {
+			"actions": {
+				"add": "Add"
+			},
 			"columns": {
 				"actions": "Actions"
 			},
 			"common": {
 				"no_items": "No items"
+			},
+			"filter": {
+				"clear": "Clear",
+				"search": "Search"
 			}
 		},
 		"toolbar": {

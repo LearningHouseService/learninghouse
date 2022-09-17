@@ -12,25 +12,20 @@ import { AuthService } from '../../auth.service';
   templateUrl: './apikeys.component.html',
   styleUrls: ['./apikeys.component.scss']
 })
-export class APIKeysComponent implements OnInit, AfterViewInit {
+export class APIKeysComponent implements AfterViewInit {
 
   apikeys: APIKeyModel[] = [];
   dataSource = new MatTableDataSource<APIKeyModel>();
 
-  displayedColumns = ['description', 'role'];
+  displayedColumns = ['description', 'role', 'actions'];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('sort') sort!: MatSort;
 
   constructor(private authService: AuthService, private translateService: TranslateService) {
   }
 
-  ngOnInit(): void {
-    this.loadData();
-  }
-
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
+    this.loadData();
     this.dataSource.sort = this.sort;
   }
 
@@ -50,11 +45,6 @@ export class APIKeysComponent implements OnInit, AfterViewInit {
         })
       )
       .subscribe()
-  }
-
-  doFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLocaleLowerCase();
   }
 
 }

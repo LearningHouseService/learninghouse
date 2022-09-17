@@ -93,6 +93,14 @@
 				}
 			}
 		},
+		"table": {
+			"columns": {
+				"actions": "Actions"
+			},
+			"common": {
+				"no_items": "No items"
+			}
+		},
 		"toolbar": {
 			"buttons": {
 				"information": "Open service information dialog",

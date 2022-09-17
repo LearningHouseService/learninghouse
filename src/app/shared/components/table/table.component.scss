@@ -1,0 +1,21 @@
+mat-card {
+    padding: 32px;
+
+    mat-card-content {
+        table {
+            width: 100%;
+
+            .mat-column-actions {
+                flex: 0 0 7% !important;
+                width: 7% !important;
+            }
+
+            .no-items {
+                font-style: italic;
+                font-size: 0.9em;
+                color: #888888;
+            }
+        }
+    }
+
+}

@@ -1,6 +1,12 @@
 mat-card {
     padding: 32px;
 
+    mat-card-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     mat-card-content {
         table {
             width: 100%;
@@ -15,6 +21,11 @@ mat-card {
                 font-size: 0.9em;
                 color: #888888;
             }
+
+            .mat-footer-cell {
+                border: none;
+            }
+
         }
     }
 

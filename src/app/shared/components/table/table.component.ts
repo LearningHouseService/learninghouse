@@ -1,7 +1,8 @@
-import { AfterContentInit, AfterViewInit, Component, ContentChild, ContentChildren, Input, QueryList, ViewChild } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, ContentChild, ContentChildren, EventEmitter, Input, Output, QueryList, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import { MatColumnDef, MatHeaderRowDef, MatNoDataRow, MatRowDef, MatTable, MatTableDataSource } from '@angular/material/table';
+
+let nextId = 0;
 
 @Component({
   selector: 'learninghouse-table',
@@ -10,11 +11,19 @@ import { MatColumnDef, MatHeaderRowDef, MatNoDataRow, MatRowDef, MatTable, MatTa
 })
 export class TableComponent<T> implements AfterContentInit, AfterViewInit {
 
+  private readonly _id = `${nextId++}`;
+
   @Input()
   dataSource!: MatTableDataSource<any>;
 
   @Input()
   columns: string[] = [];
+
+  @Input()
+  add: boolean = false;
+
+  @Output()
+  onAdd = new EventEmitter<void>();
 
   @Input()
   title: string = '';
@@ -27,6 +36,8 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
   @ViewChild(MatTable, { static: true }) table!: MatTable<T>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+
+  filter: string = '';
 
   ngAfterContentInit() {
     this.columnDefs.forEach(columnDef => this.table.addColumnDef(columnDef));
@@ -42,6 +53,15 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
   doFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLocaleLowerCase();
+  }
+
+  clearFilter() {
+    this.dataSource.filter = '';
+    this.filter = '';
+  }
+
+  get title_id(): string {
+    return 'lh-table-title-' + this._id;
   }
 
 }

@@ -1,13 +1,25 @@
 <mat-card class="mat-elevation-z8">
-    <mat-card-header fxLayout="row" fxLayout.lt-sm="column" fxLayoutAlign.lt-sm="center stretch"
-        fxLayoutAlign="space-between center" fxLayoutGap.lt-sm="1.1rem">
-        <mat-card-title>{{title | translate}}</mat-card-title>
-        <mat-form-field fxFlex="30%" fxFlex.lt-lg="50%" fxFlex.lt-sm="98%">
-            <input matInput type="text" placeholder="Filter" (keyup)="doFilter($event)">
-        </mat-form-field>
+    <mat-card-header fxLayout="row" fxLayoutAlign="space-between center" fxLayout.lt-sm="column"
+        fxLayoutAlign.lt-sm="center stretch" fxLayoutGap.lt-sm="1.1rem">
+        <mat-card-title [attr.id]="title_id">{{title | translate}}</mat-card-title>
+        <div fxFlex="100%" fxLayout="row" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
+            <mat-form-field fxFlex="100%" appearance="outline">
+                <mat-icon matPrefix>search</mat-icon>
+                <mat-label>{{'components.table.filter.search' | translate}}</mat-label>
+                <input matInput type="text" (keyup)="doFilter($event)" [(ngModel)]="filter">
+                <button *ngIf="filter" matSuffix mat-icon-button
+                    [attr.aria-label]="'components.table.filter.clear' | translate" (click)="clearFilter()">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+            <button mat-fab color="primary" [matTooltip]="'components.table.actions.add' | translate" *ngIf="add"
+                (click)="onAdd.emit()">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
     </mat-card-header>
     <mat-card-content fxLayout=" column" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
-        <table mat-table [dataSource]="dataSource">
+        <table mat-table [dataSource]="dataSource" [attr.aria-describedby]="title_id">
             <ng-content></ng-content>
 
             <ng-container matColumnDef="actions">
@@ -16,17 +28,23 @@
                 <td mat-cell *matCellDef="let row"> Temp </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <ng-container matColumnDef="paginator">
+                <td mat-footer-cell *matFooterCellDef [colSpan]="columns.length">
+                    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                </td>
+            </ng-container>
+
+
+            <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
             <tr mat-row *matRowDef="let row; columns: columns;"></tr>
 
             <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell no-items" [attr.colspan]="columns.length">{{'components.table.common.no_items' |
+                <td class="mat-cell no-items" [colSpan]="columns.length">{{'components.table.common.no_items' |
                     translate}}
                 </td>
             </tr>
+
+            <tr mat-footer-row *matFooterRowDef="['paginator']; sticky: true"></tr>
         </table>
     </mat-card-content>
-    <mat-card-actions>
-        <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
-    </mat-card-actions>
 </mat-card>

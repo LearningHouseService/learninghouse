@@ -9,12 +9,14 @@ import { MaterialModule } from './material/material.module';
 import { PasswordComponent } from './components/password/password.component';
 import { SessionTimerComponent } from './components/session-timer/session-timer.component';
 import { TableComponent } from './components/table/table.component';
+import { SelectComponent } from './components/select/select.component';
 
 const components = [
   AlertComponent,
   FormResponseComponent,
   InputComponent,
   PasswordComponent,
+  SelectComponent,
   SessionTimerComponent,
   TableComponent
 ]

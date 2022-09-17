@@ -1,0 +1,8 @@
+<mat-form-field fxFlex>
+    <mat-label>{{name}}<span *ngIf="!required"> (Optional)</span></mat-label>
+    <mat-select [required]="required" [formControl]="control" [maxlength]="maxlength!">
+        <mat-option [value]="option.value" *ngFor="let option of options">{{option.label | translate}}</mat-option>
+    </mat-select>
+    <mat-icon matSuffix *ngIf="clickableSuffixIcon" (click)="clickSuffix.emit()">{{clickableSuffixIcon}}</mat-icon>
+    <mat-error matListItem *ngFor="let error of errorTranslationKeys()">{{error | translate}}</mat-error>
+</mat-form-field>

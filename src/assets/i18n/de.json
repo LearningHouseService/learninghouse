@@ -1,9 +1,15 @@
 {
 	"common": {
+		"buttons": {
+			"copy_to_clipboard": "In die Zwischenablage kopieren"
+		},
 		"errors": {
 			"INVALID_PASSWORD": "Ungültiges Passwort",
 			"UNAUTHORIZED": "Nicht autorisiert",
 			"not_implemented": "Diese Seite ist noch nicht implementiert."
+		},
+		"messages": {
+			"success": "Erfolgreich"
 		},
 		"mode": {
 			"development": "Entwicklung",
@@ -24,6 +30,12 @@
 		}
 	},
 	"components": {
+		"editdialog": {
+			"buttons": {
+				"add": "Hinzufügen",
+				"close": "Schließen"
+			}
+		},
 		"infodialog": {
 			"mode": "Servicemodus",
 			"okay_button": "OK",
@@ -32,6 +44,8 @@
 		},
 		"input": {
 			"errors": {
+				"apikeyDescriptionPattern": "Darf nur die Buchstaben A-Z und Unterstriche enthalten",
+				"apikeyDescriptionShort": "Muss mindestens 3 Zeichen enthalten",
 				"confirmMismatch": "Die Passwörter müssen übereinstimmen",
 				"required": "Pflichtfeld ausfüllen"
 			}
@@ -123,7 +137,14 @@
 					"role": "Benutzerrolle"
 				},
 				"common": {
+					"dialog_title": "Neuer API-Schlüssel",
 					"title": "API-Schlüssel"
+				},
+				"errors": {
+					"APIKEY_EXISTS": "Dieser API-Schlüssel existiert bereits. Bitte wählen Sie eine andere Beschreibung!"
+				},
+				"messages": {
+					"newapikey": "Bitte speichern Sie den folgenden API-Schlüssel, er wird nicht wieder angezeigt: {{apikey}}"
 				}
 			},
 			"login": {

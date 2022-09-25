@@ -1,15 +1,19 @@
-<div mat-dialog-title>title</div>
-<form>
-    <mat-dialog-content>
-        <learninghouse-form-response [success]="(success$ | async)" [successMessage]="successMessage"
-            [error]="(error$ | async)"></learninghouse-form-response>
-        <learninghouse-input [name]="'pages.auth.apikeys.columns.description' | translate" [control]="description">
-        </learninghouse-input>
-        <learninghouse-select [name]="'pages.auth.apikeys.columns.role' | translate" [control]="role"
-            [options]="roleOptions">
-        </learninghouse-select>
-    </mat-dialog-content>
-    <mat-dialog-actions>
-        <button mat-button>Ok</button>
-    </mat-dialog-actions>
-</form>
+<learninghouse-edit-dialog [errorPrefix]="'pages.auth.apikeys.errors'" [error]="error$ | async"
+    [success]="(success$ | async)!" [title]="'pages.auth.apikeys.common.dialog_title'" [add]="!(success$ | async)"
+    (onAdd)="onAdd()" (onClose)="onClose()" [valid]="form.valid">
+    <learninghouse-alert *ngIf="(success$ |async)" [alertType]="AlertType.warning">
+        <div fxLayout="row" fxLayoutAlign="start center">
+            <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:
+                {apikey: apikey?.key} }}</span>
+            <button mat-icon-button fxFlex="36px" [matTooltip]="'common.buttons.copy_to_clipboard' | translate" (click)="copyToClipboard()">
+                <mat-icon>content_copy</mat-icon>
+            </button>
+        </div>
+    </learninghouse-alert>
+    <learninghouse-input [name]="'pages.auth.apikeys.columns.description' | translate" [control]="description"
+        [maxlength]="15">
+    </learninghouse-input>
+    <learninghouse-select [name]="'pages.auth.apikeys.columns.role' | translate" [control]="role"
+        [options]="roleOptions">
+    </learninghouse-select>
+</learninghouse-edit-dialog>

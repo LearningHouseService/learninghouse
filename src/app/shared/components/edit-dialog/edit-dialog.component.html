@@ -1,0 +1,17 @@
+<div class="container">
+    <div mat-dialog-title>{{title | translate}}</div>
+    <form>
+        <mat-dialog-content>
+            <learninghouse-form-response [success]="success" [successMessage]="successMessage!" [error]="error"
+                [errorPrefix]="errorPrefix!"></learninghouse-form-response>
+            <ng-content></ng-content>
+        </mat-dialog-content>
+        <mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+            <button mat-raised-button (click)="onClose.emit()">{{'components.editdialog.buttons.close' |
+                translate}}</button>
+            <button mat-raised-button type="submit" *ngIf="add" (click)="onAdd.emit()" color="primary"
+                [disabled]="!valid">{{'components.editdialog.buttons.add' |
+                translate}}</button>
+        </mat-dialog-actions>
+    </form>
+</div>

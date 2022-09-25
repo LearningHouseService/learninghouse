@@ -15,4 +15,24 @@ export class AuthValidators {
             return error;
         };
     }
+    static APIKeyDescriptionValidator(control: AbstractControl): ValidationErrors | null {
+        const DESCRIPTION_PATTERN = /^[A-Za-z]\w{1,13}[A-Za-z0-9]$/;
+
+        const value = control.value;
+        let result = null;
+
+        if (value) {
+            if (value.length < 3) {
+                result = {
+                    apikeyDescriptionShort: true
+                };
+            } else if (!DESCRIPTION_PATTERN.test(value)) {
+                result = {
+                    apikeyDescriptionPattern: true
+                };
+            }
+        }
+
+        return result;
+    }
 }

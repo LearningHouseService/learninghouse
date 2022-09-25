@@ -10,9 +10,11 @@ import { PasswordComponent } from './components/password/password.component';
 import { SessionTimerComponent } from './components/session-timer/session-timer.component';
 import { TableComponent } from './components/table/table.component';
 import { SelectComponent } from './components/select/select.component';
+import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
 
 const components = [
   AlertComponent,
+  EditDialogComponent,
   FormResponseComponent,
   InputComponent,
   PasswordComponent,

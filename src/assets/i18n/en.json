@@ -1,9 +1,15 @@
 {
 	"common": {
+		"buttons": {
+			"copy_to_clipboard": "Copy to clipboard"
+		},
 		"errors": {
 			"INVALID_PASSWORD": "Invalid password",
 			"UNAUTHORIZED": "Unauthorized",
 			"not_implemented": "This is page is not implemented yet."
+		},
+		"messages": {
+			"success": "Successful"
 		},
 		"mode": {
 			"development": "Development",
@@ -24,6 +30,12 @@
 		}
 	},
 	"components": {
+		"editdialog": {
+			"buttons": {
+				"add": "Add",
+				"close": "Close"
+			}
+		},
 		"infodialog": {
 			"mode": "Service mode",
 			"okay_button": "OK",
@@ -32,6 +44,8 @@
 		},
 		"input": {
 			"errors": {
+				"apikeyDescriptionPattern": "May only contain the letters A-Z and underscores",
+				"apikeyDescriptionShort": "Must contain at least 3 characters",
 				"confirmMismatch": "Passwords must match",
 				"required": "Fill required field"
 			}
@@ -123,7 +137,14 @@
 					"role": "User role"
 				},
 				"common": {
+					"dialog_title": "New API key",
 					"title": "API keys"
+				},
+				"errors": {
+					"APIKEY_EXISTS": "This API key already exists. Please choose another description!"
+				},
+				"messages": {
+					"newapikey": "Please save the following API key, it will not show up again: {{apikey}}"
 				}
 			},
 			"login": {

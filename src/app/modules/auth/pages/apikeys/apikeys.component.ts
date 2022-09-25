@@ -49,6 +49,14 @@ export class APIKeysComponent implements AfterViewInit {
   }
 
   onAdd(): void {
-    const dialogRef = this.dialog.open(AddAPIKeyDialogComponent);
+    const dialogRef = this.dialog.open(AddAPIKeyDialogComponent, {
+      width: '400px'
+    });
+
+    dialogRef.afterClosed().subscribe((apikey: APIKeyModel | null) => {
+      if (apikey) {
+        this.loadData();
+      }
+    });
   }
 }

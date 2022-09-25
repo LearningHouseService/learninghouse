@@ -13,7 +13,7 @@ export class FormResponseComponent {
   success: boolean | null = false;
 
   @Input()
-  successMessage: string = 'components.formresponse.success';
+  successMessage: string = 'common.messages.success';
 
   @Input()
   error: string | null = null;

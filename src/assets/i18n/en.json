@@ -110,13 +110,17 @@
 		},
 		"table": {
 			"actions": {
-				"add": "Add"
+				"add": "Add",
+				"cancel": "Cancel",
+				"delete": "Delete"
 			},
 			"columns": {
 				"actions": "Actions"
 			},
 			"common": {
-				"no_items": "No items"
+				"delete": "Delete",
+				"no_items": "No items",
+				"sure": "Are you sure?"
 			},
 			"filter": {
 				"clear": "Clear",

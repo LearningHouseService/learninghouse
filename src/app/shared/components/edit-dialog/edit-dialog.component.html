@@ -7,15 +7,23 @@
             <ng-content></ng-content>
         </mat-dialog-content>
         <mat-dialog-actions fxLayout="row" [fxLayoutAlign]="(add || edit) ? 'space-between center' : 'center center'">
-            <button mat-raised-button (click)="onClose.emit()"
-                [color]="!(add || edit) ? 'primary' : ''">{{'components.editdialog.buttons.close' |
-                translate}}</button>
+            <button mat-raised-button (click)="onClose.emit()" [color]="!(add || edit) ? 'primary' : ''">
+                <mat-icon>close</mat-icon>
+                {{'components.editdialog.buttons.close' |
+                translate}}
+            </button>
             <button mat-raised-button type="submit" *ngIf="edit" (click)="onEdit.emit()" color="primary"
-                [disabled]="!valid">{{'components.editdialog.buttons.edit' |
-                translate}}</button>
+                [disabled]="!valid">
+                <mat-icon>edit</mat-icon>
+                {{'components.editdialog.buttons.edit' |
+                translate}}
+            </button>
             <button mat-raised-button type="submit" *ngIf="add" (click)="onAdd.emit()" color="primary"
-                [disabled]="!valid">{{'components.editdialog.buttons.add' |
-                translate}}</button>
+                [disabled]="!valid">
+                <mat-icon>add</mat-icon>
+                {{'components.editdialog.buttons.add' |
+                translate}}
+            </button>
         </mat-dialog-actions>
     </form>
 </div>

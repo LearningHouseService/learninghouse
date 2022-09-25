@@ -25,7 +25,11 @@
             <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef> {{'components.table.columns.actions' | translate}}
                 </th>
-                <td mat-cell *matCellDef="let row"> Temp </td>
+                <td mat-cell *matCellDef="let row">
+                    <button mat-icon-button (click)="deleteRow(row)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
             </ng-container>
 
             <ng-container matColumnDef="paginator">

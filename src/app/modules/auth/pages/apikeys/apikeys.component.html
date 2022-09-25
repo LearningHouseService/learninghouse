@@ -1,6 +1,6 @@
 <learninghouse-table [title]="'pages.auth.apikeys.common.title'" [dataSource]="dataSource" [columns]="displayedColumns"
     matSort matSortActive="description" matSortDirection="asc" matSortDisableClear #sort="matSort" [add]="true"
-    (onAdd)="onAdd()">
+    (onAdd)="onAdd()" (onDelete)="onDelete($event)">
     <ng-container matColumnDef="description">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'pages.auth.apikeys.columns.description'
             |translate}} </th>

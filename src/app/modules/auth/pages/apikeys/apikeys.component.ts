@@ -59,4 +59,14 @@ export class APIKeysComponent implements AfterViewInit {
       }
     });
   }
+
+  onDelete(apikey: APIKeyModel): void {
+    this.authService.deleteAPIKey(apikey.description)
+      .pipe(
+        map(() => {
+          this.loadData();
+        })
+      )
+      .subscribe()
+  }
 }

@@ -174,4 +174,8 @@ export class AuthService {
     });
   }
 
+  public deleteAPIKey(description: string): Observable<string> {
+    return this.api.delete('/auth/apikey/' + description);
+  }
+
 }

@@ -11,6 +11,7 @@ import { SessionTimerComponent } from './components/session-timer/session-timer.
 import { TableComponent } from './components/table/table.component';
 import { SelectComponent } from './components/select/select.component';
 import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
+import { DeleteDialogComponent } from './components/table/delete-dialog/delete-dialog.component';
 
 const components = [
   AlertComponent,
@@ -25,7 +26,7 @@ const components = [
 
 
 @NgModule({
-  declarations: [components],
+  declarations: [components, DeleteDialogComponent],
   imports: [
     CommonModule,
     FormsModule,

@@ -110,13 +110,17 @@
 		},
 		"table": {
 			"actions": {
-				"add": "Hinzufügen"
+				"add": "Hinzufügen",
+				"cancel": "Abbruch",
+				"delete": "Löschen"
 			},
 			"columns": {
 				"actions": "Aktionen"
 			},
 			"common": {
-				"no_items": "Keine Einträge"
+				"delete": "Löschen",
+				"no_items": "Keine Einträge",
+				"sure": "Wirklich löschen?"
 			},
 			"filter": {
 				"clear": "Löschen",

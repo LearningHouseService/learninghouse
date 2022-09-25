@@ -1,6 +1,8 @@
 import { AfterContentInit, AfterViewInit, Component, ContentChild, ContentChildren, EventEmitter, Input, Output, QueryList, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatColumnDef, MatHeaderRowDef, MatNoDataRow, MatRowDef, MatTable, MatTableDataSource } from '@angular/material/table';
+import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
 
 let nextId = 0;
 
@@ -45,6 +47,8 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
 
   filter: string = '';
 
+  constructor(public dialog: MatDialog) { }
+
   ngAfterContentInit() {
     this.columnDefs.forEach(columnDef => this.table.addColumnDef(columnDef));
     this.rowDefs.forEach(rowDef => this.table.addRowDef(rowDef));
@@ -64,6 +68,19 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
   clearFilter() {
     this.dataSource.filter = '';
     this.filter = '';
+  }
+
+  deleteRow(row: T) {
+    const dialogRef = this.dialog.open(DeleteDialogComponent, {
+      width: '400px'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.onDelete.emit(row);
+      }
+
+    })
   }
 
   get title_id(): string {

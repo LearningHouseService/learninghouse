@@ -6,8 +6,12 @@
                 [errorPrefix]="errorPrefix!"></learninghouse-form-response>
             <ng-content></ng-content>
         </mat-dialog-content>
-        <mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
-            <button mat-raised-button (click)="onClose.emit()">{{'components.editdialog.buttons.close' |
+        <mat-dialog-actions fxLayout="row" [fxLayoutAlign]="(add || edit) ? 'space-between center' : 'center center'">
+            <button mat-raised-button (click)="onClose.emit()"
+                [color]="!(add || edit) ? 'primary' : ''">{{'components.editdialog.buttons.close' |
+                translate}}</button>
+            <button mat-raised-button type="submit" *ngIf="edit" (click)="onEdit.emit()" color="primary"
+                [disabled]="!valid">{{'components.editdialog.buttons.edit' |
                 translate}}</button>
             <button mat-raised-button type="submit" *ngIf="add" (click)="onAdd.emit()" color="primary"
                 [disabled]="!valid">{{'components.editdialog.buttons.add' |

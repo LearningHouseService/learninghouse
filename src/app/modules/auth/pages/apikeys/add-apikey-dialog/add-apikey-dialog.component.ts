@@ -29,6 +29,7 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse {
 
   constructor(public dialogRef: MatDialogRef<AddAPIKeyDialogComponent>, private formBuilder: NonNullableFormBuilder, private authService: AuthService, private clipboardService: ClipboardService) {
     super('pages.auth.apikeys.common.success');
+    this.dialogRef.disableClose = true;
     this.form = this.formBuilder.group({
       description: ['', [Validators.required, AuthValidators.APIKeyDescriptionValidator]],
       role: [APIKeyRole.user, [Validators.required]]

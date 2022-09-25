@@ -31,6 +31,12 @@ export class EditDialogComponent {
   @Output()
   onAdd = new EventEmitter<void>();
 
+  @Input()
+  edit: boolean = false;
+
+  @Output()
+  onEdit = new EventEmitter<void>();
+
   @Output()
   onClose = new EventEmitter<void>();
 

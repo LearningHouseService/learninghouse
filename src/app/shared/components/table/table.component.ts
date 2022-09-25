@@ -26,6 +26,12 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
   onAdd = new EventEmitter<void>();
 
   @Input()
+  delete: boolean = false;
+
+  @Output()
+  onDelete = new EventEmitter<T>();
+
+  @Input()
   title: string = '';
 
   @ContentChildren(MatHeaderRowDef) headerRowDefs!: QueryList<MatHeaderRowDef>;

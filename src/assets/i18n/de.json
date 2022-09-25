@@ -33,7 +33,8 @@
 		"editdialog": {
 			"buttons": {
 				"add": "Hinzufügen",
-				"close": "Schließen"
+				"close": "Schließen",
+				"edit": "Bearbeiten"
 			}
 		},
 		"infodialog": {

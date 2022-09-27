@@ -5,7 +5,10 @@ ARG VERSION
 RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \ 
-        libatlas-base-dev; \
+        libatlas-base-dev \
+        libgfortran5-dev \ 
+        libgfortran5 \
+        libatlas3-base; \
     pip3 wheel \
         --wheel-dir=/root/wheels \
         --extra-index-url https://www.piwheels.org/simple \
@@ -28,7 +31,9 @@ RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         gosu \
-        tini; \
+        tini \
+        libgfortran5 \
+        libatlas3-base; \
     ln -s -f $(which gosu) /usr/local/bin/gosu; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \

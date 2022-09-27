@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -156,15 +156,15 @@ class DatasetPreprocessing():
 
     @classmethod
     def columns_intersection(cls,
-                             list_or_dataframe1: pd.DataFrame | List[str],
-                             list_or_dataframe2: pd.DataFrame | List[str]) \
+                             list_or_dataframe1: Union[pd.DataFrame, List[str]],
+                             list_or_dataframe2: Union[pd.DataFrame, List[str]]) \
             -> List[str]:
         set1 = cls.set_of_columns(list_or_dataframe1)
         set2 = cls.set_of_columns(list_or_dataframe2)
         return sorted(list(set.intersection(set1, set2)))
 
     @staticmethod
-    def set_of_columns(list_or_dataframe: pd.DataFrame | List[str]) -> Set[str]:
+    def set_of_columns(list_or_dataframe: Union[pd.DataFrame, List[str]]) -> Set[str]:
         set_of_columns = None
         if isinstance(list_or_dataframe, pd.DataFrame):
             set_of_columns = set(list_or_dataframe.columns.values.tolist())

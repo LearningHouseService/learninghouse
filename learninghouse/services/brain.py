@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from os import path, stat
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import joblib
 import pandas as pd
@@ -36,8 +36,8 @@ class Brain():
         self.dataset: DatasetConfiguration = DatasetConfiguration(
             self.configuration)
 
-        self._estimator: Optional[RandomForestClassifier |
-                                  RandomForestRegressor] = None
+        self._estimator: Optional[Union[RandomForestClassifier,
+                                  RandomForestRegressor]] = None
 
         self.score: Optional[float] = 0.0
 
@@ -45,7 +45,7 @@ class Brain():
 
         self.trained_at: Optional[datetime] = None
 
-    def estimator(self) -> RandomForestClassifier | RandomForestRegressor:
+    def estimator(self) -> Union[RandomForestClassifier, RandomForestRegressor]:
         if self._estimator is None:
             self._estimator = self.configuration.estimator.typed.estimator_class(
                 n_estimators=self.configuration.estimator.estimators,
@@ -107,7 +107,7 @@ class Brain():
 
 class BrainService():
 
-    brains: Dict[str, Dict[str, int | Brain]] = {}
+    brains: Dict[str, Dict[str, Union[int, Brain]]] = {}
 
     @classmethod
     def request(cls, name: str, request_data: Optional[Dict[str, Any]] = None) -> BrainInfo:

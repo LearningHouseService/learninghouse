@@ -4,7 +4,7 @@ from datetime import datetime
 from os import path
 from random import randint
 from secrets import token_hex
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from passlib.hash import sha512_crypt
 from pydantic import BaseModel, Field
@@ -168,7 +168,7 @@ class SecurityDatabase(BaseModel):
     def list_api_keys(self) -> List[APIKeyInfo]:
         return [APIKeyInfo.from_api_key(x) for x in self.api_keys.values()]
 
-    def find_apikey_by_key(self, key: str) -> APIKeyInfo | None:
+    def find_apikey_by_key(self, key: str) -> Union[APIKeyInfo, None]:
         api_key_info = None
         hashed_key = sha512_crypt.hash(key, salt=self.salt, rounds=self.rounds)
 
@@ -179,7 +179,7 @@ class SecurityDatabase(BaseModel):
 
     def find_apikey_by_description(
             self, description: str,
-            full_api_key: bool = False) -> APIKeyInfo | APIKey | None:
+            full_api_key: bool = False) -> [APIKeyInfo, APIKey, None]:
         api_key_info = None
 
         for api_key in self.api_keys.values():

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -64,7 +64,7 @@ class AuthService():
 
         return token
 
-    def revoke_refresh_token(self, refresh_token_jti: str | None) -> bool:
+    def revoke_refresh_token(self, refresh_token_jti: Union[str, None]) -> bool:
 
         self.cleanup_refresh_tokens()
 
@@ -157,7 +157,7 @@ class AuthService():
 
     async def get_refresh(self,
                           credentials: HTTPAuthorizationCredentials = Security(
-                              jwt_bearer)) -> str | None:
+                              jwt_bearer)) -> Union[str, None]:
         is_valid, jti = self.validate_credentials(
             credentials, False, 'refresh')
 
@@ -187,7 +187,7 @@ class AuthService():
     def is_admin_user_or_trainer(self,
                                  credentials: HTTPAuthorizationCredentials,
                                  query: str,
-                                 header: str) -> UserRole | None:
+                                 header: str) -> Union[UserRole, None]:
         role = None
 
         is_valid, _ = self.validate_credentials(credentials, False, 'admin')
@@ -207,9 +207,9 @@ class AuthService():
         return role
 
     def validate_credentials(self,
-                             credentials: HTTPAuthorizationCredentials | None,
+                             credentials: Union[HTTPAuthorizationCredentials, None],
                              auto_error: bool,
-                             subject: str) -> Tuple[bool, str | None]:
+                             subject: str) -> Tuple[bool, Union[str, None]]:
         is_valid = True
         jti = None
 
@@ -238,7 +238,7 @@ class AuthService():
         if auto_error:
             raise LearningHouseSecurityException(description)
 
-    def verify_jwt(self, access_token: str, subject: str) -> Tuple[bool, str | None]:
+    def verify_jwt(self, access_token: str, subject: str) -> Tuple[bool, Union[str, None]]:
         verified = False
         jti = None
         try:

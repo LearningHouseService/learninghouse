@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 from secrets import token_hex
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from pydantic import BaseSettings, DirectoryPath
 
@@ -85,7 +85,7 @@ class ServiceSettings(BaseSettings):
         return base_url
 
     @property
-    def documentation_url(self) -> str | None:
+    def documentation_url(self) -> Union[str, None]:
         documentation_url = None
 
         if self.docs_url is not None:

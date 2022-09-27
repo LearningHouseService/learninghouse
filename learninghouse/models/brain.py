@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictFloat
 
@@ -43,7 +43,7 @@ class BrainTrainingRequest(DictModel):
     for this `feature` will be assumed.
     """
 
-    __root__: Dict[str, StrictBool | StrictInt | StrictFloat | str | None] = Field(None, example={
+    __root__: Dict[str, Union[StrictBool, StrictInt, StrictFloat, str, None]] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
@@ -57,7 +57,7 @@ class BrainTrainingRequest(DictModel):
 
 
 class BrainPredictionRequest(DictModel):
-    __root__: Dict[str,  StrictBool | StrictInt | StrictFloat | str | None] = Field(None, example={
+    __root__: Dict[str,  Union[StrictBool, StrictInt, StrictFloat, str, None]] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
@@ -71,11 +71,11 @@ class BrainPredictionRequest(DictModel):
 
 class BrainPredictionResult(BaseModel):
     brain: BrainInfo
-    preprocessed: Dict[str, StrictBool | StrictInt | StrictFloat | str] = Field(None, example={
+    preprocessed: Dict[str, Union[StrictBool, StrictInt, StrictFloat, str]] = Field(None, example={
         'azimuth': 321.4441223144531,
         'elevation': -19.691608428955078,
         'rain_gauge': 0.0,
         'pressure_trend_1h_falling': 1
     })
-    prediction: StrictBool | StrictInt | StrictFloat = Field(
+    prediction: Union[StrictBool, StrictInt, StrictFloat] = Field(
         None, example=False)

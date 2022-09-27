@@ -5,6 +5,7 @@ ARG VERSION
 RUN set -eux; \
     pip3 wheel \
         --wheel-dir=/root/wheels \
+        --extra-index-url https://www.piwheels.org/simple \
         learninghouse==${VERSION}
 
 FROM python:3.10-slim

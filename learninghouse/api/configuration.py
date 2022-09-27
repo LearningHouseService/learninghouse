@@ -1,18 +1,17 @@
 
-from fastapi import APIRouter, Body, Path, status, Depends
+from fastapi import APIRouter, Body, Depends, status
 
 from learninghouse.api.errors.brain import BrainExists, BrainNoConfiguration
 from learninghouse.api.errors.sensor import NoSensor, SensorExists
 from learninghouse.models.configuration import (BrainConfiguration,
                                                 BrainConfigurationRequest,
                                                 BrainConfigurations,
-                                                BrainDeleteResult,
-                                                BrainFileType, Sensor,
+                                                BrainDeleteResult, Sensor,
                                                 SensorDeleteResult, Sensors,
                                                 SensorType)
+from learninghouse.services.auth import auth_service
 from learninghouse.services.configuration import (BrainConfigurationService,
                                                   SensorConfigurationService)
-from learninghouse.services.auth import auth_service
 
 brain_router = APIRouter(
     prefix='/brain',
@@ -76,16 +75,16 @@ async def brain_put(name: str, configuration: BrainConfiguration):
     return BrainConfigurationService.update(name, configuration)
 
 
-@brain_router.delete('/{name}/configuration/{filetype}',
+@brain_router.delete('/{name}/configuration',
                      response_model=BrainDeleteResult,
-                     summary='Delete specific file or whole brain',
+                     summary='Delete whole brain',
                      responses={
                          status.HTTP_200_OK: {
-                             'description': 'Returns the name of the brain and the deleted filetype'
+                             'description': 'Returns the name of the brain'
                          }
                      })
-async def brain_delete(name: str, filetype: BrainFileType = Path(BrainFileType.ALL)):
-    return BrainConfigurationService.delete(name, filetype)
+async def brain_delete(name: str):
+    return BrainConfigurationService.delete(name)
 
 sensor_router = APIRouter(
     prefix='/sensor',

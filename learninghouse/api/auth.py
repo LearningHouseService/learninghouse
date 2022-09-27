@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Union
 
 from fastapi import APIRouter, Depends, Path
 
+from learninghouse.api.errors.auth import InvalidPassword
 from learninghouse.models.auth import (APIKey, APIKeyInfo, APIKeyRequest,
                                        LoginRequest, PasswordRequest, Token,
                                        UserRole)
@@ -16,7 +17,13 @@ router = APIRouter(
 
 
 @router.post('/token',
-             response_model=Token)
+             response_model=Token,
+             responses={
+                 200: {
+                     'description': 'Successfully retrieve token'
+                 },
+                 InvalidPassword.STATUS_CODE: InvalidPassword.api_description()
+             })
 async def post_token(request: LoginRequest):
     return auth.create_token(request.password)
 
@@ -29,7 +36,7 @@ async def put_token(refresh_token_jti: str = Depends(auth.protect_refresh)):
 
 @router.delete('/token',
                response_model=bool)
-async def delete_token(refresh_token_jti: str = Depends(auth.protect_refresh)):
+async def delete_token(refresh_token_jti: Union[str, None] = Depends(auth.get_refresh)):
     return auth.revoke_refresh_token(refresh_token_jti)
 
 
@@ -60,7 +67,7 @@ if not auth.is_initial_admin_password:
     async def delete_apikey(description: str = Path(None,
                                                     min_length=3,
                                                     max_length=15,
-                                                    regex='^[a-z][a-z_]{1,13}[a-z]$',
+                                                    regex=r'^[A-Za-z]\w{1,13}[A-Za-z0-9]$',
                                                     example='app_as_user')):
         return auth.delete_apikey(description)
 

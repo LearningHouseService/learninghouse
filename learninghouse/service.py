@@ -39,15 +39,15 @@ def get_application() -> FastAPI:
         LearningHouseException, learninghouse_exception_handler)
 
     application.add_middleware(
+        uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware)
+
+    application.add_middleware(
         CORSMiddleware,
         allow_origins=['*'],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    application.add_middleware(
-        uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware)
 
     if auth_service().is_initial_admin_password:
         application.add_middleware(EnforceInitialPasswordChange)

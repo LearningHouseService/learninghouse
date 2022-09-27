@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from os import path, stat
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import joblib
 import pandas as pd
@@ -36,8 +36,8 @@ class Brain():
         self.dataset: DatasetConfiguration = DatasetConfiguration(
             self.configuration)
 
-        self._estimator: Optional[RandomForestClassifier |
-                                  RandomForestRegressor] = None
+        self._estimator: Optional[Union[RandomForestClassifier,
+                                  RandomForestRegressor]] = None
 
         self.score: Optional[float] = 0.0
 
@@ -45,7 +45,7 @@ class Brain():
 
         self.trained_at: Optional[datetime] = None
 
-    def estimator(self) -> RandomForestClassifier | RandomForestRegressor:
+    def estimator(self) -> Union[RandomForestClassifier, RandomForestRegressor]:
         if self._estimator is None:
             self._estimator = self.configuration.estimator.typed.estimator_class(
                 n_estimators=self.configuration.estimator.estimators,
@@ -56,6 +56,10 @@ class Brain():
         return self._estimator
 
     @property
+    def actual_versions(self) -> bool:
+        return self.versions == versions
+
+    @property
     def info(self) -> BrainInfo:
         info = BrainInfo(
             name=self.name,
@@ -64,22 +68,18 @@ class Brain():
             training_data_size=self.dataset.data_size,
             score=self.score,
             trained_at=self.trained_at,
-            versions=self.versions
+            versions=self.versions,
+            actual_versions=self.actual_versions
         )
 
         return info
 
     @classmethod
-    def load_trained(cls, name: str, check_versions: Optional[bool] = True) -> Brain:
+    def load_trained(cls, name: str) -> Brain:
         try:
             filename = sanitize_configuration_filename(
                 name, BrainFileType.TRAINED_FILE)
             brain_config = joblib.load(filename)
-            if brain_config.versions != versions:
-                logger.warning(
-                    f'Trained brain {name} is not actual. Versions: {brain_config.versions}')
-                if check_versions:
-                    raise BrainNotActual(name, brain_config.versions)
 
             return brain_config
         except FileNotFoundError as exc:
@@ -105,7 +105,9 @@ class Brain():
             infofile.write(self.info.json(indent=4))
 
 
-class BrainTraining():
+class BrainService():
+
+    brains: Dict[str, Dict[str, Union[int, Brain]]] = {}
 
     @classmethod
     def request(cls, name: str, request_data: Optional[Dict[str, Any]] = None) -> BrainInfo:
@@ -169,14 +171,13 @@ class BrainTraining():
         except FileNotFoundError as exc:
             raise BrainNoConfiguration(name) from exc
 
-
-class BrainPrediction():
-    brains: Dict[str, Dict[str, int | Brain]] = {}
-
     @classmethod
     def prediction(cls, name: str, request_data: Dict[str, Any]):
         try:
             brain = cls.load_brain(name)
+            if not brain.actual_versions:
+                raise BrainNotActual(name, brain.versions)
+
             request_data = DatasetPreprocessing.add_time_information(
                 request_data)
 

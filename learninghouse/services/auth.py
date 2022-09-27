@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -9,6 +9,7 @@ from jose import JWTError, jwt
 
 from learninghouse.api.errors import (LearningHouseSecurityException,
                                       LearningHouseUnauthorizedException)
+from learninghouse.api.errors.auth import InvalidPassword
 from learninghouse.core.logging import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.auth import (APIKey, APIKeyInfo, APIKeyRequest,
@@ -42,7 +43,7 @@ class AuthService():
 
     def create_token(self, password: str) -> Token:
         if not self.database.authenticate_password(password):
-            raise LearningHouseSecurityException('Invalid password')
+            raise InvalidPassword()
 
         self.cleanup_refresh_tokens()
         token = self.create_new_token()
@@ -63,14 +64,15 @@ class AuthService():
 
         return token
 
-    def revoke_refresh_token(self, refresh_token_jti: str) -> bool:
+    def revoke_refresh_token(self, refresh_token_jti: Union[str, None]) -> bool:
 
         self.cleanup_refresh_tokens()
 
-        if refresh_token_jti in self.refresh_tokens:
-            del self.refresh_tokens[refresh_token_jti]
+        if refresh_token_jti:
+            if refresh_token_jti in self.refresh_tokens:
+                del self.refresh_tokens[refresh_token_jti]
 
-        logger.info('Logout admininstrator refresh token')
+            logger.info('Logout admininstrator refresh token')
 
         return True
 
@@ -82,9 +84,13 @@ class AuthService():
         return True
 
     def cleanup_refresh_tokens(self):
+        del_tokens = []
         for jti, expire in self.refresh_tokens.items():
             if expire < datetime.utcnow():
-                del self.refresh_tokens[jti]
+                del_tokens.append(jti)
+
+        for jti in del_tokens:
+            del self.refresh_tokens[jti]
 
     def create_new_token(self) -> Token:
         issuetime = datetime.utcnow()
@@ -106,7 +112,7 @@ class AuthService():
 
     def update_password(self, old_password: str, new_password: str) -> bool:
         if not self.database.authenticate_password(old_password):
-            raise LearningHouseSecurityException('Invalid old password')
+            raise InvalidPassword()
 
         self.database.update_password(new_password)
         self.database.write()
@@ -149,6 +155,14 @@ class AuthService():
 
         return jti
 
+    async def get_refresh(self,
+                          credentials: HTTPAuthorizationCredentials = Security(
+                              jwt_bearer)) -> Union[str, None]:
+        is_valid, jti = self.validate_credentials(
+            credentials, False, 'refresh')
+
+        return jti if is_valid else None
+
     async def protect_user(self,
                            credentials: HTTPAuthorizationCredentials = Security(
                                jwt_bearer),
@@ -173,7 +187,7 @@ class AuthService():
     def is_admin_user_or_trainer(self,
                                  credentials: HTTPAuthorizationCredentials,
                                  query: str,
-                                 header: str) -> UserRole | None:
+                                 header: str) -> Union[UserRole, None]:
         role = None
 
         is_valid, _ = self.validate_credentials(credentials, False, 'admin')
@@ -193,9 +207,9 @@ class AuthService():
         return role
 
     def validate_credentials(self,
-                             credentials: HTTPAuthorizationCredentials | None,
+                             credentials: Union[HTTPAuthorizationCredentials, None],
                              auto_error: bool,
-                             subject: str) -> Tuple[bool, str | None]:
+                             subject: str) -> Tuple[bool, Union[str, None]]:
         is_valid = True
         jti = None
 
@@ -224,7 +238,7 @@ class AuthService():
         if auto_error:
             raise LearningHouseSecurityException(description)
 
-    def verify_jwt(self, access_token: str, subject: str) -> Tuple[bool, str | None]:
+    def verify_jwt(self, access_token: str, subject: str) -> Tuple[bool, Union[str, None]]:
         verified = False
         jti = None
         try:

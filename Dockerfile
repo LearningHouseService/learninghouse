@@ -6,7 +6,6 @@ RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \ 
         libatlas-base-dev \
-        libgfortran5-dev \ 
         libgfortran5 \
         libatlas3-base; \
     pip3 wheel \

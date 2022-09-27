@@ -1,19 +1,14 @@
-FROM python:3.9-slim as buildimage
+FROM python:3.10-slim as buildimage
 
 ARG VERSION
 
 RUN set -eux; \
-    apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \ 
-        libatlas-base-dev \
-        libgfortran5 \
-        libatlas3-base; \
     pip3 wheel \
         --wheel-dir=/root/wheels \
         --extra-index-url https://www.piwheels.org/simple \
         learninghouse==${VERSION}
 
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 ARG VERSION
 
@@ -30,9 +25,7 @@ RUN set -eux; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
         gosu \
-        tini \
-        libgfortran5 \
-        libatlas3-base; \
+        tini; \
     ln -s -f $(which gosu) /usr/local/bin/gosu; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/*; \

@@ -3,6 +3,9 @@ FROM python:3.9-slim as buildimage
 ARG VERSION
 
 RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \ 
+        libatlas-base-dev; \
     pip3 wheel \
         --wheel-dir=/root/wheels \
         --extra-index-url https://www.piwheels.org/simple \

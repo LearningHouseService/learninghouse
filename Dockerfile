@@ -1,13 +1,14 @@
-FROM python:3.10-slim as buildimage
+FROM python:3.9-slim as buildimage
 
 ARG VERSION
 
 RUN set -eux; \
     pip3 wheel \
         --wheel-dir=/root/wheels \
+        --extra-index-url https://www.piwheels.org/simple \
         learninghouse==${VERSION}
 
-FROM python:3.10-slim
+FROM python:3.9-slim
 
 ARG VERSION
 

@@ -112,7 +112,10 @@
 			"actions": {
 				"add": "Hinzufügen",
 				"cancel": "Abbruch",
-				"delete": "Löschen"
+				"delete": "Löschen",
+				"delete_row_description": "{{rowDescription}} löschen",
+				"edit": "Bearbeiten",
+				"edit_row_description": "{{rowDescription}} bearbeiten"
 			},
 			"columns": {
 				"actions": "Aktionen"

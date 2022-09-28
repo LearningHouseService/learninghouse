@@ -2,9 +2,20 @@ import { AfterContentInit, AfterViewInit, Component, ContentChild, ContentChildr
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatColumnDef, MatHeaderRowDef, MatNoDataRow, MatRowDef, MatTable, MatTableDataSource } from '@angular/material/table';
+import { TableActionsService } from '../../services/table-actions.service';
 import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
 
 let nextId = 0;
+
+export interface TableConfig {
+  id?: string;
+  title: string;
+  rowDescription?: string;
+  columns: string[];
+  showAdd?: boolean;
+  showEdit?: boolean;
+  showDelete?: boolean;
+}
 
 @Component({
   selector: 'learninghouse-table',
@@ -16,25 +27,35 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
   private readonly _id = `${nextId++}`;
 
   @Input()
-  dataSource!: MatTableDataSource<any>;
+  dataSource!: MatTableDataSource<T>;
 
   @Input()
-  columns: string[] = [];
+  set config(values: TableConfig) {
+    this._tableConfig = {
+      id: 'table_' + this._id,
+      showAdd: true,
+      showEdit: false,
+      showDelete: false,
+      ...values
+    }
 
-  @Input()
-  add: boolean = false;
+    if (!this.config.rowDescription) {
+      this.config.rowDescription = this.config.columns[0];
+    }
 
-  @Output()
-  onAdd = new EventEmitter<void>();
+    if (this.config.showEdit || this.config.showDelete) {
+      this.config.columns.push('actions');
+    }
+  }
 
-  @Input()
-  delete: boolean = false;
+  get config(): TableConfig {
+    return this._tableConfig;
+  }
 
-  @Output()
-  onDelete = new EventEmitter<T>();
-
-  @Input()
-  title: string = '';
+  private _tableConfig = {
+    title: '',
+    columns: ['actions']
+  };
 
   @ContentChildren(MatHeaderRowDef) headerRowDefs!: QueryList<MatHeaderRowDef>;
   @ContentChildren(MatRowDef) rowDefs!: QueryList<MatRowDef<T>>;
@@ -47,7 +68,7 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
 
   filter: string = '';
 
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, public actionsService: TableActionsService) { }
 
   ngAfterContentInit() {
     this.columnDefs.forEach(columnDef => this.table.addColumnDef(columnDef));
@@ -77,9 +98,8 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.onDelete.emit(row);
+        this.actionsService.onDelete.emit({ id: this.config.id!, row: row });
       }
-
     })
   }
 

@@ -1,10 +1,11 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
-import { map } from 'rxjs';
+import { map, Subject, takeUntil } from 'rxjs';
 import { APIKeyModel } from 'src/app/shared/models/auth.model';
+import { TableActionsService, TableAddAction, TableDeleteAction } from 'src/app/shared/services/table-actions.service';
 import { AuthService } from '../../auth.service';
 import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.component';
 
@@ -13,16 +14,36 @@ import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.
   templateUrl: './apikeys.component.html',
   styleUrls: ['./apikeys.component.scss']
 })
-export class APIKeysComponent implements AfterViewInit {
+export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
-  apikeys: APIKeyModel[] = [];
   dataSource = new MatTableDataSource<APIKeyModel>();
 
-  displayedColumns = ['description', 'role', 'actions'];
+  tableConfig = {
+    title: 'pages.auth.apikeys.common.title',
+    columns: ['description', 'role'],
+    showDelete: true
+  }
+
+  private destroyed = new Subject<void>();
 
   @ViewChild('sort') sort!: MatSort;
 
-  constructor(public dialog: MatDialog, private authService: AuthService, private translateService: TranslateService) {
+  constructor(public dialog: MatDialog, private authService: AuthService, private translateService: TranslateService, private tableActions: TableActionsService) {
+
+    this.tableActions.onAdd.pipe(
+      takeUntil(this.destroyed),
+      map(() => this.onAdd())
+    ).subscribe()
+
+    this.tableActions.onDelete.pipe(
+      takeUntil(this.destroyed),
+      map((action: TableDeleteAction<APIKeyModel>) => this.onDelete(action.row))
+    ).subscribe()
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed.next();
+    this.destroyed.complete();
   }
 
   ngAfterViewInit(): void {
@@ -34,7 +55,6 @@ export class APIKeysComponent implements AfterViewInit {
     this.authService.getAPIKeys()
       .pipe(
         map((apikeys) => {
-          this.apikeys = apikeys;
           const translatedAPIKeys: APIKeyModel[] = [];
           apikeys.forEach((apikey) => {
             translatedAPIKeys.push({
@@ -50,7 +70,7 @@ export class APIKeysComponent implements AfterViewInit {
 
   onAdd(): void {
     const dialogRef = this.dialog.open(AddAPIKeyDialogComponent, {
-      width: '400px'
+      width: '480px'
     });
 
     dialogRef.afterClosed().subscribe((apikey: APIKeyModel | null) => {

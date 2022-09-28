@@ -112,7 +112,10 @@
 			"actions": {
 				"add": "Add",
 				"cancel": "Cancel",
-				"delete": "Delete"
+				"delete": "Delete",
+				"delete_row_description": "Delete {{rowDescription}}",
+				"edit": "Edit",
+				"edit_row_description": "Edit {{rowDescription}}"
 			},
 			"columns": {
 				"actions": "Actions"

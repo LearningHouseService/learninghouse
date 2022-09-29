@@ -2,22 +2,20 @@ import { BehaviorSubject, of } from "rxjs";
 import { LearningHouseError } from "../../models/api.model";
 
 export class AbstractFormResponse {
-    success$ = new BehaviorSubject<boolean>(false);
-
-    error$ = new BehaviorSubject<string | null>(null);
-
-    constructor(public successMessage: string) { }
+    state$ = new BehaviorSubject<string | null>(null);
 
     handleSuccess() {
-        this.error$.next(null);
-        this.success$.next(true);
+        this.state$.next('success');
         return of(true);
     }
 
     handleError(error: LearningHouseError) {
-        this.success$.next(false);
-        this.error$.next(error.key);
+        this.state$.next(error.key);
         return of(false);
+    }
+
+    get isSuccess(): boolean {
+        return this.state$.getValue() === 'success';
     }
 
 }

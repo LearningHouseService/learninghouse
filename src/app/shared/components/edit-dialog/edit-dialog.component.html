@@ -1,28 +1,23 @@
 <div class="container">
-    <div mat-dialog-title>{{title | translate}}</div>
+    <div mat-dialog-title>{{config.title | translate}}</div>
     <form>
         <mat-dialog-content>
-            <learninghouse-form-response [success]="success" [successMessage]="successMessage!" [error]="error"
-                [errorPrefix]="errorPrefix!"></learninghouse-form-response>
+            <learninghouse-form-response [state]="state" [config]="config.responseConfig!">
+            </learninghouse-form-response>
             <ng-content></ng-content>
         </mat-dialog-content>
-        <mat-dialog-actions fxLayout="row" [fxLayoutAlign]="(add || edit) ? 'space-between center' : 'center center'">
-            <button mat-raised-button (click)="onClose.emit()" [color]="!(add || edit) ? 'primary' : ''">
+        <mat-dialog-actions fxLayout="row"
+            [fxLayoutAlign]="(config.submitButton$ | async) ? 'space-between center' : 'center center'">
+            <button mat-raised-button [color]="!(config.submitButton$ | async) ? 'primary' : ''"
+                (click)="actions.onClose.emit()">
                 <mat-icon>close</mat-icon>
                 {{'components.editdialog.buttons.close' |
                 translate}}
             </button>
-            <button mat-raised-button type="submit" *ngIf="edit" (click)="onEdit.emit()" color="primary"
-                [disabled]="!valid">
-                <mat-icon>edit</mat-icon>
-                {{'components.editdialog.buttons.edit' |
-                translate}}
-            </button>
-            <button mat-raised-button type="submit" *ngIf="add" (click)="onAdd.emit()" color="primary"
-                [disabled]="!valid">
-                <mat-icon>add</mat-icon>
-                {{'components.editdialog.buttons.add' |
-                translate}}
+            <button mat-raised-button type="submit" *ngIf="(config.submitButton$ | async)" color="primary"
+                [disabled]="!valid" (click)="actions.onSubmit.emit()">
+                <mat-icon>{{(config.submitButton$ | async)?.icon}}</mat-icon>
+                {{(config.submitButton$ | async)!.label| translate}}
             </button>
         </mat-dialog-actions>
     </form>

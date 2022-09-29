@@ -1,6 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { AlertType } from '../alert/alert.component';
 
+export interface FormResponseConfig {
+  successMessage?: string;
+  errorPrefix?: string;
+}
 @Component({
   selector: 'learninghouse-form-response',
   templateUrl: './form-response.component.html',
@@ -10,14 +14,20 @@ export class FormResponseComponent {
   public AlertType = AlertType
 
   @Input()
-  success: boolean | null = false;
+  set config(values: FormResponseConfig) {
+    this._config = {
+      successMessage: 'common.messages.success',
+      errorPrefix: 'common.errors',
+      ...values
+    };
+  }
+
+  get config(): FormResponseConfig {
+    return this._config;
+  }
+
+  private _config = {}
 
   @Input()
-  successMessage: string = 'common.messages.success';
-
-  @Input()
-  error: string | null = null;
-
-  @Input()
-  errorPrefix: string = 'common.errors';
+  state?: string | null = null;
 }

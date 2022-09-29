@@ -1,19 +1,18 @@
-<learninghouse-edit-dialog [errorPrefix]="'pages.auth.apikeys.errors'" [error]="error$ | async"
-    [success]="(success$ | async)!" [title]="'pages.auth.apikeys.common.dialog_title'" [add]="!(success$ | async)"
-    (onAdd)="onAdd()" (onClose)="onClose()" [valid]="form.valid">
-    <learninghouse-alert *ngIf="(success$ |async)" [alertType]="AlertType.warning">
+<learninghouse-edit-dialog [config]="dialogConfig" [state]="(state$ | async)" [valid]="form.valid">
+    <learninghouse-alert *ngIf="isSuccess" [alertType]="AlertType.warning">
         <div fxLayout="row" fxLayoutAlign="start center">
             <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:
                 {apikey: apikey?.key} }}</span>
-            <button mat-icon-button fxFlex="36px" [matTooltip]="'common.buttons.copy_to_clipboard' | translate" (click)="copyToClipboard()">
+            <button mat-icon-button fxFlex="36px" [matTooltip]="'common.buttons.copy_to_clipboard' | translate"
+                (click)="copyToClipboard()">
                 <mat-icon>content_copy</mat-icon>
             </button>
         </div>
     </learninghouse-alert>
-    <learninghouse-input [name]="'pages.auth.apikeys.columns.description' | translate" [control]="description"
-        [maxlength]="15">
+    <learninghouse-input [name]="'pages.auth.apikeys.columns.description' | translate"
+        [control]="form.controls.description" [maxlength]="15">
     </learninghouse-input>
-    <learninghouse-select [name]="'pages.auth.apikeys.columns.role' | translate" [control]="role"
+    <learninghouse-select [name]="'pages.auth.apikeys.columns.role' | translate" [control]="form.controls.role"
         [options]="roleOptions">
     </learninghouse-select>
 </learninghouse-edit-dialog>

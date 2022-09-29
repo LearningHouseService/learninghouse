@@ -1,7 +1,8 @@
 {
 	"common": {
 		"buttons": {
-			"copy_to_clipboard": "Copy to clipboard"
+			"copy_to_clipboard": "Copy to clipboard",
+			"save": "Save"
 		},
 		"errors": {
 			"INVALID_PASSWORD": "Invalid password",
@@ -146,6 +147,7 @@
 				},
 				"common": {
 					"dialog_title": "New API key",
+					"success": "Succesfully added",
 					"title": "API keys"
 				},
 				"errors": {

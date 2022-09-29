@@ -1,7 +1,8 @@
 {
 	"common": {
 		"buttons": {
-			"copy_to_clipboard": "In die Zwischenablage kopieren"
+			"copy_to_clipboard": "In die Zwischenablage kopieren",
+			"save": "Speichern"
 		},
 		"errors": {
 			"INVALID_PASSWORD": "Ungültiges Passwort",
@@ -146,6 +147,7 @@
 				},
 				"common": {
 					"dialog_title": "Neuer API-Schlüssel",
+					"success": "Erfolgreich hinzugefügt",
 					"title": "API-Schlüssel"
 				},
 				"errors": {

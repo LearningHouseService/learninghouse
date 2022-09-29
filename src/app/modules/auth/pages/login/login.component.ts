@@ -4,9 +4,17 @@ import { Router } from '@angular/router';
 import { catchError, map } from 'rxjs';
 import { AlertType } from 'src/app/shared/components/alert/alert.component';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
+import { FormResponseConfig } from 'src/app/shared/components/form-response/form-response.component';
 import { ServiceMode } from 'src/app/shared/models/api.model';
 import { APIService } from 'src/app/shared/services/api.service';
 import { AuthService } from '../../auth.service';
+import { AuthValidators } from '../../auth.validators';
+import { ChangePasswordForm, ChangePasswordRequestForm } from '../change-password/change-password.component';
+
+interface NormalPasswordForm {
+  password: FormControl<string>;
+}
+
 
 @Component({
   selector: 'learninghouse-login',
@@ -19,20 +27,30 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
 
   public ServiceMode = ServiceMode;
 
-  private form: FormGroup;
+  public normal: FormGroup<NormalPasswordForm>;
+
+  public initial: FormGroup<ChangePasswordForm>;
+
+  readonly responseConfig: FormResponseConfig = {
+    successMessage: 'pages.auth.login.common.success'
+  };
 
   constructor(private formBuilder: NonNullableFormBuilder, public api: APIService, private authService: AuthService,
     private router: Router) {
-    super('pages.auth.login.common.success');
-    this.form = this.formBuilder.group({
-      normal: this.formBuilder.group({
-        password: ['', [Validators.required]]
-      }),
-      initial: this.formBuilder.group({
-        old_password: ['', [Validators.required]],
-        new_password: ['', [Validators.required]]
-      })
+    super();
 
+    this.normal = this.formBuilder.group<NormalPasswordForm>({
+      password: this.formBuilder.control('', [Validators.required])
+    })
+
+    this.initial = this.formBuilder.group<ChangePasswordForm>({
+      api: this.formBuilder.group<ChangePasswordRequestForm>({
+        old_password: this.formBuilder.control('', [Validators.required]),
+        new_password: this.formBuilder.control('', [Validators.required])
+      }),
+      confirm_password: this.formBuilder.control('', [Validators.required])
+    }, {
+      validators: [AuthValidators.MatchValidator('api.new_password', 'confirm_password')]
     });
   }
 
@@ -40,28 +58,8 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
     this.api.update_mode()
   }
 
-  get normal(): FormGroup {
-    return <FormGroup>this.form.get('normal');
-  }
-
-  get password(): FormControl {
-    return <FormControl>this.form.get('normal.password');
-  }
-
-  get initial(): FormGroup {
-    return <FormGroup>this.form.get('initial');
-  }
-
-  get old_password(): FormControl {
-    return <FormControl>this.form.get('initial.old_password');
-  }
-
-  get new_password(): FormControl {
-    return <FormControl>this.form.get('initial.new_password');
-  }
-
   submitLoginAdmin() {
-    this.authService.loginAdmin(this.normal.value)
+    this.authService.loginAdmin(this.normal.getRawValue())
       .pipe(
         map(() => {
           this.router.navigate(['/dashboard']);
@@ -72,7 +70,7 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
   }
 
   submitLoginAPIKey() {
-    this.authService.loginAPIKey(this.password.value)
+    this.authService.loginAPIKey(this.normal.controls.password.value)
       .pipe(
         map(() => {
           this.router.navigate(['/dashboard']);
@@ -83,13 +81,13 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
   }
 
   submitInitial() {
-    this.authService.loginAdmin({ password: this.old_password.value })
+    this.authService.loginAdmin({ password: this.initial.controls.api.controls.old_password.value })
       .pipe(
         map(() => {
-          this.authService.changePassword(this.initial.value)
+          this.authService.changePassword(this.initial.controls.api.getRawValue())
             .pipe(
               map(() => {
-                this.authService.loginAdmin({ password: this.new_password.value })
+                this.authService.loginAdmin({ password: this.initial.controls.api.controls.new_password.value })
                   .pipe(
                     map(() => {
                       this.handleSuccess();

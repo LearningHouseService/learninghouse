@@ -1,5 +1,6 @@
 <mat-form-field fxFlex>
-    <mat-label>{{name}}<span *ngIf="!required"> (Optional)</span></mat-label>
+    <mat-label>{{name | translate}}<span *ngIf="!required"> ({{'components.input.common.optional' | translate}})</span>
+    </mat-label>
     <input matInput #input [type]="type" [required]="required" [formControl]="control" [maxlength]="maxlength!">
     <mat-icon matSuffix *ngIf="clickableSuffixIcon" (click)="clickSuffix.emit()">{{clickableSuffixIcon}}</mat-icon>
     <mat-error matListItem *ngFor="let error of errorTranslationKeys()">{{error | translate}}</mat-error>

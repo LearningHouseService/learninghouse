@@ -1,5 +1,6 @@
 <mat-form-field fxFlex>
-    <mat-label>{{name}}<span *ngIf="!required"> (Optional)</span></mat-label>
+    <mat-label>{{name | translate}}<span *ngIf="!required"> ({{'components.input.common.optional' | translate}})</span>
+    </mat-label>
     <mat-select [required]="required" [formControl]="control" [maxlength]="maxlength!">
         <mat-option [value]="option.value" *ngFor="let option of options">{{option.label | translate}}</mat-option>
     </mat-select>

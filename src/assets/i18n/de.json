@@ -28,6 +28,10 @@
 			"administrator": "Administrator",
 			"trainer": "Trainer",
 			"user": "Benutzer"
+		},
+		"sensortype": {
+			"categorical": "Kategorial",
+			"numerical": "Numerisch"
 		}
 	},
 	"components": {
@@ -186,6 +190,17 @@
 					"confirm_password": "Kennwort bestätigen",
 					"new_password": "Neues Kennwort",
 					"old_password": "Altes Kennwort"
+				}
+			}
+		},
+		"configuration": {
+			"sensors": {
+				"columns": {
+					"name": "Name",
+					"typed": "Sensorart"
+				},
+				"common": {
+					"title": "Sensoren"
 				}
 			}
 		}

@@ -1,17 +1,23 @@
-import { AfterContentInit, AfterViewInit, Component, ContentChild, ContentChildren, EventEmitter, Input, Output, QueryList, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
+import { MediaObserver } from '@angular/flex-layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatColumnDef, MatHeaderRowDef, MatNoDataRow, MatRowDef, MatTable, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { TableActionsService } from '../../services/table-actions.service';
 import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
 
 let nextId = 0;
 
+export interface TableColumn {
+  attr: string;
+  label: string;
+}
+
 export interface TableConfig {
   id?: string;
   title: string;
   rowDescription?: string;
-  columns: string[];
+  columns: TableColumn[];
   showAdd?: boolean;
   showEdit?: boolean;
   showDelete?: boolean;
@@ -22,12 +28,14 @@ export interface TableConfig {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss']
 })
-export class TableComponent<T> implements AfterContentInit, AfterViewInit {
+export class TableComponent<T> implements AfterViewInit {
 
   private readonly _id = `${nextId++}`;
 
   @Input()
   dataSource!: MatTableDataSource<T>;
+
+  displayColumns: string[] = [];
 
   @Input()
   set config(values: TableConfig) {
@@ -40,11 +48,15 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
     }
 
     if (!this.config.rowDescription) {
-      this.config.rowDescription = this.config.columns[0];
+      this.config.rowDescription = this.config.columns[0].attr;
     }
 
+    this.config.columns.forEach((column) => {
+      this.displayColumns.push(column.attr)
+    });
+
     if (this.config.showEdit || this.config.showDelete) {
-      this.config.columns.push('actions');
+      this.displayColumns.push('actions');
     }
   }
 
@@ -52,30 +64,20 @@ export class TableComponent<T> implements AfterContentInit, AfterViewInit {
     return this._tableConfig;
   }
 
-  private _tableConfig = {
+  private _tableConfig: TableConfig = {
     title: '',
-    columns: ['actions']
+    columns: []
   };
 
-  @ContentChildren(MatHeaderRowDef) headerRowDefs!: QueryList<MatHeaderRowDef>;
-  @ContentChildren(MatRowDef) rowDefs!: QueryList<MatRowDef<T>>;
-  @ContentChildren(MatColumnDef) columnDefs!: QueryList<MatColumnDef>;
-  @ContentChild(MatNoDataRow) noDataRow!: MatNoDataRow;
-
-  @ViewChild(MatTable, { static: true }) table!: MatTable<T>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   filter: string = '';
 
-  constructor(public dialog: MatDialog, public actionsService: TableActionsService) { }
+  constructor(public dialog: MatDialog,
+    public actionsService: TableActionsService,
+    public media$: MediaObserver) { }
 
-  ngAfterContentInit() {
-    this.columnDefs.forEach(columnDef => this.table.addColumnDef(columnDef));
-    this.rowDefs.forEach(rowDef => this.table.addRowDef(rowDef));
-    this.headerRowDefs.forEach(headerRowDef => this.table.addHeaderRowDef(headerRowDef));
-    this.table.setNoDataRow(this.noDataRow);
-  }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;

@@ -18,14 +18,18 @@
             </button>
         </div>
     </mat-card-header>
-    <mat-card-content fxLayout=" column" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
-        <table mat-table [dataSource]="dataSource" [attr.aria-describedby]="title_id">
-            <ng-content></ng-content>
+    <mat-card-content>
+        <mat-table [dataSource]="dataSource" [attr.aria-describedby]="title_id">
+            <ng-container [matColumnDef]="column.attr" *ngFor="let column of config.columns">
+                <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.label | translate}} </mat-header-cell>
+                <mat-cell *matCellDef="let row" [attr.data-label]="column.label | translate">{{row[column.attr]}}
+                </mat-cell>
+            </ng-container>
 
             <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef> {{'components.table.columns.actions' | translate}}
-                </th>
-                <td mat-cell *matCellDef="let row">
+                <mat-header-cell *matHeaderCellDef> {{'components.table.columns.actions' | translate}}
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row">
                     <button mat-icon-button (click)="actionsService.onEdit.emit({id: config.id!, row: row})"
                         *ngIf="config.showEdit"
                         [matTooltip]="'components.table.actions.edit_row_description' | translate: {rowDescription: row[config.rowDescription!]}">
@@ -35,26 +39,27 @@
                         [matTooltip]="'components.table.actions.delete_row_description' | translate: {rowDescription: row[config.rowDescription!]}">
                         <mat-icon>delete</mat-icon>
                     </button>
-                </td>
+                </mat-cell>
             </ng-container>
 
             <ng-container matColumnDef="paginator">
-                <td mat-footer-cell *matFooterCellDef [colSpan]="config.columns.length">
+                <mat-footer-cell *matFooterCellDef>
                     <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
-                </td>
+                </mat-footer-cell>
             </ng-container>
 
 
-            <tr mat-header-row *matHeaderRowDef="config.columns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: config.columns;"></tr>
+            <mat-header-row *matHeaderRowDef="displayColumns;"></mat-header-row>>
+            <mat-row *matRowDef="let row; columns: displayColumns;"></mat-row>>
 
             <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell no-items" [colSpan]="config.columns.length">{{'components.table.common.no_items' |
+                <td class="mat-cell no-items" [colSpan]="media$.isActive('lt-md') ? 1 : displayColumns.length">
+                    {{'components.table.common.no_items' |
                     translate}}
                 </td>
             </tr>
 
-            <tr mat-footer-row *matFooterRowDef="['paginator']; sticky: true"></tr>
-        </table>
+            <tr mat-footer-row *matFooterRowDef="['paginator'];"></tr>
+        </mat-table>
     </mat-card-content>
 </mat-card>

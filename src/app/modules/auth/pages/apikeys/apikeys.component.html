@@ -1,13 +1,3 @@
 <learninghouse-table [config]="tableConfig" [dataSource]="dataSource" matSort matSortActive="description"
     matSortDirection="asc" matSortDisableClear #sort="matSort">
-    <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'pages.auth.apikeys.columns.description'
-            |translate}} </th>
-        <td mat-cell *matCellDef="let row"> {{row.description}} </td>
-    </ng-container>
-    <ng-container matColumnDef="role">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> {{'pages.auth.apikeys.columns.role' | translate}}
-        </th>
-        <td mat-cell *matCellDef="let row"> {{row.role}} </td>
-    </ng-container>
 </learninghouse-table>

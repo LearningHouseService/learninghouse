@@ -20,7 +20,10 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
   tableConfig = {
     title: 'pages.auth.apikeys.common.title',
-    columns: ['description', 'role'],
+    columns: [
+      { attr: 'description', label: 'pages.auth.apikeys.columns.description' },
+      { attr: 'role', label: 'pages.auth.apikeys.columns.role' }
+    ],
     showDelete: true
   }
 

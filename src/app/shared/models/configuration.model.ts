@@ -1,9 +1,9 @@
 export enum SensorType {
-    numerical,
-    categorical
+    NUMERICAL = 'numerical',
+    CATEGORICAL = 'categorical'
 }
 
-export interface Sensor {
+export interface SensorModel {
     name: string;
     typed: SensorType;
 }

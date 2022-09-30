@@ -1,0 +1,7 @@
+<learninghouse-edit-dialog [config]="dialogConfig" [state]="(state$ | async)" [valid]="form.valid">
+    <learninghouse-input [name]="'pages.configuration.sensors.columns.name'" [control]="form.controls.name">
+    </learninghouse-input>
+    <learninghouse-select [name]="'pages.configuration.sensors.columns.typed'" [control]="form.controls.typed"
+        [options]="typedOptions">
+    </learninghouse-select>
+</learninghouse-edit-dialog>

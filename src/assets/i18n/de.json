@@ -49,6 +49,9 @@
 			"title": "Informationen"
 		},
 		"input": {
+			"common": {
+				"optional": "Optional"
+			},
 			"errors": {
 				"apikeyDescriptionPattern": "Darf nur die Buchstaben A-Z und Unterstriche enthalten",
 				"apikeyDescriptionShort": "Muss mindestens 3 Zeichen enthalten",
@@ -200,6 +203,8 @@
 					"typed": "Sensorart"
 				},
 				"common": {
+					"add_dialog_title": "Sensor hinzufügen",
+					"edit_dialog_title": "Sensor bearbeiten",
 					"title": "Sensoren"
 				}
 			}

@@ -32,8 +32,8 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
   private destroyed = new Subject<void>();
 
   public roleOptions = [
-    { value: APIKeyRole.user, label: 'common.role.user' },
-    { value: APIKeyRole.trainer, label: 'common.role.trainer' }
+    { value: APIKeyRole.USER, label: 'common.role.user' },
+    { value: APIKeyRole.TRAINER, label: 'common.role.trainer' }
   ]
 
   public dialogConfig: EditDialogConfig = {
@@ -56,17 +56,17 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
 
     this.form = this.fb.group<APIKeyForm>({
       description: this.fb.control<string>('', [Validators.required, AuthValidators.APIKeyDescriptionValidator]),
-      role: this.fb.control<APIKeyRole>(APIKeyRole.user, [Validators.required])
+      role: this.fb.control<APIKeyRole>(APIKeyRole.USER, [Validators.required])
     })
 
-    dialogActions.onSubmit
+    this.dialogActions.onSubmit
       .pipe(
         takeUntil(this.destroyed),
         map(() => this.onAdd())
       )
       .subscribe();
 
-    dialogActions.onClose
+    this.dialogActions.onClose
       .pipe(
         takeUntil(this.destroyed),
         map(() => this.onClose())

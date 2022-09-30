@@ -170,7 +170,7 @@ export class AuthService {
   public addAPIKey(apikey: APIKeyModel): Observable<APIKeyModel> {
     return this.api.post<APIKeyModel>('/auth/apikey', {
       description: apikey.description,
-      role: APIKeyRole[apikey.role]
+      role: apikey.role
     });
   }
 

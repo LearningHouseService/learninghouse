@@ -57,8 +57,8 @@ export interface ChangePasswordRequestModel {
 }
 
 export enum APIKeyRole {
-    user,
-    trainer
+    USER = 'user',
+    TRAINER = 'trainer'
 }
 
 export interface APIKeyModel {

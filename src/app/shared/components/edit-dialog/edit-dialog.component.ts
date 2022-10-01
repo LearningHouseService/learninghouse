@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { EditDialogActionsService } from '../../services/edit-dialog-actions.service';
 import { FormResponseConfig } from '../form-response/form-response.component';
@@ -31,7 +32,7 @@ export class EditDialogComponent {
   state: string | null = null;
 
   @Input()
-  valid: boolean = false;
+  form!: FormGroup;
 
   constructor(public actions: EditDialogActionsService) { }
 

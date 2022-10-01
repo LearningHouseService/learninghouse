@@ -20,19 +20,25 @@ interface SensorForm {
 })
 export class AddEditSensorDialogComponent extends AbstractFormResponse implements OnInit, OnDestroy {
 
-  static readonly ADD_DIALOG_CONFIG = {
+  private static readonly SUCCESS_MESSAGE = 'pages.configuration.sensors.common.success';
+
+  private static readonly ERROR_PREFIX = 'pages.configuration.sensors.errors';
+
+  private static readonly ADD_DIALOG_CONFIG = {
     title: 'pages.configuration.sensors.common.add_dialog_title',
     submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.ADD),
     responseConfig: {
-      successMessage: 'pages.configuration.sensors.common.success'
+      successMessage: AddEditSensorDialogComponent.SUCCESS_MESSAGE,
+      errorPrefix: AddEditSensorDialogComponent.ERROR_PREFIX
     }
   };
 
-  static readonly EDIT_DIALOG_CONFIG = {
+  private static readonly EDIT_DIALOG_CONFIG = {
     title: 'pages.configuration.sensors.common.edit_dialog_title',
     submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.EDIT),
     responseConfig: {
-      successMessage: 'pages.configuration.sensors.common.success'
+      successMessage: AddEditSensorDialogComponent.SUCCESS_MESSAGE,
+      errorPrefix: AddEditSensorDialogComponent.ERROR_PREFIX
     }
   };
 

@@ -1,6 +1,6 @@
 <div class="container">
     <div mat-dialog-title>{{config.title | translate}}</div>
-    <form>
+    <form (ngSubmit)="actions.onSubmit.emit()">
         <mat-dialog-content>
             <learninghouse-form-response [state]="state" [config]="config.responseConfig!">
             </learninghouse-form-response>
@@ -8,14 +8,14 @@
         </mat-dialog-content>
         <mat-dialog-actions fxLayout="row"
             [fxLayoutAlign]="(config.submitButton$ | async) ? 'space-between center' : 'center center'">
-            <button mat-raised-button [color]="!(config.submitButton$ | async) ? 'primary' : ''"
+            <button type="button" mat-raised-button [color]="!(config.submitButton$ | async) ? 'primary' : ''"
                 (click)="actions.onClose.emit()">
                 <mat-icon>close</mat-icon>
                 {{'components.editdialog.buttons.close' |
                 translate}}
             </button>
             <button mat-raised-button type="submit" *ngIf="(config.submitButton$ | async)" color="primary"
-                [disabled]="!valid" (click)="actions.onSubmit.emit()">
+                [disabled]="!form.valid" (click)="actions.onSubmit.emit()">
                 <mat-icon>{{(config.submitButton$ | async)?.icon}}</mat-icon>
                 {{(config.submitButton$ | async)!.label| translate}}
             </button>

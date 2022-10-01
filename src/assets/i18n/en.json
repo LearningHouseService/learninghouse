@@ -205,7 +205,11 @@
 				"common": {
 					"add_dialog_title": "Add sensor",
 					"edit_dialog_title": "Edit sensor",
+					"success": "Successfully",
 					"title": "Sensors"
+				},
+				"errors": {
+					"EXISTS": "There is already a sensor with this name"
 				}
 			}
 		}

@@ -9,6 +9,10 @@ import { TableActionsService, TableDeleteAction } from 'src/app/shared/services/
 import { AuthService } from '../../auth.service';
 import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.component';
 
+interface APIKeyTableModel extends APIKeyModel {
+  roleTranslated: string;
+}
+
 @Component({
   selector: 'learninghouse-apikeys',
   templateUrl: './apikeys.component.html',
@@ -16,13 +20,13 @@ import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.
 })
 export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
-  dataSource = new MatTableDataSource<APIKeyModel>();
+  dataSource = new MatTableDataSource<APIKeyTableModel>();
 
   tableConfig = {
     title: 'pages.auth.apikeys.common.title',
     columns: [
       { attr: 'description', label: 'pages.auth.apikeys.columns.description' },
-      { attr: 'role', label: 'pages.auth.apikeys.columns.role' }
+      { attr: 'roleTranslated', label: 'pages.auth.apikeys.columns.role' }
     ],
     showDelete: true
   }
@@ -40,7 +44,8 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
     this.tableActions.onDelete.pipe(
       takeUntil(this.destroyed),
-      map((action: TableDeleteAction<APIKeyModel>) => this.onDelete(action.row))
+      map((action: TableDeleteAction<APIKeyTableModel>) => action.row),
+      map((apikey: APIKeyModel) => this.onDelete(apikey))
     ).subscribe()
   }
 
@@ -58,11 +63,11 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
     this.authService.getAPIKeys()
       .pipe(
         map((apikeys) => {
-          const translatedAPIKeys: APIKeyModel[] = [];
+          const translatedAPIKeys: APIKeyTableModel[] = [];
           apikeys.forEach((apikey) => {
             translatedAPIKeys.push({
-              description: apikey.description,
-              role: this.translateService.instant('common.role.' + apikey.role)
+              ...apikey,
+              roleTranslated: this.translateService.instant('common.role.' + apikey.role)
             });
           })
           this.dataSource.data = translatedAPIKeys;

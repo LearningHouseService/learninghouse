@@ -205,7 +205,11 @@
 				"common": {
 					"add_dialog_title": "Sensor hinzufügen",
 					"edit_dialog_title": "Sensor bearbeiten",
+					"success": "Erfolgreich",
 					"title": "Sensoren"
+				},
+				"errors": {
+					"EXISTS": "Es gibt bereits einen Sensor mit diesem Namen"
 				}
 			}
 		}

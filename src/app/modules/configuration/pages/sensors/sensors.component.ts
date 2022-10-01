@@ -50,7 +50,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
       .pipe(
         takeUntil(this.destroyed),
         map((action: TableEditAction<SensorTableModel>) => { return action.row }),
-        map((sensor: SensorTableModel) => this.onEdit(sensor))
+        map((sensor: SensorModel) => this.onEdit(sensor))
       )
       .subscribe();
 
@@ -58,7 +58,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
       .pipe(
         takeUntil(this.destroyed),
         map((action: TableDeleteAction<SensorTableModel>) => { return action.row }),
-        map((sensor: SensorTableModel) => this.onDelete(sensor))
+        map((sensor: SensorModel) => this.onDelete(sensor))
       )
       .subscribe();
 

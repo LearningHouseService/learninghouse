@@ -5,13 +5,11 @@ import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { map, Subject, takeUntil } from 'rxjs';
 import { SensorModel, SensorType } from 'src/app/shared/models/configuration.model';
-import { TableActionsService, TableEditAction } from 'src/app/shared/services/table-actions.service';
+import { TableActionsService, TableDeleteAction, TableEditAction } from 'src/app/shared/services/table-actions.service';
 import { ConfigurationService } from '../../configuration.service';
 import { AddEditSensorDialogComponent } from './add-edit-sensor-dialog/add-edit-sensor-dialog.component';
 
-interface SensorTableModel {
-  name: string;
-  typed: SensorType;
+interface SensorTableModel extends SensorModel {
   typedTranslated: string;
 }
 
@@ -52,7 +50,15 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
       .pipe(
         takeUntil(this.destroyed),
         map((action: TableEditAction<SensorTableModel>) => { return action.row }),
-        map((sensor: SensorTableModel) => this.onEdit({ name: sensor.name, typed: sensor.typed as SensorType }))
+        map((sensor: SensorTableModel) => this.onEdit(sensor))
+      )
+      .subscribe();
+
+    this.tableActions.onDelete
+      .pipe(
+        takeUntil(this.destroyed),
+        map((action: TableDeleteAction<SensorTableModel>) => { return action.row }),
+        map((sensor: SensorTableModel) => this.onDelete(sensor))
       )
       .subscribe();
 
@@ -75,8 +81,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
           const translatedSensors: SensorTableModel[] = [];
           sensors.forEach((sensor) => {
             translatedSensors.push({
-              name: sensor.name,
-              typed: sensor.typed,
+              ...sensor,
               typedTranslated: this.translateService.instant('common.sensortype.' + sensor.typed)
             });
           });
@@ -111,6 +116,16 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
         this.loadData();
       }
     });
+  }
+
+  onDelete(sensor: SensorModel): void {
+    this.configService.deleteSensor(sensor)
+      .pipe(
+        map(() => {
+          this.loadData();
+        })
+      )
+      .subscribe()
   }
 
 }

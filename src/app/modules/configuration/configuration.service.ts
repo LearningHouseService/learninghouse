@@ -22,4 +22,18 @@ export class ConfigurationService {
                 })
             )
     }
+
+    createSensor(sensor: SensorModel): Observable<SensorModel> {
+        return this.api.post('/sensor', sensor);
+    }
+
+
+    updateSensor(sensor: SensorModel): Observable<SensorModel> {
+        return this.api.put('/sensor/' + sensor.name, sensor);
+    }
+
+
+    deleteSensor(sensor: SensorModel): Observable<{ name: string }> {
+        return this.api.delete('/sensor/' + sensor.name);
+    }
 }

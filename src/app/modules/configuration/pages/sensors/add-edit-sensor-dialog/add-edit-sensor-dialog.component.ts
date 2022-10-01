@@ -1,11 +1,12 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { BehaviorSubject, map, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, catchError, map, Subject, takeUntil } from 'rxjs';
 import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/edit-dialog/edit-dialog.component';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
 import { SensorModel, SensorType } from 'src/app/shared/models/configuration.model';
+import { ConfigurationService } from '../../../configuration.service';
 
 interface SensorForm {
   name: FormControl<string>;
@@ -18,6 +19,22 @@ interface SensorForm {
   styleUrls: ['./add-edit-sensor-dialog.component.scss']
 })
 export class AddEditSensorDialogComponent extends AbstractFormResponse implements OnInit, OnDestroy {
+
+  static readonly ADD_DIALOG_CONFIG = {
+    title: 'pages.configuration.sensors.common.add_dialog_title',
+    submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.ADD),
+    responseConfig: {
+      successMessage: 'pages.configuration.sensors.common.success'
+    }
+  };
+
+  static readonly EDIT_DIALOG_CONFIG = {
+    title: 'pages.configuration.sensors.common.edit_dialog_title',
+    submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.EDIT),
+    responseConfig: {
+      successMessage: 'pages.configuration.sensors.common.success'
+    }
+  };
 
   public form: FormGroup<SensorForm>
 
@@ -32,11 +49,12 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
     { value: SensorType.CATEGORICAL, label: 'common.sensortype.categorical' }
   ]
 
-  public dialogConfig: EditDialogConfig;
+  public dialogConfig$ = new BehaviorSubject<EditDialogConfig>(AddEditSensorDialogComponent.ADD_DIALOG_CONFIG);
 
   constructor(public dialogRef: MatDialogRef<AddEditSensorDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: SensorModel | null,
     private fb: NonNullableFormBuilder,
+    private configService: ConfigurationService,
     private dialogActions: EditDialogActionsService) {
 
     super();
@@ -50,24 +68,17 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
 
     if (this.data) {
       this.isEdit = true;
-      this.dialogConfig = {
-        title: 'pages.configuration.sensors.common.edit_dialog_title',
-        submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.EDIT),
-        responseConfig: {
-          successMessage: 'pages.configuration.sensors.common.success'
-        }
-      };
+      this.dialogConfig$.next(AddEditSensorDialogComponent.EDIT_DIALOG_CONFIG);
     } else {
       this.isEdit = false;
-      this.dialogConfig = {
-        title: 'pages.configuration.sensors.common.add_dialog_title',
-        submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.ADD),
-        responseConfig: {
-          successMessage: 'pages.configuration.sensors.common.success'
-        }
-      };
     }
 
+    this.dialogActions.onSubmit
+      .pipe(
+        takeUntil(this.destroyed),
+        map(() => this.onSubmit())
+      )
+      .subscribe();
 
     this.dialogActions.onClose
       .pipe(
@@ -88,6 +99,35 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
   ngOnDestroy(): void {
     this.destroyed.next();
     this.destroyed.complete();
+  }
+
+  onSubmit(): void {
+    if (this.isEdit) {
+      this.configService.updateSensor({
+        name: this.data!.name,
+        typed: this.form.controls.typed.value
+      })
+        .pipe(
+          map(() => {
+            this.handleSuccess();
+          }),
+          catchError((error) => this.handleError(error))
+        )
+        .subscribe();
+    } else {
+      this.configService.createSensor(this.form.getRawValue())
+        .pipe(
+          map((sensor: SensorModel) => {
+            this.isEdit = true;
+            this.data = sensor;
+            this.form.controls.name.disable();
+            this.dialogConfig$.next(AddEditSensorDialogComponent.EDIT_DIALOG_CONFIG);
+            this.handleSuccess();
+          }),
+          catchError((error) => this.handleError(error))
+        )
+        .subscribe();
+    }
   }
 
   onClose(): void {

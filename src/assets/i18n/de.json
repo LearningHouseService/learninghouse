@@ -4,6 +4,27 @@
 			"copy_to_clipboard": "In die Zwischenablage kopieren",
 			"save": "Speichern"
 		},
+		"enums": {
+			"estimatortype": {
+				"classifier": "Klassifikator",
+				"regressor": "Regressor"
+			},
+			"mode": {
+				"development": "Entwicklung",
+				"initial": "Initialisierung",
+				"production": "Produktion",
+				"unknown": "Unbekannt"
+			},
+			"role": {
+				"administrator": "Administrator",
+				"trainer": "Trainer",
+				"user": "Benutzer"
+			},
+			"sensortype": {
+				"categorical": "Kategorial",
+				"numerical": "Numerisch"
+			}
+		},
 		"errors": {
 			"INVALID_PASSWORD": "Ungültiges Passwort",
 			"UNAUTHORIZED": "Nicht autorisiert",
@@ -12,26 +33,11 @@
 		"messages": {
 			"success": "Erfolgreich"
 		},
-		"mode": {
-			"development": "Entwicklung",
-			"initial": "Initialisierung",
-			"production": "Produktion",
-			"unknown": "Unbekannt"
-		},
 		"paginator": {
 			"items_per_page": "Einträge pro Seite",
 			"next_page": "Nächste Seite",
 			"of_label": "von",
 			"previous_page": "Vorherige Seite"
-		},
-		"role": {
-			"administrator": "Administrator",
-			"trainer": "Trainer",
-			"user": "Benutzer"
-		},
-		"sensortype": {
-			"categorical": "Kategorial",
-			"numerical": "Numerisch"
 		}
 	},
 	"components": {
@@ -197,6 +203,16 @@
 			}
 		},
 		"configuration": {
+			"brains": {
+				"common": {
+					"title": "Konfiguration der Gehirne"
+				},
+				"fields": {
+					"dependent": "Abhängige Variable",
+					"name": "Name",
+					"typed": "Schätzertyp"
+				}
+			},
 			"sensors": {
 				"columns": {
 					"name": "Name",

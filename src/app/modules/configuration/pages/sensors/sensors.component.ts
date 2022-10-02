@@ -82,7 +82,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
           sensors.forEach((sensor) => {
             translatedSensors.push({
               ...sensor,
-              typedTranslated: this.translateService.instant('common.sensortype.' + sensor.typed)
+              typedTranslated: this.translateService.instant('common.enums.sensortype.' + sensor.typed)
             });
           });
 

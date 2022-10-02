@@ -67,7 +67,7 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
           apikeys.forEach((apikey) => {
             translatedAPIKeys.push({
               ...apikey,
-              roleTranslated: this.translateService.instant('common.role.' + apikey.role)
+              roleTranslated: this.translateService.instant('common.enums.role.' + apikey.role)
             });
           })
           this.dataSource.data = translatedAPIKeys;

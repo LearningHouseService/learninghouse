@@ -32,8 +32,8 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
   private destroyed = new Subject<void>();
 
   public roleOptions = [
-    { value: APIKeyRole.USER, label: 'common.role.user' },
-    { value: APIKeyRole.TRAINER, label: 'common.role.trainer' }
+    { value: APIKeyRole.USER, label: 'common.enums.role.user' },
+    { value: APIKeyRole.TRAINER, label: 'common.enums.role.trainer' }
   ]
 
   public dialogConfig: EditDialogConfig = {

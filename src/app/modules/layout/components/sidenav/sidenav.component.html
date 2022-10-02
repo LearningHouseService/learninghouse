@@ -27,7 +27,7 @@
                         {{'components.sidenav.buttons.logout' | translate}}
                     </h3>
                     <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
-                        {{'common.role.' + (authService.role$ | async) | translate}}</p>
+                        {{'common.enums.role.' + (authService.role$ | async) | translate}}</p>
                 </button>
                 <ng-container mat-list-item *ngIf="media$.isActive('gt-sm')">
                     <button mat-list-item *ngIf="(sidenavService.isOpened$ | async)"

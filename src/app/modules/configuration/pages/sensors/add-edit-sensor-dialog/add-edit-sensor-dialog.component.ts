@@ -51,8 +51,8 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
   private destroyed = new Subject<void>();
 
   public typedOptions = [
-    { value: SensorType.NUMERICAL, label: 'common.sensortype.numerical' },
-    { value: SensorType.CATEGORICAL, label: 'common.sensortype.categorical' }
+    { value: SensorType.NUMERICAL, label: 'common.enums.sensortype.numerical' },
+    { value: SensorType.CATEGORICAL, label: 'common.enums.sensortype.categorical' }
   ]
 
   public dialogConfig$ = new BehaviorSubject<EditDialogConfig>(AddEditSensorDialogComponent.ADD_DIALOG_CONFIG);

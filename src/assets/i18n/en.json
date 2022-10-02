@@ -4,6 +4,27 @@
 			"copy_to_clipboard": "Copy to clipboard",
 			"save": "Save"
 		},
+		"enums": {
+			"estimatortype": {
+				"classifier": "Classifier",
+				"regressor": "Regressor"
+			},
+			"mode": {
+				"development": "Development",
+				"initial": "Initialization",
+				"production": "Production",
+				"unknown": "Unknown"
+			},
+			"role": {
+				"administrator": "Administrator",
+				"trainer": "Trainer",
+				"user": "User"
+			},
+			"sensortype": {
+				"categorical": "Categorical",
+				"numerical": "numerical"
+			}
+		},
 		"errors": {
 			"INVALID_PASSWORD": "Invalid password",
 			"UNAUTHORIZED": "Unauthorized",
@@ -12,26 +33,11 @@
 		"messages": {
 			"success": "Successful"
 		},
-		"mode": {
-			"development": "Development",
-			"initial": "Initialization",
-			"production": "Production",
-			"unknown": "Unknown"
-		},
 		"paginator": {
 			"items_per_page": "Items per page",
 			"next_page": "Next page",
 			"of_label": "of",
 			"previous_page": "Previous page"
-		},
-		"role": {
-			"administrator": "Administrator",
-			"trainer": "Trainer",
-			"user": "User"
-		},
-		"sensortype": {
-			"categorical": "Categorical",
-			"numerical": "numerical"
 		}
 	},
 	"components": {
@@ -197,6 +203,16 @@
 			}
 		},
 		"configuration": {
+			"brains": {
+				"common": {
+					"title": "Brains configuration"
+				},
+				"fields": {
+					"dependent": "Dependent variable",
+					"name": "Name",
+					"typed": "Estimator type"
+				}
+			},
 			"sensors": {
 				"columns": {
 					"name": "Name",

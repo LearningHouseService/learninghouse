@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { map, Observable } from "rxjs";
-import { SensorModel, SensorType } from "src/app/shared/models/configuration.model";
+import { BrainConfigurationModel, SensorModel, SensorType } from "src/app/shared/models/configuration.model";
 import { APIService } from "src/app/shared/services/api.service";
 
 @Injectable({
@@ -9,6 +9,19 @@ import { APIService } from "src/app/shared/services/api.service";
 export class ConfigurationService {
 
     constructor(private api: APIService) { }
+
+    getBrains(): Observable<BrainConfigurationModel[]> {
+        return this.api.get<{ [key: string]: BrainConfigurationModel }>('/brains/configuration')
+            .pipe(
+                map((result) => {
+                    const brains: BrainConfigurationModel[] = [];
+                    for (const configuration of Object.values(result)) {
+                        brains.push(configuration);
+                    }
+                    return brains;
+                })
+            )
+    }
 
     getSensors(): Observable<SensorModel[]> {
         return this.api.get<{ [key: string]: SensorType }>('/sensors')

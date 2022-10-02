@@ -94,6 +94,7 @@ class BrainConfiguration(BaseModel):
         For the beginning a `test_size` of 20 % (0.2) like the example should be fine.
     """  # pylint: disable=line-too-long
 
+    name: str = Field(None, example='darkness')
     estimator: BrainEstimatorConfiguration
     dependent: str = Field(None, example='darkness')
     dependent_encode: Optional[bool] = Field(False)

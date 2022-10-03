@@ -4,8 +4,9 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { map, Subject, takeUntil } from 'rxjs';
-import { SensorModel, SensorType } from 'src/app/shared/models/configuration.model';
-import { TableActionsService, TableDeleteAction, TableEditAction } from 'src/app/shared/services/table-actions.service';
+import { TableActionButton, TableConfig } from 'src/app/shared/components/table/table.component';
+import { SensorModel } from 'src/app/shared/models/configuration.model';
+import { TableActionsService, TableRowAction } from 'src/app/shared/services/table-actions.service';
 import { ConfigurationService } from '../../configuration.service';
 import { AddEditSensorDialogComponent } from './add-edit-sensor-dialog/add-edit-sensor-dialog.component';
 
@@ -22,14 +23,14 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
 
   dataSource = new MatTableDataSource<SensorTableModel>();
 
-  tableConfig = {
+  tableConfig: TableConfig = {
     title: 'pages.configuration.sensors.common.title',
     columns: [
       { attr: 'name', label: 'pages.configuration.sensors.columns.name' },
       { attr: 'typedTranslated', label: 'pages.configuration.sensors.columns.typed' }
     ],
-    showEdit: true,
-    showDelete: true
+    actions: [TableActionButton.ADD],
+    rowActions: [TableActionButton.EDIT_ROW, TableActionButton.DELETE_ROW]
   }
 
   private destroyed = new Subject<void>();
@@ -39,26 +40,23 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
   constructor(public dialog: MatDialog, private configService: ConfigurationService,
     private translateService: TranslateService, private tableActions: TableActionsService) {
 
-    this.tableActions.onAdd
+    this.tableActions.onTableAction
       .pipe(
         takeUntil(this.destroyed),
         map(() => this.onAdd())
       )
       .subscribe();
 
-    this.tableActions.onEdit
+    this.tableActions.onTableRowAction
       .pipe(
         takeUntil(this.destroyed),
-        map((action: TableEditAction<SensorTableModel>) => { return action.row }),
-        map((sensor: SensorModel) => this.onEdit(sensor))
-      )
-      .subscribe();
-
-    this.tableActions.onDelete
-      .pipe(
-        takeUntil(this.destroyed),
-        map((action: TableDeleteAction<SensorTableModel>) => { return action.row }),
-        map((sensor: SensorModel) => this.onDelete(sensor))
+        map((action: TableRowAction<SensorModel>) => {
+          if (action.actionId === TableActionButton.EDIT_ROW.id) {
+            this.onEdit(action.row);
+          } else {
+            this.onDelete(action.row);
+          }
+        })
       )
       .subscribe();
 

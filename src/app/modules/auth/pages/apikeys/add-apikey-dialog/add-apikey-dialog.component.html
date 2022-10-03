@@ -1,4 +1,4 @@
-<learninghouse-edit-dialog [config]="dialogConfig" [state]="(state$ | async)" [form]="form">
+<learninghouse-edit-dialog [config]="(dialogConfig$ | async)!" [state]="(state$ | async)" [form]="form">
     <learninghouse-alert *ngIf="isSuccess" [alertType]="AlertType.warning">
         <div fxLayout="row" fxLayoutAlign="start center">
             <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:

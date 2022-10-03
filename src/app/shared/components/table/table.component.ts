@@ -13,14 +13,28 @@ export interface TableColumn {
   label: string;
 }
 
+export class TableActionButton {
+  static readonly ADD = new TableActionButton('add', 'components.table.actions.add', 'add');
+
+  static readonly EDIT_ROW = new TableActionButton('edit', 'components.table.actions.edit_row_description', 'edit');
+
+  static readonly DELETE_ROW = new TableActionButton('delete', 'components.table.actions.delete_row_description', 'delete');
+
+  constructor(public id: string,
+    public label: string,
+    public icon?: string,
+    public svg?: string) { }
+}
+
+
 export interface TableConfig {
-  id?: string;
   title: string;
-  rowDescription?: string;
   columns: TableColumn[];
-  showAdd?: boolean;
-  showEdit?: boolean;
-  showDelete?: boolean;
+
+  id?: string;
+  rowDescription?: string;
+  actions?: TableActionButton[];
+  rowActions?: TableActionButton[];
 }
 
 @Component({
@@ -41,9 +55,8 @@ export class TableComponent<T> implements AfterViewInit {
   set config(values: TableConfig) {
     this._tableConfig = {
       id: 'table_' + this._id,
-      showAdd: true,
-      showEdit: false,
-      showDelete: false,
+      actions: [],
+      rowActions: [],
       ...values
     }
 
@@ -55,7 +68,7 @@ export class TableComponent<T> implements AfterViewInit {
       this.displayColumns.push(column.attr)
     });
 
-    if (this.config.showEdit || this.config.showDelete) {
+    if (this.config.rowActions) {
       this.displayColumns.push('actions');
     }
   }
@@ -93,16 +106,20 @@ export class TableComponent<T> implements AfterViewInit {
     this.filter = '';
   }
 
-  deleteRow(row: T) {
-    const dialogRef = this.dialog.open(DeleteDialogComponent, {
-      width: '400px'
-    });
+  onRowAction(actionId: string, row: T) {
+    if (actionId === TableActionButton.DELETE_ROW.id) {
+      const dialogRef = this.dialog.open(DeleteDialogComponent, {
+        width: '400px'
+      });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.actionsService.onDelete.emit({ id: this.config.id!, row: row });
-      }
-    })
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this.actionsService.onTableRowAction.emit({ tableId: this.config.id!, actionId: actionId, row: row });
+        }
+      })
+    } else {
+      this.actionsService.onTableRowAction.emit({ tableId: this.config.id!, actionId: actionId, row: row })
+    }
   }
 
   get title_id(): string {

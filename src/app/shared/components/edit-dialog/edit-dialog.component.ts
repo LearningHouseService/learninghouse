@@ -1,23 +1,20 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
 import { EditDialogActionsService } from '../../services/edit-dialog-actions.service';
 import { FormResponseConfig } from '../form-response/form-response.component';
 
 export class SubmitButtonType {
-  static readonly SAVE = new SubmitButtonType('save', 'common.buttons.save');
-
   static readonly ADD = new SubmitButtonType('add', 'components.editdialog.buttons.add');
 
   static readonly EDIT = new SubmitButtonType('edit', 'components.editdialog.buttons.edit');
 
-  private constructor(public readonly icon: string, public readonly label: string) { }
+  public constructor(public readonly icon: string, public readonly label: string) { }
 
 }
 
 export interface EditDialogConfig {
   title: string;
-  submitButton$?: BehaviorSubject<SubmitButtonType | null>;
+  submitButton?: SubmitButtonType | null;
   responseConfig?: FormResponseConfig
 }
 

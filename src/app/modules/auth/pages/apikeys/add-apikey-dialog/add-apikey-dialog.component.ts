@@ -36,13 +36,19 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
     { value: APIKeyRole.TRAINER, label: 'common.enums.role.trainer' }
   ]
 
-  public dialogConfig: EditDialogConfig = {
+  private static readonly NO_ADD_DIALOG_CONFIG = {
     title: 'pages.auth.apikeys.common.dialog_title',
-    submitButton$: new BehaviorSubject<SubmitButtonType | null>(SubmitButtonType.ADD),
     responseConfig: {
       successMessage: 'pages.auth.apikeys.common.success'
     }
   };
+
+  private static readonly ADD_DIALOG_CONFIG = {
+    ...AddAPIKeyDialogComponent.NO_ADD_DIALOG_CONFIG,
+    submitButton: SubmitButtonType.ADD
+  };
+
+  public dialogConfig$ = new BehaviorSubject<EditDialogConfig>(AddAPIKeyDialogComponent.ADD_DIALOG_CONFIG);
 
   constructor(public dialogRef: MatDialogRef<AddAPIKeyDialogComponent>,
     private fb: NonNullableFormBuilder,
@@ -84,7 +90,7 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
       .pipe(
         map((apikey: APIKeyModel) => {
           this.apikey = apikey;
-          this.dialogConfig.submitButton$!.next(null);
+          this.dialogConfig$.next(AddAPIKeyDialogComponent.NO_ADD_DIALOG_CONFIG);
           this.form.disable();
           this.handleSuccess();
         }),

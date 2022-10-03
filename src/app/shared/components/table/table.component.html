@@ -12,9 +12,12 @@
                     <mat-icon>close</mat-icon>
                 </button>
             </mat-form-field>
-            <button mat-fab color="primary" [matTooltip]="'components.table.actions.add' | translate"
-                *ngIf="config.showAdd" (click)="actionsService.onAdd.emit({id: config.id!})">
-                <mat-icon>add</mat-icon>
+            <button mat-fab color="primary" [matTooltip]="action.label | translate"
+                (click)="actionsService.onTableAction.emit({tableId: config.id!, actionId: action.id})"
+                *ngFor="let action of this.config.actions">
+                <mat-icon matListIcon [svgIcon]="action.svg ? action.svg : ''">{{action.icon ? action.icon:
+                    ''}}
+                </mat-icon>
             </button>
         </div>
     </mat-card-header>
@@ -30,14 +33,12 @@
                 <mat-header-cell *matHeaderCellDef> {{'components.table.columns.actions' | translate}}
                 </mat-header-cell>
                 <mat-cell *matCellDef="let row">
-                    <button mat-icon-button (click)="actionsService.onEdit.emit({id: config.id!, row: row})"
-                        *ngIf="config.showEdit"
-                        [matTooltip]="'components.table.actions.edit_row_description' | translate: {rowDescription: row[config.rowDescription!]}">
-                        <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="deleteRow(row)" *ngIf="config.showDelete"
-                        [matTooltip]="'components.table.actions.delete_row_description' | translate: {rowDescription: row[config.rowDescription!]}">
-                        <mat-icon>delete</mat-icon>
+                    <button mat-icon-button
+                        [matTooltip]="action.label | translate: {rowDescription: row[config.rowDescription!]}"
+                        (click)="onRowAction(action.id, row)" *ngFor="let action of config.rowActions">
+                        <mat-icon matListIcon [svgIcon]="action.svg ? action.svg : ''">{{action.icon ? action.icon:
+                            ''}}
+                        </mat-icon>
                     </button>
                 </mat-cell>
             </ng-container>
@@ -53,7 +54,7 @@
             <mat-row *matRowDef="let row; columns: displayColumns;"></mat-row>>
 
             <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell no-items" [colSpan]="media$.isActive('lt-md') ? 1 : displayColumns.length">
+                <td class="mat-cell no-items" [colSpan]="media$.isActive('lt-sm') ? 1 : displayColumns.length">
                     {{'components.table.common.no_items' |
                     translate}}
                 </td>

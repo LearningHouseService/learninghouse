@@ -4,8 +4,9 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { map, Subject, takeUntil } from 'rxjs';
+import { TableActionButton, TableConfig } from 'src/app/shared/components/table/table.component';
 import { APIKeyModel } from 'src/app/shared/models/auth.model';
-import { TableActionsService, TableDeleteAction } from 'src/app/shared/services/table-actions.service';
+import { TableActionsService, TableRowAction } from 'src/app/shared/services/table-actions.service';
 import { AuthService } from '../../auth.service';
 import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.component';
 
@@ -22,13 +23,14 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
   dataSource = new MatTableDataSource<APIKeyTableModel>();
 
-  tableConfig = {
+  tableConfig: TableConfig = {
     title: 'pages.auth.apikeys.common.title',
     columns: [
       { attr: 'description', label: 'pages.auth.apikeys.columns.description' },
       { attr: 'roleTranslated', label: 'pages.auth.apikeys.columns.role' }
     ],
-    showDelete: true
+    actions: [TableActionButton.ADD],
+    rowActions: [TableActionButton.DELETE_ROW]
   }
 
   private destroyed = new Subject<void>();
@@ -37,14 +39,14 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
   constructor(public dialog: MatDialog, private authService: AuthService, private translateService: TranslateService, private tableActions: TableActionsService) {
 
-    this.tableActions.onAdd.pipe(
+    this.tableActions.onTableAction.pipe(
       takeUntil(this.destroyed),
       map(() => this.onAdd())
     ).subscribe()
 
-    this.tableActions.onDelete.pipe(
+    this.tableActions.onTableRowAction.pipe(
       takeUntil(this.destroyed),
-      map((action: TableDeleteAction<APIKeyTableModel>) => action.row),
+      map((action: TableRowAction<APIKeyTableModel>) => action.row),
       map((apikey: APIKeyModel) => this.onDelete(apikey))
     ).subscribe()
   }

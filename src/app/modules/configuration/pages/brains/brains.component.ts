@@ -4,6 +4,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { map, Subject } from 'rxjs';
+import { TableActionButton, TableConfig } from 'src/app/shared/components/table/table.component';
 import { BrainConfigurationModel } from 'src/app/shared/models/configuration.model';
 import { TableActionsService } from 'src/app/shared/services/table-actions.service';
 import { ConfigurationService } from '../../configuration.service';
@@ -21,16 +22,17 @@ export class BrainsComponent implements AfterViewInit, OnDestroy {
 
   dataSource = new MatTableDataSource<BrainConfigurationTableModel>();
 
-  tableConfig = {
+  tableConfig: TableConfig = {
     title: 'pages.configuration.brains.common.title',
     columns: [
       { attr: 'name', label: 'pages.configuration.brains.fields.name' },
       { attr: 'estimatorTypedTranslated', label: 'pages.configuration.brains.fields.typed' },
       { attr: 'dependent', label: 'pages.configuration.brains.fields.dependent' }
     ],
-    showEdit: true,
-    showDelete: true
+    actions: [TableActionButton.ADD],
+    rowActions: [TableActionButton.EDIT_ROW, TableActionButton.DELETE_ROW]
   }
+
 
   private destroyed = new Subject<void>();
 

@@ -21,7 +21,16 @@ export class FormFieldDirective implements OnInit {
 
     errorTranslationKeys(): string[] {
         return Object.keys(this.control.errors || {})
-            .map(key => 'components.input.errors.' + key);
+            .map((key) => {
+                const error = this.control.errors![key];
+                let translationKey = 'components.input.errors.' + key;
+
+                if (typeof error === 'string') {
+                    translationKey = error;
+                }
+
+                return translationKey;
+            })
     }
 
 }

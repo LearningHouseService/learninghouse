@@ -7,7 +7,7 @@ export class AuthValidators {
             const targetCtrl = control.get(target);
 
             const error = sourceCtrl && targetCtrl && sourceCtrl.value !== targetCtrl.value
-                ? { confirmMismatch: true }
+                ? { confirmMismatch: 'pages.auth.password.errors.confirmMismatch' }
                 : null;
 
             targetCtrl?.setErrors(error);
@@ -24,11 +24,11 @@ export class AuthValidators {
         if (value) {
             if (value.length < 3) {
                 result = {
-                    apikeyDescriptionShort: true
+                    apikeyDescriptionShort: 'pages.auth.apikeys.errors.apikeyDescriptionShort'
                 };
             } else if (!DESCRIPTION_PATTERN.test(value)) {
                 result = {
-                    apikeyDescriptionPattern: true
+                    apikeyDescriptionPattern: 'pages.auth.apikeys.errors.apikeyDescriptionPattern'
                 };
             }
         }

@@ -43,7 +43,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
     this.tableActions.onTableAction
       .pipe(
         takeUntil(this.destroyed),
-        map(() => this.onAdd())
+        map(() => this.onAddEdit(null))
       )
       .subscribe();
 
@@ -52,7 +52,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
         takeUntil(this.destroyed),
         map((action: TableRowAction<SensorModel>) => {
           if (action.actionId === TableActionButton.EDIT_ROW.id) {
-            this.onEdit(action.row);
+            this.onAddEdit(action.row);
           } else {
             this.onDelete(action.row);
           }
@@ -72,38 +72,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
     this.dataSource.sort = this.sort;
   }
 
-  loadData(): void {
-    this.configService.getSensors()
-      .pipe(
-        map((sensors) => {
-          const translatedSensors: SensorTableModel[] = [];
-          sensors.forEach((sensor) => {
-            translatedSensors.push({
-              ...sensor,
-              typedTranslated: this.translateService.instant('common.enums.sensortype.' + sensor.typed)
-            });
-          });
-
-          this.dataSource.data = translatedSensors;
-
-        })
-      )
-      .subscribe()
-  }
-
-  onAdd(): void {
-    const dialogRef = this.dialog.open(AddEditSensorDialogComponent, {
-      width: '480px'
-    });
-
-    dialogRef.afterClosed().subscribe((sensor: SensorModel | null) => {
-      if (sensor) {
-        this.loadData();
-      }
-    });
-  }
-
-  onEdit(sensor: SensorModel): void {
+  onAddEdit(sensor: SensorModel | null): void {
     const dialogRef = this.dialog.open(AddEditSensorDialogComponent, {
       width: '480px',
       data: sensor
@@ -121,6 +90,25 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
       .pipe(
         map(() => {
           this.loadData();
+        })
+      )
+      .subscribe()
+  }
+
+  loadData(): void {
+    this.configService.getSensors()
+      .pipe(
+        map((sensors) => {
+          const translatedSensors: SensorTableModel[] = [];
+          sensors.forEach((sensor) => {
+            translatedSensors.push({
+              ...sensor,
+              typedTranslated: this.translateService.instant('common.enums.sensortype.' + sensor.typed)
+            });
+          });
+
+          this.dataSource.data = translatedSensors;
+
         })
       )
       .subscribe()

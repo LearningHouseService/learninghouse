@@ -23,6 +23,11 @@ export class ConfigurationService {
             )
     }
 
+
+    deleteBrainConfiguration(brainConfiguration: BrainConfigurationModel): Observable<{ name: string }> {
+        return this.api.delete('/brain/' + brainConfiguration.name + '/configuration');
+    }
+
     getSensors(): Observable<SensorModel[]> {
         return this.api.get<{ [key: string]: SensorType }>('/sensors')
             .pipe(

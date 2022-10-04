@@ -3,15 +3,15 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { AlertComponent } from './components/alert/alert.component';
+import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
 import { FormResponseComponent } from './components/form-response/form-response.component';
 import { InputComponent } from './components/input/input.component';
-import { MaterialModule } from './material/material.module';
 import { PasswordComponent } from './components/password/password.component';
-import { SessionTimerComponent } from './components/session-timer/session-timer.component';
-import { TableComponent } from './components/table/table.component';
 import { SelectComponent } from './components/select/select.component';
-import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
+import { SessionTimerComponent } from './components/session-timer/session-timer.component';
 import { DeleteDialogComponent } from './components/table/delete-dialog/delete-dialog.component';
+import { TableComponent } from './components/table/table.component';
+import { MaterialModule } from './material/material.module';
 
 const components = [
   AlertComponent,
@@ -26,7 +26,9 @@ const components = [
 
 
 @NgModule({
-  declarations: [components, DeleteDialogComponent],
+  declarations: [
+    components,
+    DeleteDialogComponent],
   imports: [
     CommonModule,
     FormsModule,

@@ -59,9 +59,7 @@
 				"optional": "Optional"
 			},
 			"errors": {
-				"apikeyDescriptionPattern": "Darf nur die Buchstaben A-Z und Unterstriche enthalten",
-				"apikeyDescriptionShort": "Muss mindestens 3 Zeichen enthalten",
-				"confirmMismatch": "Die Passwörter müssen übereinstimmen",
+				"integer": "Es sind nur ganze Zahlen erlaubt",
 				"required": "Pflichtfeld ausfüllen"
 			}
 		},
@@ -164,7 +162,9 @@
 					"title": "API-Schlüssel"
 				},
 				"errors": {
-					"APIKEY_EXISTS": "Dieser API-Schlüssel existiert bereits. Bitte wählen Sie eine andere Beschreibung!"
+					"APIKEY_EXISTS": "Dieser API-Schlüssel existiert bereits. Bitte wählen Sie eine andere Beschreibung!",
+					"apikeyDescriptionPattern": "Darf nur die Buchstaben A-Z und Unterstriche enthalten",
+					"apikeyDescriptionShort": "Muss mindestens 3 Zeichen enthalten"
 				},
 				"messages": {
 					"newapikey": "Bitte speichern Sie den folgenden API-Schlüssel, er wird nicht wieder angezeigt: {{apikey}}"
@@ -195,6 +195,9 @@
 					"success": "Passwort erfolgreich geändert",
 					"title": "Administratorkennwort ändern"
 				},
+				"errors": {
+					"confirmMismatch": "Die Passwörter müssen übereinstimmen"
+				},
 				"fields": {
 					"confirm_password": "Kennwort bestätigen",
 					"new_password": "Neues Kennwort",
@@ -205,10 +208,18 @@
 		"configuration": {
 			"brains": {
 				"common": {
+					"add_dialog_title": "Gehirnkonfiguration hinzufügen",
+					"advanced_configuration": "Erweiterte Schätzerkonfiguration",
+					"edit_dialog_title": "Gehirnkonfiguration bearbeiten",
 					"title": "Konfiguration der Gehirne"
+				},
+				"errors": {
+					"estimatorMax": "Muss größer als 100 und kleiner als 1000 sein",
+					"estimatorsMin": "Muss größer als 100 und kleiner als 1000 sein"
 				},
 				"fields": {
 					"dependent": "Abhängige Variable",
+					"estimators": "Anzahl",
 					"name": "Name",
 					"typed": "Schätzertyp"
 				}

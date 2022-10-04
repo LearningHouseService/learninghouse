@@ -59,9 +59,7 @@
 				"optional": "Optional"
 			},
 			"errors": {
-				"apikeyDescriptionPattern": "May only contain the letters A-Z and underscores",
-				"apikeyDescriptionShort": "Must contain at least 3 characters",
-				"confirmMismatch": "Passwords must match",
+				"integer": "Only integers are allowed",
 				"required": "Fill required field"
 			}
 		},
@@ -164,7 +162,9 @@
 					"title": "API keys"
 				},
 				"errors": {
-					"APIKEY_EXISTS": "This API key already exists. Please choose another description!"
+					"APIKEY_EXISTS": "This API key already exists. Please choose another description!",
+					"apikeyDescriptionPattern": "May only contain the letters A-Z and underscores",
+					"apikeyDescriptionShort": "Must contain at least 3 characters"
 				},
 				"messages": {
 					"newapikey": "Please save the following API key, it will not show up again: {{apikey}}"
@@ -195,6 +195,9 @@
 					"success": "Successfully changed password",
 					"title": "Change administrator password"
 				},
+				"errors": {
+					"confirmMismatch": "Passwords must match"
+				},
 				"fields": {
 					"confirm_password": "Confirm password",
 					"new_password": "New password",
@@ -205,10 +208,18 @@
 		"configuration": {
 			"brains": {
 				"common": {
+					"add_dialog_title": "Add brain configuration",
+					"advanced_configuration": "Advanced estimator configuration",
+					"edit_dialog_title": "Edit brain configuration",
 					"title": "Brains configuration"
+				},
+				"errors": {
+					"estimatorMax": "Must be larger than 100 and smaller than 1000",
+					"estimatorsMin": "Must be larger than 100 and smaller than 1000"
 				},
 				"fields": {
 					"dependent": "Dependent variable",
+					"estimators": "Number",
 					"name": "Name",
 					"typed": "Estimator type"
 				}

@@ -5,5 +5,5 @@
         <mat-option [value]="option.value" *ngFor="let option of options">{{option.label | translate}}</mat-option>
     </mat-select>
     <mat-icon matSuffix *ngIf="clickableSuffixIcon" (click)="clickSuffix.emit()">{{clickableSuffixIcon}}</mat-icon>
-    <mat-error matListItem *ngFor="let error of errorTranslationKeys()">{{error | translate}}</mat-error>
+    <mat-error matListItem *ngFor="let error of errorTranslations()">{{error | translate}}</mat-error>
 </mat-form-field>

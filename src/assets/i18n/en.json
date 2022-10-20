@@ -60,6 +60,8 @@
 			},
 			"errors": {
 				"integer": "Only integers are allowed",
+				"max": "Must be smaller than {{param}}",
+				"min": "Must be larger than {{param}}",
 				"required": "Fill required field"
 			}
 		},
@@ -213,13 +215,10 @@
 					"edit_dialog_title": "Edit brain configuration",
 					"title": "Brains configuration"
 				},
-				"errors": {
-					"estimatorMax": "Must be larger than 100 and smaller than 1000",
-					"estimatorsMin": "Must be larger than 100 and smaller than 1000"
-				},
 				"fields": {
 					"dependent": "Dependent variable",
 					"estimators": "Number",
+					"max_depth": "Maximum depth",
 					"name": "Name",
 					"typed": "Estimator type"
 				}

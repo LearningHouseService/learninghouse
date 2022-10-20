@@ -60,6 +60,8 @@
 			},
 			"errors": {
 				"integer": "Es sind nur ganze Zahlen erlaubt",
+				"max": "Muss kleiner als {{param}} sein",
+				"min": "Muss grösser als {{param}} sein",
 				"required": "Pflichtfeld ausfüllen"
 			}
 		},
@@ -213,13 +215,10 @@
 					"edit_dialog_title": "Gehirnkonfiguration bearbeiten",
 					"title": "Konfiguration der Gehirne"
 				},
-				"errors": {
-					"estimatorMax": "Muss größer als 100 und kleiner als 1000 sein",
-					"estimatorsMin": "Muss größer als 100 und kleiner als 1000 sein"
-				},
 				"fields": {
 					"dependent": "Abhängige Variable",
 					"estimators": "Anzahl",
+					"max_depth": "Maximale Tiefe",
 					"name": "Name",
 					"typed": "Schätzertyp"
 				}

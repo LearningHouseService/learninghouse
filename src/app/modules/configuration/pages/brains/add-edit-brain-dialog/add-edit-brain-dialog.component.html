@@ -1,14 +1,16 @@
 <learninghouse-edit-dialog [config]="(dialogConfig$ | async)!" [state]="(state$ | async)" [form]="form">
-    <learninghouse-input [name]="'pages.configuration.brains.fields.name'" [control]="form.controls.name">
+    <learninghouse-input name="pages.configuration.brains.fields.name" [control]="form.controls.name">
     </learninghouse-input>
-    <learninghouse-select [name]="'pages.configuration.brains.fields.typed'"
+    <learninghouse-select name="pages.configuration.brains.fields.typed"
         [control]="form.controls.estimator.controls.typed" [options]="typedOptions">
     </learninghouse-select>
     <mat-expansion-panel class="mat-elevation-z0">
         <mat-expansion-panel-header>
             {{'pages.configuration.brains.common.advanced_configuration' | translate}}
         </mat-expansion-panel-header>
-        <learninghouse-input [name]="'pages.configuration.brains.fields.estimators'"
+        <learninghouse-input name="pages.configuration.brains.fields.estimators"
             [control]="form.controls.estimator.controls.estimators"></learninghouse-input>
+        <learninghouse-input name="pages.configuration.brains.fields.max_depth"
+            [control]="form.controls.estimator.controls.max_depth"></learninghouse-input>
     </mat-expansion-panel>
 </learninghouse-edit-dialog>

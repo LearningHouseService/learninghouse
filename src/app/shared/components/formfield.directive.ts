@@ -1,5 +1,7 @@
+import { ThisReceiver } from '@angular/compiler';
 import { Directive, Input, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { TranslateCompiler, TranslateService } from '@ngx-translate/core';
 
 @Directive()
 export class FormFieldDirective implements OnInit {
@@ -12,6 +14,7 @@ export class FormFieldDirective implements OnInit {
     @Input()
     name = '';
 
+    constructor(private translate: TranslateService) { }
 
     ngOnInit(): void {
         if (this.control.validator) {
@@ -19,18 +22,35 @@ export class FormFieldDirective implements OnInit {
         }
     }
 
-    errorTranslationKeys(): string[] {
+    errorTranslations(): string[] {
         return Object.keys(this.control.errors || {})
             .map((key) => {
                 const error = this.control.errors![key];
-                let translationKey = 'components.input.errors.' + key;
+                let translation = 'components.input.errors.' + key;
+                let param = null;
 
-                if (typeof error === 'string') {
-                    translationKey = error;
+                switch (key) {
+                    case 'min':
+                        param = error['min'];
+                        break;
+                    case 'max':
+                        param = error['max'];
+                        break;
+                    default:
+                        if (typeof error === 'string') {
+                            translation = error;
+                        }
+
                 }
 
-                return translationKey;
-            })
+                if (param) {
+                    translation = this.translate.instant(translation, { param: param });
+                } else {
+                    translation = this.translate.instant(translation);
+                }
+
+                return translation;
+            });
     }
 
 }

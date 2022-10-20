@@ -6,8 +6,8 @@ import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/ed
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
 import { BrainConfigurationModel, BrainEstimatorType } from 'src/app/shared/models/configuration.model';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
+import { GenericValidators } from 'src/app/shared/validators/generic.validators';
 import { ConfigurationService } from '../../../configuration.service';
-import { ConfigurationValidators } from '../../../configuration.validators';
 
 interface BrainConfigurationForm {
   name: FormControl<string>;
@@ -73,8 +73,16 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
       name: this.fb.control<string>('', [Validators.required]),
       estimator: this.fb.group({
         typed: this.fb.control<BrainEstimatorType>(BrainEstimatorType.CLASSIFIER, [Validators.required]),
-        estimators: this.fb.control<number>(100, [ConfigurationValidators.EstimatorsValidator]),
-        max_depth: this.fb.control<number>(5),
+        estimators: this.fb.control<number>(100, [
+          GenericValidators.IntegerValidator,
+          Validators.min(100),
+          Validators.max(1000)
+        ]),
+        max_depth: this.fb.control<number>(5, [
+          GenericValidators.IntegerValidator,
+          Validators.min(4),
+          Validators.max(10)
+        ]),
         random_state: this.fb.control<number>(0)
       }),
       dependent: this.fb.control<string>('', [Validators.required]),

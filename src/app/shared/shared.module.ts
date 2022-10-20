@@ -12,6 +12,7 @@ import { SessionTimerComponent } from './components/session-timer/session-timer.
 import { DeleteDialogComponent } from './components/table/delete-dialog/delete-dialog.component';
 import { TableComponent } from './components/table/table.component';
 import { MaterialModule } from './material/material.module';
+import { ButtonGroupComponent } from './components/button-group/button-group.component';
 
 const components = [
   AlertComponent,
@@ -28,7 +29,8 @@ const components = [
 @NgModule({
   declarations: [
     components,
-    DeleteDialogComponent],
+    DeleteDialogComponent,
+    ButtonGroupComponent],
   imports: [
     CommonModule,
     FormsModule,

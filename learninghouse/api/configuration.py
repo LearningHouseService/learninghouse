@@ -4,7 +4,6 @@ from fastapi import APIRouter, Body, Depends, status
 from learninghouse.api.errors.brain import BrainExists, BrainNoConfiguration
 from learninghouse.api.errors.sensor import NoSensor, SensorExists
 from learninghouse.models.configuration import (BrainConfiguration,
-                                                BrainConfigurationRequest,
                                                 BrainConfigurations,
                                                 BrainDeleteResult, Sensor,
                                                 SensorDeleteResult, Sensors)
@@ -56,8 +55,8 @@ async def brain_get(name: str):
                        },
                        BrainExists.STATUS_CODE: BrainExists.api_description()
                    })
-async def brain_post(brain: BrainConfigurationRequest):
-    return BrainConfigurationService.create(brain.name, brain.configuration)
+async def brain_post(brain: BrainConfiguration):
+    return BrainConfigurationService.create(brain)
 
 
 @brain_router.put('/{name}/configuration',

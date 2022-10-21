@@ -75,11 +75,11 @@ class BrainConfigurationService():
             raise BrainNoConfiguration(name) from exc
 
     @staticmethod
-    def create(name: str, configuration: BrainConfiguration) -> BrainConfiguration:
-        if BrainConfiguration.json_config_file_exists(name):
-            raise BrainExists(name)
+    def create(configuration: BrainConfiguration) -> BrainConfiguration:
+        if BrainConfiguration.json_config_file_exists(configuration.name):
+            raise BrainExists(configuration.name)
 
-        configuration.to_json_file(name)
+        configuration.to_json_file(configuration.name)
 
         return configuration
 

@@ -4,6 +4,13 @@
     <learninghouse-select name="pages.configuration.brains.fields.typed"
         [control]="form.controls.estimator.controls.typed" [options]="typedOptions">
     </learninghouse-select>
+    <learninghouse-input name="pages.configuration.brains.fields.dependent" [control]="form.controls.dependent">
+    </learninghouse-input>
+    <learninghouse-select name="pages.configuration.brains.fields.dependent_encode"
+        [control]="form.controls.dependent_encode" [options]="encodeOptions">
+    </learninghouse-select>
+    <learninghouse-input name="pages.configuration.brains.fields.test_size" [control]="form.controls.test_size">
+    </learninghouse-input>
     <mat-expansion-panel class="mat-elevation-z0">
         <mat-expansion-panel-header>
             {{'pages.configuration.brains.common.advanced_configuration' | translate}}

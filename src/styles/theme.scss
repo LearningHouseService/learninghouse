@@ -106,6 +106,7 @@ $learninghouse-theme: mat-light-theme($learninghouse-primary, $learninghouse-acc
 
 @include angular-material-theme($learninghouse-theme);
 
+
 // Workaround for https://github.com/angular/material2/issues/4580.
 @mixin mat-form-field-multiline-workaround($typography-config: null) {
     @if $typography-config ==null {
@@ -144,6 +145,12 @@ $learninghouse-theme: mat-light-theme($learninghouse-primary, $learninghouse-acc
             min-height: $subscript-min-height;
             margin-bottom: $subscript-margin-bottom;
         }
+    }
+
+
+    .mat-button-toggle-checked {
+        background-color: mat-color($learninghouse-primary);
+        color: mat-color($learninghouse-primary, default-contrast) !important;
     }
 }
 

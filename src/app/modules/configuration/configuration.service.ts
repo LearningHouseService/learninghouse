@@ -23,6 +23,13 @@ export class ConfigurationService {
             )
     }
 
+    createBrain(brain: BrainConfigurationModel): Observable<BrainConfigurationModel> {
+        return this.api.post<BrainConfigurationModel>('/brain/configuration', brain);
+    }
+
+    updateBrain(brain: BrainConfigurationModel): Observable<BrainConfigurationModel> {
+        return this.api.put<BrainConfigurationModel>('/brain/' + brain.name + '/configuration', brain);
+    }
 
     deleteBrainConfiguration(brainConfiguration: BrainConfigurationModel): Observable<{ name: string }> {
         return this.api.delete('/brain/' + brainConfiguration.name + '/configuration');

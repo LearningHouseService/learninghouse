@@ -2,7 +2,9 @@
 	"common": {
 		"buttons": {
 			"copy_to_clipboard": "In die Zwischenablage kopieren",
-			"save": "Speichern"
+			"no": "Nein",
+			"save": "Speichern",
+			"yes": "Ja"
 		},
 		"enums": {
 			"estimatortype": {
@@ -213,13 +215,16 @@
 					"add_dialog_title": "Gehirnkonfiguration hinzufügen",
 					"advanced_configuration": "Erweiterte Schätzerkonfiguration",
 					"edit_dialog_title": "Gehirnkonfiguration bearbeiten",
+					"success": "Erfolgreich",
 					"title": "Konfiguration der Gehirne"
 				},
 				"fields": {
 					"dependent": "Abhängige Variable",
+					"dependent_encode": "Abhängige Variable codieren",
 					"estimators": "Anzahl",
 					"max_depth": "Maximale Tiefe",
 					"name": "Name",
+					"test_size": "Testgröße",
 					"typed": "Schätzertyp"
 				}
 			},

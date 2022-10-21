@@ -2,7 +2,9 @@
 	"common": {
 		"buttons": {
 			"copy_to_clipboard": "Copy to clipboard",
-			"save": "Save"
+			"no": "No",
+			"save": "Save",
+			"yes": "Yes"
 		},
 		"enums": {
 			"estimatortype": {
@@ -213,13 +215,16 @@
 					"add_dialog_title": "Add brain configuration",
 					"advanced_configuration": "Advanced estimator configuration",
 					"edit_dialog_title": "Edit brain configuration",
+					"success": "Successfully",
 					"title": "Brains configuration"
 				},
 				"fields": {
 					"dependent": "Dependent variable",
+					"dependent_encode": "Encode dependent variable",
 					"estimators": "Number",
 					"max_depth": "Maximum depth",
 					"name": "Name",
+					"test_size": "Test size",
 					"typed": "Estimator type"
 				}
 			},

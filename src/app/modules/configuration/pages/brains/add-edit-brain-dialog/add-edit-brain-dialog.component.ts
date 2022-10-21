@@ -1,9 +1,10 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormControl, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Subject, BehaviorSubject, takeUntil, map } from 'rxjs';
+import { Subject, BehaviorSubject, takeUntil, map, catchError } from 'rxjs';
 import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/edit-dialog/edit-dialog.component';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
+import { SelectOption } from 'src/app/shared/components/select/select.component';
 import { BrainConfigurationModel, BrainEstimatorType } from 'src/app/shared/models/configuration.model';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
 import { GenericValidators } from 'src/app/shared/validators/generic.validators';
@@ -14,8 +15,7 @@ interface BrainConfigurationForm {
   estimator: FormGroup<{
     typed: FormControl<BrainEstimatorType>,
     estimators: FormControl<number>,
-    max_depth: FormControl<number>,
-    random_state: FormControl<number>
+    max_depth: FormControl<number>
   }>;
   dependent: FormControl<string>;
   dependent_encode: FormControl<boolean>;
@@ -52,10 +52,15 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
 
   private destroyed = new Subject<void>();
 
-  public typedOptions = [
+  public typedOptions: SelectOption<BrainEstimatorType>[] = [
     { value: BrainEstimatorType.CLASSIFIER, label: 'common.enums.estimatortype.classifier' },
     { value: BrainEstimatorType.REGRESSOR, label: 'common.enums.estimatortype.regressor' }
   ]
+
+  public encodeOptions: SelectOption<boolean>[] = [
+    { value: true, label: 'common.buttons.yes' },
+    { value: false, label: 'common.buttons.no' }
+  ];
 
   public dialogConfig$ = new BehaviorSubject<EditDialogConfig>(AddEditBrainDialogComponent.ADD_DIALOG_CONFIG);
 
@@ -82,12 +87,11 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
           GenericValidators.IntegerValidator,
           Validators.min(4),
           Validators.max(10)
-        ]),
-        random_state: this.fb.control<number>(0)
+        ])
       }),
       dependent: this.fb.control<string>('', [Validators.required]),
       dependent_encode: this.fb.control<boolean>(false, [Validators.required]),
-      test_size: this.fb.control<number>(0.2)
+      test_size: this.fb.control<number>(0.2, [Validators.required, Validators.min(0.1)])
     })
 
     if (this.data) {
@@ -125,7 +129,31 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
     this.destroyed.complete();
   }
 
-  onSubmit(): void { }
+  onSubmit(): void {
+    if (this.isEdit) {
+      this.configService.updateBrain(this.form.getRawValue())
+        .pipe(
+          map(() => {
+            this.handleSuccess();
+          }),
+          catchError((error) => this.handleError(error))
+        )
+        .subscribe();
+    } else {
+      this.configService.createBrain(this.form.getRawValue())
+        .pipe(
+          map((brain: BrainConfigurationModel) => {
+            this.isEdit = true;
+            this.data = brain;
+            this.form.controls.name.disable();
+            this.dialogConfig$.next(AddEditBrainDialogComponent.EDIT_DIALOG_CONFIG);
+            this.handleSuccess();
+          }),
+          catchError((error) => this.handleError(error))
+        )
+        .subscribe();
+    }
+  }
 
   onClose(): void {
     if (this.isSuccess) {

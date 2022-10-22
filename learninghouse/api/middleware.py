@@ -40,7 +40,8 @@ class EnforceInitialPasswordChange(BaseHTTPMiddleware):
         endpoint = request.url.path
         if (auth.is_initial_admin_password
                 and not (endpoint in self.endpoints
-                         or endpoint.startswith('/static/'))):
+                         or endpoint.startswith('/static/')
+                         or endpoint.startswith('/ui'))):
             logger.warning(INITIAL_PASSWORD_WARNING)
             return LearningHouseUnauthorizedException(
                 'Change initial password.').response()

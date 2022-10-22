@@ -5,13 +5,14 @@ import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 import { LayoutModule } from './modules/layout/layout.module';
+import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 
 // import ngx-translate and the http loader
+import { LocationStrategy } from '@angular/common';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { MatPaginatorIntl } from '@angular/material/paginator';
 import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-paginator-intl';
 
 @NgModule({
@@ -24,7 +25,7 @@ import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-pagin
       loader: {
         provide: TranslateLoader,
         useFactory: HttpLoaderFactory,
-        deps: [HttpClient]
+        deps: [HttpClient, LocationStrategy]
       }
     }),
     AppRoutingModule,
@@ -46,6 +47,8 @@ import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-pagin
 })
 export class AppModule { }
 
-export function HttpLoaderFactory(http: HttpClient): TranslateHttpLoader {
-  return new TranslateHttpLoader(http);
+export function HttpLoaderFactory(http: HttpClient, locationStrategy: LocationStrategy): TranslateHttpLoader {
+  const loader = new TranslateHttpLoader(http);
+  loader.prefix = `${locationStrategy.getBaseHref()}assets/i18n/`;
+  return loader;
 }

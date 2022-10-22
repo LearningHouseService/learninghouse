@@ -4,6 +4,7 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { AuthService } from './modules/auth/auth.service';
 import { TranslateService } from "@ngx-translate/core";
 import defaultLanguage from "./../assets/i18n/en.json";
+import { LocationStrategy } from '@angular/common';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -22,7 +23,7 @@ export class AppComponent implements OnInit {
 
     this.matIconRegistry.addSvgIcon(
       'learninghouse',
-      this.domSanitizer.bypassSecurityTrustResourceUrl("../assets/learninghouse_icon.svg")
+      this.domSanitizer.bypassSecurityTrustResourceUrl("assets/learninghouse_icon.svg")
     );
   }
 

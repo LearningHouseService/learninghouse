@@ -47,6 +47,7 @@ Environment Variable             | default (production/development) | descriptio
 LEARNINGHOUSE_ENVIRONMENT        | production                       | Choose environment default settings production or development. 
 LEARNINGHOUSE_HOST               | 127.0.0.1                        | Set address the service should bind. (use 0.0.0.0 for all available)
 LEARNINGHOUSE_PORT               | 5000                             | Set the port the service should listen.
+LEARNINGHOUSE_BASE_URL           | _Not set_                        | Set base url for external access
 LEARNINGHOUSE_CONFIG_DIRECTORY   | ./brains                         | Define directory where all configuration data goes
 LEARNINGHOUSE_OPENAPI_FILE       | /learninghouse_api.json          | File url path to OpenAPI json file
 LEARNINGHOUSE_DOCS_URL           | /docs                            | Define url path for interactive [API documentation](#api-documentation). If you set to empty the documentation will be disabled.

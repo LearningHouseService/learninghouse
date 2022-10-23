@@ -75,6 +75,10 @@ class BrainEstimatorConfiguration(BaseModel):
     max_depth: Optional[int] = Field(5, ge=4, le=10)
     random_state: Optional[int] = Field(0)
 
+    class Config:
+        # pylint: disable=too-few-public-methods
+        use_enum_values = True
+
 
 class BrainConfiguration(BaseModel):
     """
@@ -94,6 +98,7 @@ class BrainConfiguration(BaseModel):
         For the beginning a `test_size` of 20 % (0.2) like the example should be fine.
     """  # pylint: disable=line-too-long
 
+    name: str = Field(None, example='darkness')
     estimator: BrainEstimatorConfiguration
     dependent: str = Field(None, example='darkness')
     dependent_encode: Optional[bool] = Field(False)
@@ -125,11 +130,6 @@ class BrainConfiguration(BaseModel):
 
 class BrainConfigurations(DictModel):
     __root__: Dict[str, BrainConfiguration]
-
-
-class BrainConfigurationRequest(BaseModel):
-    name: str = Field(None, example='darkness')
-    configuration: BrainConfiguration
 
 
 class BrainFileType(str, EnumModel):

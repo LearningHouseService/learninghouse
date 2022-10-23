@@ -7,6 +7,8 @@
 **/brains/*/*.csv
 **/brains/*/*.pkl
 
+**/ui/*
+
 logging.yaml
 
 # Byte-compiled / optimized / DLL files

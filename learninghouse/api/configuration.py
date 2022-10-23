@@ -4,11 +4,9 @@ from fastapi import APIRouter, Body, Depends, status
 from learninghouse.api.errors.brain import BrainExists, BrainNoConfiguration
 from learninghouse.api.errors.sensor import NoSensor, SensorExists
 from learninghouse.models.configuration import (BrainConfiguration,
-                                                BrainConfigurationRequest,
                                                 BrainConfigurations,
                                                 BrainDeleteResult, Sensor,
-                                                SensorDeleteResult, Sensors,
-                                                SensorType)
+                                                SensorDeleteResult, Sensors)
 from learninghouse.services.auth import auth_service
 from learninghouse.services.configuration import (BrainConfigurationService,
                                                   SensorConfigurationService)
@@ -57,8 +55,8 @@ async def brain_get(name: str):
                        },
                        BrainExists.STATUS_CODE: BrainExists.api_description()
                    })
-async def brain_post(brain: BrainConfigurationRequest):
-    return BrainConfigurationService.create(brain.name, brain.configuration)
+async def brain_post(brain: BrainConfiguration):
+    return BrainConfigurationService.create(brain)
 
 
 @brain_router.put('/{name}/configuration',
@@ -119,7 +117,7 @@ async def sensor_get(name: str):
     return SensorConfigurationService.get(name)
 
 
-@sensor_router.post('/sensor',
+@sensor_router.post('',
                     response_model=Sensor,
                     summary='Create a new sensor',
                     description='Add a new sensor configuration.',
@@ -144,8 +142,8 @@ async def sensor_post(sensor: Sensor):
                        },
                        NoSensor.STATUS_CODE: NoSensor.api_description()
                    })
-async def sensor_put(name: str, typed: SensorType = Body()):
-    return SensorConfigurationService.update(name, typed)
+async def sensor_put(name: str, sensor: Sensor = Body()):
+    return SensorConfigurationService.update(name, sensor.typed)
 
 
 @sensor_router.delete('/{name}',

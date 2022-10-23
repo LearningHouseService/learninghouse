@@ -9,9 +9,9 @@
 
 For configuration see: 
 
-https://github.com/LearningHouseService/learninghouse-core 
+https://github.com/LearningHouseService/learninghouse-monorepo/tree/master/learninghouse-core
 
-For all environment variables see [.env.example file](https://raw.githubusercontent.com/LearningHouseService/learninghouse-core/master/.env.example)
+For all environment variables see [.env.example file](https://raw.githubusercontent.com/LearningHouseService/learninghouse-monorepo/master/learninghouse-core/.env.example)
 
 ## Contact.
 

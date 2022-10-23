@@ -1,6 +1,6 @@
 {
     "search.exclude": {
-        "versioneer.py": true,
+        "**/versioneer.py": true,
         "**/_version.py": true,
         "**/*.po": true
     },
@@ -15,12 +15,14 @@
     "python.linting.pylintEnabled": true,
     "python.linting.pylintArgs": [
         "--enable=W0611",
-        "--disable=C0111"
+        "--disable=C0111",
+        "--rcfile=${workspaceFolder}/learninghouse-core/.pylintrc"
     ],
     "python.linting.enabled": true,
     "python.pythonPath": "/usr/bin/python3",
     "git.alwaysSignOff": true,
     "python.sortImports.args": [
-        "--src=${workspaceFolder}"
-    ]
+        "--src=${workspaceFolder}/learninghouse-core"
+    ],
+    "python.envFile": "${workspaceFolder}/learninghouse-core/.env"
 }

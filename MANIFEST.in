@@ -1,0 +1,17 @@
+# Include the README
+include *.md
+
+# Include the license file
+include LICENSE
+
+# Include information about third party licensors
+include THIRD-PARTY-NOTICES
+
+include requirements.txt
+
+recursive-include learninghouse *.py
+recursive-include learninghouse/static *
+
+# Include information about version
+include versioneer.py
+include learninghouse/_version.py

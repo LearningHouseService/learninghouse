@@ -2,7 +2,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, catchError, map, Observable } from 'rxjs';
-import { LoginRequestModel, Role, TokenModel } from '../../shared/models/auth.model';
+import { APIKeyModel, APIKeyRole, ChangePasswordRequestModel, LoginRequestModel, Role, TokenModel } from '../../shared/models/auth.model';
 import { APIService } from '../../shared/services/api.service';
 
 
@@ -25,6 +25,10 @@ export class AuthService {
       .pipe(
         map((tokens) => this.handleTokens(tokens))
       )
+  }
+
+  changePassword(changePassword: ChangePasswordRequestModel) {
+    return this.api.put<boolean>('/auth/password', changePassword);
   }
 
   restoreSession() {
@@ -158,5 +162,20 @@ export class AuthService {
       this.refreshTokenExpireDate$.next(null);
     }
   }
-}
 
+  public getAPIKeys(): Observable<APIKeyModel[]> {
+    return this.api.get<APIKeyModel[]>('/auth/apikeys')
+  }
+
+  public addAPIKey(apikey: APIKeyModel): Observable<APIKeyModel> {
+    return this.api.post<APIKeyModel>('/auth/apikey', {
+      description: apikey.description,
+      role: apikey.role
+    });
+  }
+
+  public deleteAPIKey(description: string): Observable<string> {
+    return this.api.delete('/auth/apikey/' + description);
+  }
+
+}

@@ -1,11 +1,9 @@
-import { Injectable } from '@angular/core';
 import {
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpInterceptor
+  HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
 } from '@angular/common/http';
-import { Observable, switchMap } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, Observable, switchMap } from 'rxjs';
 import { AuthService } from '../../modules/auth/auth.service';
 import { Role, TokenModel } from '../models/auth.model';
 
@@ -18,7 +16,7 @@ export class AuthInterceptor implements HttpInterceptor {
     '/versions'
   ]
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (!this.isUnprotectedEndpoint(request.url)) {
@@ -67,6 +65,11 @@ export class AuthInterceptor implements HttpInterceptor {
             return next.handle(request.clone({
               headers: request.headers.set('Authorization', 'Bearer ' + tokens.access_token)
             }))
+          }),
+          catchError((error) => {
+            this.authService.logout();
+            this.router.navigate(['/auth']);
+            throw error;
           })
         );
       }

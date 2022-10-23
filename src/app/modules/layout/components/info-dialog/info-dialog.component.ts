@@ -4,6 +4,7 @@ import { BehaviorSubject, catchError, map, of } from 'rxjs';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { VersionItem } from 'src/app/shared/models/api.model';
 import { APIService } from 'src/app/shared/services/api.service';
+import { AppService } from 'src/app/shared/services/app.service';
 
 
 @Component({
@@ -17,6 +18,7 @@ export class InfoDialogComponent implements OnInit {
 
   constructor(
     public api: APIService,
+    public appService: AppService,
     public media$: MediaObserver,
     public auth: AuthService) { }
 

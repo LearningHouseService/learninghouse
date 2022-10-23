@@ -1,0 +1,66 @@
+<mat-card class="mat-elevation-z8">
+    <mat-card-header fxLayout="row" fxLayoutAlign="space-between center" fxLayout.lt-sm="column"
+        fxLayoutAlign.lt-sm="center stretch" fxLayoutGap.lt-sm="1.1rem">
+        <mat-card-title [attr.id]="title_id">{{config.title | translate}}</mat-card-title>
+        <div fxFlex="100%" fxLayout="row" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
+            <mat-form-field fxFlex="100%" appearance="outline">
+                <mat-icon matPrefix>search</mat-icon>
+                <mat-label>{{'components.table.filter.search' | translate}}</mat-label>
+                <input matInput type="text" (keyup)="doFilter($event)" [(ngModel)]="filter">
+                <button *ngIf="filter" matSuffix mat-icon-button
+                    [attr.aria-label]="'components.table.filter.clear' | translate" (click)="clearFilter()">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+            <button mat-fab color="primary" [matTooltip]="action.label | translate"
+                (click)="actionsService.onTableAction.emit({tableId: config.id!, actionId: action.id})"
+                *ngFor="let action of this.config.actions">
+                <mat-icon matListIcon [svgIcon]="action.svg ? action.svg : ''">{{action.icon ? action.icon:
+                    ''}}
+                </mat-icon>
+            </button>
+        </div>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-table [dataSource]="dataSource" [attr.aria-describedby]="title_id">
+            <ng-container [matColumnDef]="column.attr" *ngFor="let column of config.columns">
+                <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.label | translate}} </mat-header-cell>
+                <mat-cell *matCellDef="let row" [attr.data-label]="column.label | translate">{{row[column.attr]}}
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef> {{'components.table.columns.actions' | translate}}
+                </mat-header-cell>
+                <mat-cell *matCellDef="let row">
+                    <button mat-icon-button
+                        [matTooltip]="action.label | translate: {rowDescription: row[config.rowDescription!]}"
+                        (click)="onRowAction(action.id, row)" *ngFor="let action of config.rowActions">
+                        <mat-icon matListIcon [svgIcon]="action.svg ? action.svg : ''">{{action.icon ? action.icon:
+                            ''}}
+                        </mat-icon>
+                    </button>
+                </mat-cell>
+            </ng-container>
+
+            <ng-container matColumnDef="paginator">
+                <mat-footer-cell *matFooterCellDef>
+                    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                </mat-footer-cell>
+            </ng-container>
+
+
+            <mat-header-row *matHeaderRowDef="displayColumns;"></mat-header-row>>
+            <mat-row *matRowDef="let row; columns: displayColumns;"></mat-row>>
+
+            <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell no-items" [colSpan]="media$.isActive('lt-sm') ? 1 : displayColumns.length">
+                    {{'components.table.common.no_items' |
+                    translate}}
+                </td>
+            </tr>
+
+            <tr mat-footer-row *matFooterRowDef="['paginator'];"></tr>
+        </mat-table>
+    </mat-card-content>
+</mat-card>

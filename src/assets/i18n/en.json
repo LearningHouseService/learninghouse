@@ -1,0 +1,248 @@
+{
+	"common": {
+		"buttons": {
+			"copy_to_clipboard": "Copy to clipboard",
+			"no": "No",
+			"save": "Save",
+			"yes": "Yes"
+		},
+		"enums": {
+			"estimatortype": {
+				"classifier": "Classifier",
+				"regressor": "Regressor"
+			},
+			"mode": {
+				"development": "Development",
+				"initial": "Initialization",
+				"production": "Production",
+				"unknown": "Unknown"
+			},
+			"role": {
+				"administrator": "Administrator",
+				"trainer": "Trainer",
+				"user": "User"
+			},
+			"sensortype": {
+				"categorical": "Categorical",
+				"numerical": "numerical"
+			}
+		},
+		"errors": {
+			"INVALID_PASSWORD": "Invalid password",
+			"UNAUTHORIZED": "Unauthorized",
+			"not_implemented": "This is page is not implemented yet."
+		},
+		"messages": {
+			"success": "Successful"
+		},
+		"paginator": {
+			"items_per_page": "Items per page",
+			"next_page": "Next page",
+			"of_label": "of",
+			"previous_page": "Previous page"
+		}
+	},
+	"components": {
+		"editdialog": {
+			"buttons": {
+				"add": "Add",
+				"close": "Close",
+				"edit": "Edit"
+			}
+		},
+		"infodialog": {
+			"mode": "Service mode",
+			"okay_button": "OK",
+			"role": "User role",
+			"title": "Information"
+		},
+		"input": {
+			"common": {
+				"optional": "Optional"
+			},
+			"errors": {
+				"integer": "Only integers are allowed",
+				"max": "Must be smaller than {{param}}",
+				"min": "Must be larger than {{param}}",
+				"required": "Fill required field"
+			}
+		},
+		"sessiontimer": {
+			"label": "Logout in",
+			"refresh": "Refresh session"
+		},
+		"sidenav": {
+			"buttons": {
+				"collapse": "Collapse",
+				"expand": "Expand",
+				"login": "Login",
+				"logout": "Logout"
+			},
+			"common": {
+				"actions": "Actions",
+				"main": "Main menu"
+			},
+			"navigation": {
+				"configuration": {
+					"apikeys": {
+						"subtitle": "Create or delete",
+						"title": "API keys",
+						"tooltip": "API keys: create or delete"
+					},
+					"brains": {
+						"subtitle": "Create or edit",
+						"title": "Brains",
+						"tooltip": "Brains: Create or edit"
+					},
+					"password": {
+						"subtitle": "Change the password",
+						"title": "Admin password",
+						"tooltip": "Change admin password"
+					},
+					"sensors": {
+						"subtitle": "Add and configure",
+						"title": "Sensors",
+						"tooltip": "Sensor configuration"
+					},
+					"title": "Configuration",
+					"tooltip": "Configuration submenu"
+				},
+				"dashboard": {
+					"subtitle": "Get an overview",
+					"title": "Dashboard",
+					"tooltip": "Dashboard"
+				},
+				"prediction": {
+					"subtitle": "Use a brain",
+					"title": "Prediction",
+					"tooltip": "Prediction"
+				},
+				"training": {
+					"subtitle": "Train a brain",
+					"title": "Training",
+					"tooltip": "Training"
+				}
+			}
+		},
+		"table": {
+			"actions": {
+				"add": "Add",
+				"cancel": "Cancel",
+				"delete": "Delete",
+				"delete_row_description": "Delete {{rowDescription}}",
+				"edit": "Edit",
+				"edit_row_description": "Edit {{rowDescription}}"
+			},
+			"columns": {
+				"actions": "Actions"
+			},
+			"common": {
+				"delete": "Delete",
+				"no_items": "No items",
+				"sure": "Are you sure?"
+			},
+			"filter": {
+				"clear": "Clear",
+				"search": "Search"
+			}
+		},
+		"toolbar": {
+			"buttons": {
+				"information": "Open service information dialog",
+				"menu": "Open navigation menu"
+			}
+		}
+	},
+	"pages": {
+		"auth": {
+			"apikeys": {
+				"columns": {
+					"description": "Description",
+					"role": "User role"
+				},
+				"common": {
+					"dialog_title": "New API key",
+					"success": "Succesfully added",
+					"title": "API keys"
+				},
+				"errors": {
+					"APIKEY_EXISTS": "This API key already exists. Please choose another description!",
+					"apikeyDescriptionPattern": "May only contain the letters A-Z and underscores",
+					"apikeyDescriptionShort": "Must contain at least 3 characters"
+				},
+				"messages": {
+					"newapikey": "Please save the following API key, it will not show up again: {{apikey}}"
+				}
+			},
+			"login": {
+				"buttons": {
+					"admin": "Administrator",
+					"apikey": "API Key",
+					"change": "Change password"
+				},
+				"common": {
+					"fallback_warning": "\n                    You have to change <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">fallback\n                        password</a> to\n                    unlock.",
+					"success": "Successful",
+					"title": "Login"
+				},
+				"fields": {
+					"new_password": "New password",
+					"old_password": "Fallback password",
+					"password": "Password or API key"
+				}
+			},
+			"password": {
+				"buttons": {
+					"change": "Change Password"
+				},
+				"common": {
+					"success": "Successfully changed password",
+					"title": "Change administrator password"
+				},
+				"errors": {
+					"confirmMismatch": "Passwords must match"
+				},
+				"fields": {
+					"confirm_password": "Confirm password",
+					"new_password": "New password",
+					"old_password": "Old password"
+				}
+			}
+		},
+		"configuration": {
+			"brains": {
+				"common": {
+					"add_dialog_title": "Add brain configuration",
+					"advanced_configuration": "Advanced estimator configuration",
+					"edit_dialog_title": "Edit brain configuration",
+					"success": "Successfully",
+					"title": "Brains configuration"
+				},
+				"fields": {
+					"dependent": "Dependent variable",
+					"dependent_encode": "Encode dependent variable",
+					"estimators": "Number",
+					"max_depth": "Maximum depth",
+					"name": "Name",
+					"test_size": "Test size",
+					"typed": "Estimator type"
+				}
+			},
+			"sensors": {
+				"columns": {
+					"name": "Name",
+					"typed": "Sensor type"
+				},
+				"common": {
+					"add_dialog_title": "Add sensor",
+					"edit_dialog_title": "Edit sensor",
+					"success": "Successfully",
+					"title": "Sensors"
+				},
+				"errors": {
+					"EXISTS": "There is already a sensor with this name"
+				}
+			}
+		}
+	}
+}

@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'brains',
     loadChildren: () => import('./modules/brains/brains.module').then((m) => m.BrainsModule)
+  },
+  {
+    path: 'configuration',
+    loadChildren: () => import('./modules/configuration/configuration.module').then((m) => m.ConfigurationModule)
   }
 ];
 

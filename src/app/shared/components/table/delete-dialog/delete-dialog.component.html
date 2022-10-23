@@ -1,0 +1,15 @@
+<div class="container">
+    <mat-dialog-content>
+        {{'components.table.common.sure' | translate}}
+    </mat-dialog-content>
+    <mat-dialog-actions fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="32px">
+        <button mat-raised-button [mat-dialog-close]="false">
+            <mat-icon>cancel</mat-icon>
+            {{'components.table.actions.cancel'|translate}}
+        </button>
+        <button mat-raised-button color="primary" [mat-dialog-close]="true">
+            <mat-icon>delete</mat-icon>
+            {{'components.table.actions.delete'|translate}}
+        </button>
+    </mat-dialog-actions>
+</div>

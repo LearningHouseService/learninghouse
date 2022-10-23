@@ -1,0 +1,18 @@
+<learninghouse-edit-dialog [config]="(dialogConfig$ | async)!" [state]="(state$ | async)" [form]="form">
+    <learninghouse-alert *ngIf="isSuccess" [alertType]="AlertType.warning">
+        <div fxLayout="row" fxLayoutAlign="start center">
+            <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:
+                {apikey: apikey?.key} }}</span>
+            <button mat-icon-button fxFlex="36px" [matTooltip]="'common.buttons.copy_to_clipboard' | translate"
+                (click)="copyToClipboard()">
+                <mat-icon>content_copy</mat-icon>
+            </button>
+        </div>
+    </learninghouse-alert>
+    <learninghouse-input [name]="'pages.auth.apikeys.columns.description'" [control]="form.controls.description"
+        [maxlength]="15">
+    </learninghouse-input>
+    <learninghouse-select [name]="'pages.auth.apikeys.columns.role'" [control]="form.controls.role"
+        [options]="roleOptions">
+    </learninghouse-select>
+</learninghouse-edit-dialog>

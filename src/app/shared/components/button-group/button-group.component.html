@@ -1,0 +1,8 @@
+<mat-button-toggle-group [formControl]="control" [required]="required" (focusin)="onFocusIn($event)"
+    [attr.aria-labelledby]="_formField.getLabelId()" (focusout)="onFocusOut($event)">
+    <mat-button-toggle (click)="onChange(option.value)" #button class="button-group-element" [value]="option.value"
+        *ngFor="let option of options">
+        {{option.label
+        | translate}}
+    </mat-button-toggle>
+</mat-button-toggle-group>

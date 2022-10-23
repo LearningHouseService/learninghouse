@@ -1,0 +1,6 @@
+<learninghouse-alert *ngIf="state && state ==='success'" [alertType]="AlertType.success">{{config.successMessage! |
+    translate}}
+</learninghouse-alert>
+<learninghouse-alert *ngIf="state && state !== 'success'" [alertType]="AlertType.error">{{config.errorPrefix + '.' +
+    state | translate}}
+</learninghouse-alert>

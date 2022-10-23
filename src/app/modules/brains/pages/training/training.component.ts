@@ -1,15 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { AlertType } from 'src/app/shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-training',
   templateUrl: './training.component.html',
   styleUrls: ['./training.component.scss']
 })
-export class TrainingComponent implements OnInit {
+export class TrainingComponent {
 
-  constructor() { }
-
-  ngOnInit(): void {
+  get AlertType() {
+    return AlertType;
   }
 
 }

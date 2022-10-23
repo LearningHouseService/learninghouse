@@ -5,18 +5,54 @@ mat-sidenav {
     .flex-height-container {
         height: 100%;
 
-
-        mat-nav-list {
+        mat-nav-list,
+        mat-action-list {
             width: 100%;
+
         }
     }
+
+
+    .mat-expansion-panel-body {
+        padding: 0 !important;
+    }
+
+}
+
+.mat-nav-list a.active {
+    background: #dedede;
+}
+
+mat-expansion-panel {
+
+    mat-expansion-panel-header {
+        padding: 0 16px !important;
+        height: 72px !important;
+
+        mat-panel-title {
+
+            mat-icon {
+                padding: 4px !important;
+            }
+
+            h3 {
+                padding: 0;
+                padding-left: 16px;
+                margin: 0;
+            }
+        }
+    }
+
+    ::ng-deep &.mat-elevation-z1 .mat-expansion-panel-body {
+        padding: 0 !important;
+    }
+}
+
+.mat-list-base {
+    padding-top: 0 !important;
 }
 
 mat-sidenav-content {
     height: calc(100vh - 98px);
     padding: 16px;
-
-    main {
-        height: 100%;
-    }
 }

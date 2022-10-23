@@ -1,0 +1,32 @@
+<div mat-dialog-title>
+    {{"components.infodialog.title" | translate}}
+</div>
+<mat-dialog-content>
+    <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">
+        <dt class="mat-caption" color="accent">{{"components.infodialog.mode" | translate}}</dt>
+        <dd class="mat-body-2">{{'common.enums.mode.' + (api.mode$ | async) | translate}}</dd>
+        <ng-container *ngIf="(auth.role$ | async)">
+            <dt class="mat-caption" color="accent">{{"components.infodialog.role" | translate}}</dt>
+            <dd class="mat-body-2">{{'common.enums.role.' + (auth.role$ | async) | translate}}</dd>
+        </ng-container>
+    </dl>
+    <mat-divider>
+    </mat-divider>
+    <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">
+        <dt class="mat-caption" color="accent">LearningHouse UI</dt>
+        <dd class="mat-body-2">{{appService.get_app_version()}}</dd>
+        <dt class="mat-caption" color="accent">Angular</dt>
+        <dd class="mat-body-2">{{appService.get_angular_version()}}</dd>
+    </dl>
+    <mat-divider></mat-divider>
+    <dl gdColumns="200px auto" [class.xs]="media$.isActive('xs')">
+        <ng-container *ngFor="let versionItem of (versions$ | async)">
+            <dt class="mat-caption" color="accent">{{versionItem.label}}</dt>
+            <dd class="mat-body-2">{{versionItem.version}}</dd>
+        </ng-container>
+    </dl>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button mat-dialog-close color="primary">{{"components.infodialog.okay_button" |
+        translate}}</button>
+</mat-dialog-actions>

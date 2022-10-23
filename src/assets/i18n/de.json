@@ -1,0 +1,248 @@
+{
+	"common": {
+		"buttons": {
+			"copy_to_clipboard": "In die Zwischenablage kopieren",
+			"no": "Nein",
+			"save": "Speichern",
+			"yes": "Ja"
+		},
+		"enums": {
+			"estimatortype": {
+				"classifier": "Klassifikator",
+				"regressor": "Regressor"
+			},
+			"mode": {
+				"development": "Entwicklung",
+				"initial": "Initialisierung",
+				"production": "Produktion",
+				"unknown": "Unbekannt"
+			},
+			"role": {
+				"administrator": "Administrator",
+				"trainer": "Trainer",
+				"user": "Benutzer"
+			},
+			"sensortype": {
+				"categorical": "Kategorial",
+				"numerical": "Numerisch"
+			}
+		},
+		"errors": {
+			"INVALID_PASSWORD": "Ungültiges Passwort",
+			"UNAUTHORIZED": "Nicht autorisiert",
+			"not_implemented": "Diese Seite ist noch nicht implementiert."
+		},
+		"messages": {
+			"success": "Erfolgreich"
+		},
+		"paginator": {
+			"items_per_page": "Einträge pro Seite",
+			"next_page": "Nächste Seite",
+			"of_label": "von",
+			"previous_page": "Vorherige Seite"
+		}
+	},
+	"components": {
+		"editdialog": {
+			"buttons": {
+				"add": "Hinzufügen",
+				"close": "Schließen",
+				"edit": "Bearbeiten"
+			}
+		},
+		"infodialog": {
+			"mode": "Servicemodus",
+			"okay_button": "OK",
+			"role": "Benutzerrolle",
+			"title": "Informationen"
+		},
+		"input": {
+			"common": {
+				"optional": "Optional"
+			},
+			"errors": {
+				"integer": "Es sind nur ganze Zahlen erlaubt",
+				"max": "Muss kleiner als {{param}} sein",
+				"min": "Muss grösser als {{param}} sein",
+				"required": "Pflichtfeld ausfüllen"
+			}
+		},
+		"sessiontimer": {
+			"label": "Abmelden in",
+			"refresh": "Sitzung aktualisieren"
+		},
+		"sidenav": {
+			"buttons": {
+				"collapse": "Einklappen",
+				"expand": "Erweitern",
+				"login": "Anmelden",
+				"logout": "Abmelden"
+			},
+			"common": {
+				"actions": "Aktionen",
+				"main": "Hauptmenü"
+			},
+			"navigation": {
+				"configuration": {
+					"apikeys": {
+						"subtitle": "Erstellen oder löschen",
+						"title": "API-Schlüssel",
+						"tooltip": "API-Schlüssel: erstellen oder löschen"
+					},
+					"brains": {
+						"subtitle": "Erstellen oder bearbeiten",
+						"title": "Gehirne",
+						"tooltip": "Gehirne: Erstellen oder bearbeiten"
+					},
+					"password": {
+						"subtitle": "Ändere das Kennwort",
+						"title": "Administratorkennwort",
+						"tooltip": "Adminpasswort ändern"
+					},
+					"sensors": {
+						"subtitle": "Hinzufügen und konfigurieren",
+						"title": "Sensoren",
+						"tooltip": "Sensorkonfiguration"
+					},
+					"title": "Konfiguration",
+					"tooltip": "Untermenü Konfiguration"
+				},
+				"dashboard": {
+					"subtitle": "Verschaffen Sie sich einen Überblick",
+					"title": "Dashboard",
+					"tooltip": "Dashboard"
+				},
+				"prediction": {
+					"subtitle": "Benutze ein Gehirn",
+					"title": "Prognose",
+					"tooltip": "Prognose"
+				},
+				"training": {
+					"subtitle": "Trainiere ein Gehirn",
+					"title": "Ausbildung",
+					"tooltip": "Ausbildung"
+				}
+			}
+		},
+		"table": {
+			"actions": {
+				"add": "Hinzufügen",
+				"cancel": "Abbruch",
+				"delete": "Löschen",
+				"delete_row_description": "{{rowDescription}} löschen",
+				"edit": "Bearbeiten",
+				"edit_row_description": "{{rowDescription}} bearbeiten"
+			},
+			"columns": {
+				"actions": "Aktionen"
+			},
+			"common": {
+				"delete": "Löschen",
+				"no_items": "Keine Einträge",
+				"sure": "Wirklich löschen?"
+			},
+			"filter": {
+				"clear": "Löschen",
+				"search": "Suche"
+			}
+		},
+		"toolbar": {
+			"buttons": {
+				"information": "Dialog für Serviceinformationen öffnen",
+				"menu": "Navigationsmenü öffnen"
+			}
+		}
+	},
+	"pages": {
+		"auth": {
+			"apikeys": {
+				"columns": {
+					"description": "Beschreibung",
+					"role": "Benutzerrolle"
+				},
+				"common": {
+					"dialog_title": "Neuer API-Schlüssel",
+					"success": "Erfolgreich hinzugefügt",
+					"title": "API-Schlüssel"
+				},
+				"errors": {
+					"APIKEY_EXISTS": "Dieser API-Schlüssel existiert bereits. Bitte wählen Sie eine andere Beschreibung!",
+					"apikeyDescriptionPattern": "Darf nur die Buchstaben A-Z und Unterstriche enthalten",
+					"apikeyDescriptionShort": "Muss mindestens 3 Zeichen enthalten"
+				},
+				"messages": {
+					"newapikey": "Bitte speichern Sie den folgenden API-Schlüssel, er wird nicht wieder angezeigt: {{apikey}}"
+				}
+			},
+			"login": {
+				"buttons": {
+					"admin": "Administrator",
+					"apikey": "API-Schlüssel",
+					"change": "Ändere das Kennwort"
+				},
+				"common": {
+					"fallback_warning": "\n                    Sie müssen das <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">Fallbackkennwort</a> ändern um den Service zu entsperren.",
+					"success": "Erfolgreich",
+					"title": "Anmeldung"
+				},
+				"fields": {
+					"new_password": "Neues Kennwort",
+					"old_password": "Fallbackkennwort",
+					"password": "Kennwort oder API-Schlüssel"
+				}
+			},
+			"password": {
+				"buttons": {
+					"change": "Ändere das Passwort"
+				},
+				"common": {
+					"success": "Passwort erfolgreich geändert",
+					"title": "Administratorkennwort ändern"
+				},
+				"errors": {
+					"confirmMismatch": "Die Passwörter müssen übereinstimmen"
+				},
+				"fields": {
+					"confirm_password": "Kennwort bestätigen",
+					"new_password": "Neues Kennwort",
+					"old_password": "Altes Kennwort"
+				}
+			}
+		},
+		"configuration": {
+			"brains": {
+				"common": {
+					"add_dialog_title": "Gehirnkonfiguration hinzufügen",
+					"advanced_configuration": "Erweiterte Schätzerkonfiguration",
+					"edit_dialog_title": "Gehirnkonfiguration bearbeiten",
+					"success": "Erfolgreich",
+					"title": "Konfiguration der Gehirne"
+				},
+				"fields": {
+					"dependent": "Abhängige Variable",
+					"dependent_encode": "Abhängige Variable codieren",
+					"estimators": "Anzahl",
+					"max_depth": "Maximale Tiefe",
+					"name": "Name",
+					"test_size": "Testgröße",
+					"typed": "Schätzertyp"
+				}
+			},
+			"sensors": {
+				"columns": {
+					"name": "Name",
+					"typed": "Sensorart"
+				},
+				"common": {
+					"add_dialog_title": "Sensor hinzufügen",
+					"edit_dialog_title": "Sensor bearbeiten",
+					"success": "Erfolgreich",
+					"title": "Sensoren"
+				},
+				"errors": {
+					"EXISTS": "Es gibt bereits einen Sensor mit diesem Namen"
+				}
+			}
+		}
+	}
+}

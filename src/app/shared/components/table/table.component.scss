@@ -1,0 +1,106 @@
+mat-card {
+    padding: 32px;
+
+    mat-card-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    mat-card-content {
+        mat-table {
+            width: 100%;
+
+            .mat-header-cell {
+                text-transform: uppercase;
+            }
+
+            .mat-cell {
+                text-overflow: ellipsis;
+            }
+
+            .mat-column-actions {
+                flex: 0 0 80px !important;
+                width: 80px !important;
+            }
+
+            .no-items {
+                font-style: italic;
+                font-size: 0.9em;
+                color: #888888;
+                padding-top: 14px;
+            }
+
+            .mat-footer-cell {
+                border: none;
+            }
+
+        }
+    }
+
+}
+
+
+@media(max-width: 600px) {
+    .mat-header-row {
+        display: none;
+    }
+
+
+    .mat-table .mat-cell:last-child {
+        border-bottom: 0;
+    }
+
+    .mat-table .mat-cell:first-child {
+        margin-top: 4%;
+    }
+
+    .mat-row {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+        mat-cell:not(.mat-column-actions) {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 50% 50%;
+            padding: 0;
+            text-align: right;
+            font-weight: bold;
+            word-break: break-word;
+
+            &>* {
+                grid-column: 2;
+            }
+
+            &:before {
+                content: attr(data-label);
+                text-align: left;
+                text-transform: uppercase;
+                font-weight: normal;
+                font-size: .85em;
+            }
+
+
+        }
+
+        td.mat-column-actions {
+            display: flex;
+            justify-content: center;
+            padding: 0 0.5rem;
+
+            &>button {
+                margin: 0.5rem 0;
+            }
+        }
+
+        &:last-of-type td:last-of-type {
+            border: none;
+        }
+
+
+    }
+
+
+}

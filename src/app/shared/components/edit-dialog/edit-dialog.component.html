@@ -1,0 +1,24 @@
+<div class="container">
+    <div mat-dialog-title>{{config.title | translate}}</div>
+    <form (ngSubmit)="actions.onSubmit.emit()">
+        <mat-dialog-content>
+            <learninghouse-form-response [state]="state" [config]="config.responseConfig!">
+            </learninghouse-form-response>
+            <ng-content></ng-content>
+        </mat-dialog-content>
+        <mat-dialog-actions fxLayout="row"
+            [fxLayoutAlign]="config.submitButton ? 'space-between center' : 'center center'">
+            <button type="button" mat-raised-button [color]="!config.submitButton ? 'primary' : ''"
+                (click)="actions.onClose.emit()">
+                <mat-icon>close</mat-icon>
+                {{'components.editdialog.buttons.close' |
+                translate}}
+            </button>
+            <button mat-raised-button type="submit" *ngIf="config.submitButton" color="primary"
+                [disabled]="!form.valid">
+                <mat-icon>{{config.submitButton!.icon}}</mat-icon>
+                {{config.submitButton!.label| translate}}
+            </button>
+        </mat-dialog-actions>
+    </form>
+</div>

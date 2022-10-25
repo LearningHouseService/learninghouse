@@ -1,4 +1,6 @@
-@import '~@angular/material/theming';
+@use "sass:math";
+@import '@angular/material/theming';
+
 
 @include mat-core();
 
@@ -124,7 +126,7 @@ $learninghouse-theme: mat-light-theme($learninghouse-primary, $learninghouse-acc
             }
 
             &-subscript-wrapper {
-                $subscript-margin-top: 0.5em / $subscript-font-scale;
+                $subscript-margin-top: math.div(0.5em, $subscript-font-scale);
                 $subscript-min-height: $line-height * 1em;
                 $subscript-margin-bottom: -#{$subscript-margin-top + $line-height};
 
@@ -136,8 +138,8 @@ $learninghouse-theme: mat-light-theme($learninghouse-primary, $learninghouse-acc
 
         &-appearance-legacy &-subscript-wrapper {
             // Copy-paste from @mat-form-field-legacy-typography();
-            $line-spacing: ($line-height - 1) / 2;
-            $subscript-margin-top: 0.5em / $subscript-font-scale - ($line-spacing * 2);
+            $line-spacing: math.div(($line-height - 1), 2);
+            $subscript-margin-top: math.div(0.5em, $subscript-font-scale - ($line-spacing * 2));
 
             $subscript-min-height: $line-height * 1em;
             $subscript-margin-bottom: -#{$subscript-margin-top + $line-height};

@@ -4,7 +4,7 @@
         <form *ngIf="((api.mode$ | async) === ServiceMode.INITIAL)" (ngSubmit)="submitInitial()">
             <mat-card-content fxLayout="column" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
                 <learninghouse-alert [alertType]="AlertType.warning">
-                    <span>{{'pages.auth.login.common.fallback_warning' | translate}}</span>
+                    <span [innerHTML]="'pages.auth.login.common.fallback_warning' | translate"></span>
                 </learninghouse-alert>
                 <learninghouse-form-response [state]="(state$ | async)" [config]="responseConfig">
                 </learninghouse-form-response>

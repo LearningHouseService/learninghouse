@@ -5,7 +5,7 @@ import { VERSION as APP_VERSION } from 'src/environments/version';
   providedIn: 'root'
 })
 export class AppService {
-  get_app_version(): string {
+  get_app_version(): string | null {
     return APP_VERSION.semverString;
   }
 

@@ -17,16 +17,14 @@
             "name": "ng serve",
             "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "npm: start",
-            "cwd": "${workspaceFolder}/learninghouse-ui/",
+            "preLaunchTask": "npm: start - learninghouse-ui",
             "url": "http://localhost:4200/"
         },
         {
             "name": "ng test",
             "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "npm: test",
-            "cwd": "${workspaceFolder}/learninghouse-ui/",
+            "preLaunchTask": "npm: test - learninghouse-ui",
             "url": "http://localhost:9876/debug.html"
         }
     ]

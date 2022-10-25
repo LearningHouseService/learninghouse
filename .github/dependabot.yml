@@ -12,6 +12,11 @@ updates:
       interval: "daily"
   # Maintain dependencies for pip
   - package-ecosystem: "pip" 
-    directory: "/" 
+    directory: "/learninghouse-core" 
+    schedule:
+      interval: "daily"
+  # Maintain dependencies for npm
+  - package-ecosystem: "npm" 
+    directory: "/learninghouse-ui" 
     schedule:
       interval: "daily"

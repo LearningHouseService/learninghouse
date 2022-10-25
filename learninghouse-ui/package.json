@@ -28,7 +28,7 @@
     "@ngx-translate/http-loader": "^7.0.0",
     "@w11k/git-info": "^1.1.2",
     "ngx-clipboard": "^15.1.0",
-    "rxjs": "~7.5.0",
+    "rxjs": "~7.5.7",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },

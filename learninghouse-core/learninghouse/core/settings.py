@@ -11,7 +11,7 @@ from learninghouse.api.errors import (LearningHouseException,
 from learninghouse.core.logging import LoggingLevelEnum
 from learninghouse.models.base import EnumModel
 
-LICENSE_URL = 'https://github.com/LearningHouseService/learninghouse-core/blob/master/LICENSE'
+LICENSE_URL = 'https://github.com/LearningHouseService/learninghouse-monorepo/blob/master/LICENSE'
 
 
 class ServiceSettings(BaseSettings):

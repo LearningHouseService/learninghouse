@@ -1,7 +1,7 @@
 import setuptools
 import versioneer
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("../README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 with open("requirements.txt", "r", encoding="utf-8") as fh:
@@ -18,7 +18,7 @@ setuptools.setup(
     description='learningHouse - Teach your smart home everything',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/LearningHouseService/learninghouse-core',
+    url='https://github.com/LearningHouseService/learninghouse-monorepo',
     author='Johannes Ott',
     author_email='info@johannes-ott.net',
     classifiers=[
@@ -49,6 +49,6 @@ setuptools.setup(
         ]
     },
     project_urls={
-        'Bug Reports': 'https://github.com/LearningHouseService/learninghouse-core/issues'
+        'Bug Reports': 'https://github.com/LearningHouseService/learninghouse-monorepo/issues'
     }
 )

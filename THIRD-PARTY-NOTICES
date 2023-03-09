@@ -64,3 +64,23 @@ Component: Roboto Font
 Licensor: Googlefonts Team
 Website: https://fonts.google.com
 License: Apache-2.0 License
+
+Component: Angular
+Licensor: Google LLC
+Website: https://angular.io/
+License: MIT License
+
+Component: Angular Material
+Licensor: Google LLC
+Website: https://material.angular.io/
+License: MIT License
+
+Component: Angular
+Licensor: Google LLC
+Website: https://angular.io/
+License: MIT License
+
+Component: Material Icons Font
+Licensor: Googlefonts Team
+Website: https://fonts.google.com/icons
+License: Apache-2.0 License

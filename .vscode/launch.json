@@ -8,23 +8,23 @@
             "name": "Run LearningHouse Service",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/learninghouse-core/learninghouse/__main__.py",
+            "program": "${workspaceFolder}/core/learninghouse/__main__.py",
             "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/learninghouse-core/",
+            "cwd": "${workspaceFolder}/core/",
             "justMyCode": true
         },
         {
             "name": "ng serve",
             "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "npm: start - learninghouse-ui",
+            "preLaunchTask": "npm: start - ui",
             "url": "http://localhost:4200/"
         },
         {
             "name": "ng test",
             "type": "chrome",
             "request": "launch",
-            "preLaunchTask": "npm: test - learninghouse-ui",
+            "preLaunchTask": "npm: test - ui",
             "url": "http://localhost:9876/debug.html"
         }
     ]

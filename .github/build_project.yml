@@ -24,3 +24,4 @@ jobs:
         pip install build
     - name: Build package
       run: python -m build
+      working-directory: core

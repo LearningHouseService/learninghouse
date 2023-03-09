@@ -16,13 +16,13 @@
     "python.linting.pylintArgs": [
         "--enable=W0611",
         "--disable=C0111",
-        "--rcfile=${workspaceFolder}/learninghouse-core/.pylintrc"
+        "--rcfile=${workspaceFolder}/core/.pylintrc"
     ],
     "python.linting.enabled": true,
     "python.pythonPath": "/usr/bin/python3",
     "git.alwaysSignOff": true,
     "python.sortImports.args": [
-        "--src=${workspaceFolder}/learninghouse-core"
+        "--src=${workspaceFolder}/core"
     ],
-    "python.envFile": "${workspaceFolder}/learninghouse-core/.env"
+    "python.envFile": "${workspaceFolder}/core/.env"
 }

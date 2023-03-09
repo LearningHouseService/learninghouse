@@ -4,18 +4,18 @@
 		{
 			"type": "npm",
 			"script": "start",
-			"path": "learninghouse-ui",
+			"path": "ui",
 			"problemMatcher": [],
-			"label": "npm: start - learninghouse-ui",
+			"label": "npm: start - ui",
 			"detail": "ng serve"
 		},
 		{
 			"type": "npm",
 			"script": "test",
-			"path": "learninghouse-ui",
+			"path": "ui",
 			"group": "test",
 			"problemMatcher": [],
-			"label": "npm: test - learninghouse-ui",
+			"label": "npm: test - ui",
 			"detail": "ng test"
 		}
 	]

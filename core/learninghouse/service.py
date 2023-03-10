@@ -89,6 +89,11 @@ def run():
         logger.info(
             f'See interactive documentation {settings.documentation_url}')
 
+    if ui.is_ui_installed():
+        logger.info(f'UI is reachable under {settings.base_url_calculated}/ui')
+    else:
+        logger.warning(f'UI is not installed under {ui.UI_DIRECTORY}')
+
     if auth.is_initial_admin_password:
         logger.warning(INITIAL_PASSWORD_WARNING)
 

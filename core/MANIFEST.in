@@ -1,5 +1,5 @@
 # Include the README
-include ../README.md
+include *.md
 
 # Include the license file
 include ../LICENSE
@@ -11,6 +11,7 @@ include requirements.txt
 
 recursive-include learninghouse *.py
 recursive-include learninghouse/static *
+recursive-include learninghouse/ui *
 
 # Include information about version
 include versioneer.py

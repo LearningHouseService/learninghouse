@@ -1,6 +1,5 @@
-from pathlib import Path
-
 from os import path
+from pathlib import Path
 
 from fastapi import APIRouter
 from fastapi.responses import FileResponse, RedirectResponse
@@ -14,7 +13,12 @@ router = APIRouter(include_in_schema=False)
 
 UI_DIRECTORY = str(Path(__file__).parent.parent / 'ui')
 
-if path.exists(UI_DIRECTORY):
+
+def is_ui_installed() -> bool:
+    return path.exists(UI_DIRECTORY)
+
+
+if is_ui_installed():
     ASSETS_DIRECTORY = f'{UI_DIRECTORY}/assets'
 
     with open(f'{ASSETS_DIRECTORY}/env.template.js', 'r', encoding='utf-8') as template_file:

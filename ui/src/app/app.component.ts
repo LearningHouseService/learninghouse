@@ -4,7 +4,6 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { AuthService } from './modules/auth/auth.service';
 import { TranslateService } from "@ngx-translate/core";
 import defaultLanguage from "./../assets/i18n/en.json";
-import { LocationStrategy } from '@angular/common';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

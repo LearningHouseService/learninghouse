@@ -5,8 +5,21 @@
     border: 1px solid transparent;
     border-radius: 0.25rem;
 
+    flex-direction: row;
+    box-sizing: border-box;
+    display: flex;
+    place-content: center flex-start;
+    align-items: center;
+
     a {
         font-weight: 700;
+    }
+
+    mat-icon {
+        flex: 1 1 36px;
+        box-sizing: border-box;
+        max-width: 36px;
+        min-width: 36px;
     }
 }
 

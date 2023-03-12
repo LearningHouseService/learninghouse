@@ -1,4 +1,6 @@
 import { NgModule } from '@angular/core';
+
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -38,7 +40,8 @@ const material = [
   MatTableModule,
   MatToolbarModule,
   MatTooltipModule,
-  FlexLayoutModule
+  FlexLayoutModule,
+  ClipboardModule,
 ]
 
 

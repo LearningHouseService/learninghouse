@@ -1,0 +1,16 @@
+learninghouse-alert {
+    div.learninghouse-alert-content {
+        flex-direction: row;
+        box-sizing: border-box;
+        display: flex;
+        place-content: center flex-start;
+        align-items: center;
+
+        button {
+            flex: 1 1 36px;
+            box-sizing: border-box;
+            max-width: 36px;
+            min-width: 36px;
+        }
+    }
+}

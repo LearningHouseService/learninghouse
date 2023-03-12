@@ -1,7 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { ClipboardService } from 'ngx-clipboard';
 import { BehaviorSubject, catchError, map, Subject, takeUntil } from 'rxjs';
 import { AlertType } from 'src/app/shared/components/alert/alert.component';
 import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/edit-dialog/edit-dialog.component';
@@ -53,7 +52,6 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
   constructor(public dialogRef: MatDialogRef<AddAPIKeyDialogComponent>,
     private fb: NonNullableFormBuilder,
     private authService: AuthService,
-    private clipboardService: ClipboardService,
     private dialogActions: EditDialogActionsService) {
 
     super();
@@ -108,9 +106,13 @@ export class AddAPIKeyDialogComponent extends AbstractFormResponse implements On
   }
 
   copyToClipboard() {
+    let apikey = '';
+
     if (this.apikey?.key) {
-      this.clipboardService.copy(this.apikey?.key);
+      apikey = this.apikey.key;
     }
+
+    return apikey
   }
 
 }

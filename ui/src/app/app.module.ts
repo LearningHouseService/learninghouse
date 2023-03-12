@@ -15,6 +15,8 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-paginator-intl';
 
+
+
 @NgModule({
   declarations: [
     AppComponent

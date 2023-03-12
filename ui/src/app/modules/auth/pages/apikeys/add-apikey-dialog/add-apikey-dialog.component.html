@@ -1,10 +1,10 @@
 <learninghouse-edit-dialog [config]="(dialogConfig$ | async)!" [state]="(state$ | async)" [form]="form">
     <learninghouse-alert *ngIf="isSuccess" [alertType]="AlertType.warning">
-        <div fxLayout="row" fxLayoutAlign="start center">
+        <div class="learninghouse-alert-content">
             <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:
                 {apikey: apikey?.key} }}</span>
-            <button mat-icon-button fxFlex="36px" [matTooltip]="'common.buttons.copy_to_clipboard' | translate"
-                (click)="copyToClipboard()">
+            <button type="button" mat-icon-button class="clipboard"
+                [matTooltip]="'common.buttons.copy_to_clipboard' | translate" [cdkCopyToClipboard]="copyToClipboard()">
                 <mat-icon>content_copy</mat-icon>
             </button>
         </div>

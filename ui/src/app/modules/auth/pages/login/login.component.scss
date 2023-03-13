@@ -1,30 +1,7 @@
 div.login-wrapper {
     height: 100%;
-    display: flex;
-    flex-direction: row;
-    box-sizing: border-box;
-    place-content: center;
-    align-items: center;
 
     mat-card {
         padding: 32px;
-
-        mat-card-content {
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            place-content: stretch center;
-            align-items: stretch;
-            max-width: 100%
-        }
-
-        mat-card-actions {
-            flex-direction: row;
-            box-sizing: border-box;
-            display: flex;
-            place-content: center space-between;
-            align-items: center;
-        }
     }
 }

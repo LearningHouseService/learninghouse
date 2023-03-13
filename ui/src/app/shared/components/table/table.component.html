@@ -1,9 +1,8 @@
 <mat-card class="mat-elevation-z8">
-    <mat-card-header fxLayout="row" fxLayoutAlign="space-between center" fxLayout.lt-sm="column"
-        fxLayoutAlign.lt-sm="center stretch" fxLayoutGap.lt-sm="1.1rem">
+    <mat-card-header class="flex flex-row justify-between items-center content-center gap-4 lt-sm:flex-wrap">
         <mat-card-title [attr.id]="title_id">{{config.title | translate}}</mat-card-title>
-        <div fxFlex="100%" fxLayout="row" fxLayoutAlign="center stretch" fxLayoutGap="1.1rem">
-            <mat-form-field fxFlex="100%" appearance="outline">
+        <div class="flex flex-row w-1/2 justify-center items-stretch content-stretch gap-4 lt-sm:w-full">
+            <mat-form-field class="flex w-full" appearance="outline">
                 <mat-icon matPrefix>search</mat-icon>
                 <mat-label>{{'components.table.filter.search' | translate}}</mat-label>
                 <input matInput type="text" (keyup)="doFilter($event)" [(ngModel)]="filter">
@@ -54,7 +53,7 @@
             <mat-row *matRowDef="let row; columns: displayColumns;"></mat-row>>
 
             <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell no-items" [colSpan]="media$.isActive('lt-sm') ? 1 : displayColumns.length">
+                <td class="mat-cell no-items" [colSpan]="displayColumns.length">
                     {{'components.table.common.no_items' |
                     translate}}
                 </td>

@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
-import { MediaObserver } from '@angular/flex-layout';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -88,8 +87,9 @@ export class TableComponent<T> implements AfterViewInit {
   filter: string = '';
 
   constructor(public dialog: MatDialog,
-    public actionsService: TableActionsService,
-    public media$: MediaObserver) { }
+    public actionsService: TableActionsService) { }
+
+
 
 
   ngAfterViewInit(): void {

@@ -1,6 +1,6 @@
 <learninghouse-edit-dialog [config]="(dialogConfig$ | async)!" [state]="(state$ | async)" [form]="form">
     <learninghouse-alert *ngIf="isSuccess" [alertType]="AlertType.warning">
-        <div class="learninghouse-alert-content">
+        <div class="flex flex-row border-box justify-center items-start content-start">
             <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:
                 {apikey: apikey?.key} }}</span>
             <button type="button" mat-icon-button class="clipboard"

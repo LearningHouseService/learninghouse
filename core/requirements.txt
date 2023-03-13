@@ -1,4 +1,4 @@
-fastapi==0.93.0
+fastapi==0.94.0
 uvicorn[standard]==0.20.0
 python-jose[cryptography]==3.3.0
 passlib==1.7.4

@@ -1,24 +1,3 @@
-mat-sidenav {
-    padding: 16px;
-    border-right: none;
-
-    .flex-height-container {
-        height: 100%;
-
-        mat-nav-list,
-        mat-action-list {
-            width: 100%;
-
-        }
-    }
-
-
-    .mat-expansion-panel-body {
-        padding: 0 !important;
-    }
-
-}
-
 .mat-nav-list a.active {
     background: #dedede;
 }
@@ -32,12 +11,12 @@ mat-expansion-panel {
         mat-panel-title {
 
             mat-icon {
-                padding: 4px !important;
+                color: var(--mdc-list-list-item-leading-icon-color);
             }
 
             h3 {
                 padding: 0;
-                padding-left: 16px;
+                padding-left: 36px;
                 margin: 0;
             }
         }
@@ -46,6 +25,7 @@ mat-expansion-panel {
     ::ng-deep &.mat-elevation-z1 .mat-expansion-panel-body {
         padding: 0 !important;
     }
+
 }
 
 .mat-list-base {

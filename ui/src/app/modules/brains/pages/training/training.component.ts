@@ -3,8 +3,7 @@ import { AlertType } from 'src/app/shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-training',
-  templateUrl: './training.component.html',
-  styleUrls: ['./training.component.scss']
+  templateUrl: './training.component.html'
 })
 export class TrainingComponent {
 

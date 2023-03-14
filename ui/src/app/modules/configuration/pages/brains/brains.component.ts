@@ -16,8 +16,7 @@ interface BrainConfigurationTableModel extends BrainConfigurationModel {
 
 @Component({
   selector: 'app-brains',
-  templateUrl: './brains.component.html',
-  styleUrls: ['./brains.component.scss']
+  templateUrl: './brains.component.html'
 })
 export class BrainsComponent implements AfterViewInit, OnDestroy {
 

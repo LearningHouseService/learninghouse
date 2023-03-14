@@ -18,6 +18,12 @@ module.exports = {
         'gt-md': { 'min': '1280px' },
         'gt-lg': { 'min': '1920px' }
       },
+      flex: {
+        'icon': '1 1 36px'
+      },
+      gridTemplateColumns: {
+        'infodialog': '200px minmax(200px, 1fr)'
+      }
     },
   },
   plugins: [

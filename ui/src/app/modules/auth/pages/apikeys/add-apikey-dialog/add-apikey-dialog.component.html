@@ -3,7 +3,7 @@
         <div class="flex flex-row border-box justify-center items-start content-start">
             <span>{{ 'pages.auth.apikeys.messages.newapikey' | translate:
                 {apikey: apikey?.key} }}</span>
-            <button type="button" mat-icon-button class="clipboard"
+            <button type="button" mat-icon-button class="flex flex-icon"
                 [matTooltip]="'common.buttons.copy_to_clipboard' | translate" [cdkCopyToClipboard]="copyToClipboard()">
                 <mat-icon>content_copy</mat-icon>
             </button>

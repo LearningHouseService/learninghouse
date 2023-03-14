@@ -53,7 +53,7 @@
             <mat-row *matRowDef="let row; columns: displayColumns;"></mat-row>>
 
             <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell no-items" [colSpan]="displayColumns.length">
+                <td class="mat-cell no-items" [colSpan]="(breakpoints.isXSmall$ | async) ? 1 : displayColumns.length">
                     {{'components.table.common.no_items' |
                     translate}}
                 </td>

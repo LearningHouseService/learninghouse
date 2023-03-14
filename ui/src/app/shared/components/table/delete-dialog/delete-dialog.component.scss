@@ -3,5 +3,9 @@ div.container {
 
     mat-dialog-actions {
         margin-top: 16px;
+
+        &.justify-center {
+            justify-content: center;
+        }
     }
 }

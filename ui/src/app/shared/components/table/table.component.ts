@@ -2,6 +2,7 @@ import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { BreakpointService } from '../../services/breakpoint.service';
 import { TableActionsService } from '../../services/table-actions.service';
 import { DeleteDialogComponent } from './delete-dialog/delete-dialog.component';
 
@@ -86,11 +87,10 @@ export class TableComponent<T> implements AfterViewInit {
 
   filter: string = '';
 
-  constructor(public dialog: MatDialog,
-    public actionsService: TableActionsService) { }
-
-
-
+  constructor(
+    public dialog: MatDialog,
+    public actionsService: TableActionsService,
+    public breakpoints: BreakpointService) { }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;

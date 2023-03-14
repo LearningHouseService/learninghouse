@@ -1,8 +1,8 @@
 <mat-sidenav-container autosize>
-    <mat-sidenav [mode]="media$.isActive('lt-md') ? 'over' : 'side'"
-        [opened]="!media$.isActive('lt-md') || (sidenavService.isOpened$ | async)"
-        [fixedInViewport]="media$.isActive('lt-md')" fixedTopGap="56" class="mat-elevation-z8">
-        <div fxLayout="column" fxLayoutAlign="space-between center" class="flex-height-container">
+    <mat-sidenav [mode]="(breakpoints.isSmall$ | async) ? 'over' : 'side'"
+        [opened]="!(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)"
+        [fixedInViewport]="(breakpoints.isSmall$ | async)" fixedTopGap="56" class="mat-elevation-z8">
+        <div class="flex flex-col justify-between items-stretch content-stretch h-full">
             <mat-nav-list role="navigation" [attr.aria-label]="'components.sidenav.common.main' | translate">
                 <ng-container *ngFor="let navItem of navItems">
                     <ng-container [ngTemplateOutlet]="navItem.children ? subMenu : menuLink"
@@ -12,8 +12,8 @@
                 <a mat-list-item *ngIf="!(authService.role$ | async)" routerLink="/auth"
                     [matTooltip]="'components.sidenav.buttons.login' | translate" matTooltipPosition="right"
                     [matTooltipDisabled]="(sidenavService.isOpened$ | async)">
-                    <mat-icon matListIcon>login</mat-icon>
-                    <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                    <mat-icon matListItemIcon>login</mat-icon>
+                    <h3 matListItemTitle *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
                         {{'components.sidenav.buttons.login' | translate}}
                     </h3>
                 </a>
@@ -22,30 +22,30 @@
                 <button mat-list-item *ngIf="authService.role$ | async" (click)="logout()"
                     [matTooltip]="'components.sidenav.buttons.logout' | translate" matTooltipPosition="right"
                     [matTooltipDisabled]="(sidenavService.isOpened$ | async)">
-                    <mat-icon matListIcon>logout</mat-icon>
-                    <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                    <mat-icon matListItemIcon>logout</mat-icon>
+                    <h3 matListItemTitle *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
                         {{'components.sidenav.buttons.logout' | translate}}
                     </h3>
-                    <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                    <p matListItemLine *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
                         {{'common.enums.role.' + (authService.role$ | async) | translate}}</p>
                 </button>
-                <ng-container mat-list-item *ngIf="media$.isActive('gt-sm')">
+                <ng-container mat-list-item *ngIf="!(breakpoints.isSmall$ | async)">
                     <button mat-list-item *ngIf="(sidenavService.isOpened$ | async)"
                         (click)="sidenavService.toggleNavigation()">
-                        <mat-icon matListIcon>keyboard_double_arrow_left</mat-icon>
-                        <h3 matLine>{{'components.sidenav.buttons.collapse' | translate}}</h3>
+                        <mat-icon matListItemIcon>keyboard_double_arrow_left</mat-icon>
+                        <h3 matListItemTitle>{{'components.sidenav.buttons.collapse' | translate}}</h3>
                     </button>
                     <button mat-list-item *ngIf="!(sidenavService.isOpened$ | async)"
                         [matTooltip]="'components.sidenav.buttons.expand' | translate" matTooltipPosition="right"
                         (click)="sidenavService.toggleNavigation()">
-                        <mat-icon matListIcon>
+                        <mat-icon matListItemIcon>
                             keyboard_double_arrow_right</mat-icon>
                     </button>
                 </ng-container>
             </mat-action-list>
         </div>
     </mat-sidenav>
-    <mat-sidenav-content role="main">
+    <mat-sidenav-content role="main" class="h-full">
         <ng-content></ng-content>
     </mat-sidenav-content>
 </mat-sidenav-container>
@@ -55,13 +55,13 @@
         [matTooltip]="'components.sidenav.navigation.' + navItem.key + '.tooltip' | translate"
         matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)"
         [routerLink]="navItem.route">
-        <mat-icon matListIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
+        <mat-icon matListItemIcon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
             ''}}
         </mat-icon>
-        <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+        <h3 matListItemTitle *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
             {{'components.sidenav.navigation.' + navItem.key + '.title' | translate}}
         </h3>
-        <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+        <p matListItemLine *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
             {{'components.sidenav.navigation.' + navItem.key + '.subtitle' | translate}}</p>
     </mat-list-item>
 </ng-template>
@@ -69,14 +69,14 @@
 <ng-template #subMenu let-navItem="navItem">
     <mat-expansion-panel [ngClass]="(sidenavService.isOpened$ | async) ? 'mat-elevation-z0' : 'mat-elevation-z1'"
         *ngIf="(authService.role$ | async)?.isMinimumRole(navItem.minimumRole)">
-        <mat-expansion-panel-header fxLayout="row" fxLayoutAlign="start center"
+        <mat-expansion-panel-header
             [matTooltip]="'components.sidenav.navigation.' + navItem.key +  '.tooltip' | translate"
             matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)">
             <mat-panel-title>
                 <mat-icon [svgIcon]="navItem.svg ? navItem.svg : ''">{{navItem.icon ? navItem.icon:
                     ''}}
                 </mat-icon>
-                <h3 *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                <h3 *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
                     {{'components.sidenav.navigation.' + navItem.key + '.title' | translate}}
                 </h3>
             </mat-panel-title>
@@ -88,13 +88,13 @@
                     [matTooltip]="'components.sidenav.navigation.' + navItem.key + '.' + subItem.key + '.tooltip' | translate"
                     matTooltipPosition="right" [matTooltipDisabled]="(sidenavService.isOpened$ | async)"
                     [routerLink]="subItem.route">
-                    <mat-icon matListIcon [svgIcon]="subItem.svg ? subItem.svg : ''">{{subItem.icon ? subItem.icon:
+                    <mat-icon matListItemIcon [svgIcon]="subItem.svg ? subItem.svg : ''">{{subItem.icon ? subItem.icon:
                         ''}}
                     </mat-icon>
-                    <h3 matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                    <h3 matListItemTitle *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
                         {{'components.sidenav.navigation.' + navItem.key + '.' + subItem.key + '.title' | translate}}
                     </h3>
-                    <p matLine *ngIf="media$.isActive('lt-md') || (sidenavService.isOpened$ | async)">
+                    <p matListItemLine *ngIf="(breakpoints.isSmall$ | async) || (sidenavService.isOpened$ | async)">
                         {{'components.sidenav.navigation.' + navItem.key + '.' + subItem.key + '.subtitle' | translate}}
                     </p>
                 </mat-list-item>

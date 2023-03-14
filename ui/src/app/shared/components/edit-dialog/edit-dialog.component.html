@@ -6,8 +6,10 @@
             </learninghouse-form-response>
             <ng-content></ng-content>
         </mat-dialog-content>
-        <mat-dialog-actions fxLayout="row"
-            [fxLayoutAlign]="config.submitButton ? 'space-between center' : 'center center'">
+        <mat-dialog-actions class="flex flex-row box-border items-center content-center" [ngClass]="{
+            'justify-between': config.submitButton,
+            'justify-center': !config.submitButton
+            }">
             <button type="button" mat-raised-button [color]="!config.submitButton ? 'primary' : ''"
                 (click)="actions.onClose.emit()">
                 <mat-icon>close</mat-icon>

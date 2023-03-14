@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MediaObserver } from '@angular/flex-layout';
 import { BehaviorSubject, catchError, map, of } from 'rxjs';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { VersionItem } from 'src/app/shared/models/api.model';
@@ -19,7 +18,6 @@ export class InfoDialogComponent implements OnInit {
   constructor(
     public api: APIService,
     public appService: AppService,
-    public media$: MediaObserver,
     public auth: AuthService) { }
 
   ngOnInit(): void {

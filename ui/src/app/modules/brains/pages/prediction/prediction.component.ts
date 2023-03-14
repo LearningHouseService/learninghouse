@@ -3,8 +3,7 @@ import { AlertType } from 'src/app/shared/components/alert/alert.component';
 
 @Component({
   selector: 'app-prediction',
-  templateUrl: './prediction.component.html',
-  styleUrls: ['./prediction.component.scss']
+  templateUrl: './prediction.component.html'
 })
 export class PredictionComponent {
 

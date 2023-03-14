@@ -1,9 +1,8 @@
-import { Component, ViewEncapsulation } from '@angular/core';
-import { MediaObserver } from '@angular/flex-layout';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { Role } from 'src/app/shared/models/auth.model';
+import { BreakpointService } from 'src/app/shared/services/breakpoint.service';
 import { SidenavService } from './sidenav.service';
 
 export interface SidenavItem {
@@ -72,9 +71,8 @@ export class SidenavComponent {
 
   constructor(public sidenavService: SidenavService,
     public authService: AuthService,
-    public media$: MediaObserver,
-    private router: Router,
-    private translateService: TranslateService) { }
+    public breakpoints: BreakpointService,
+    private router: Router) { }
 
   logout() {
     this.authService.logout();

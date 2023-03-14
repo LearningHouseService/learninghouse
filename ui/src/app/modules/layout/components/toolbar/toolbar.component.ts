@@ -1,24 +1,23 @@
 import { Component } from '@angular/core';
-import { MediaObserver } from '@angular/flex-layout';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { SidenavService } from '../sidenav/sidenav.service';
 import { InfoDialogComponent } from '../info-dialog/info-dialog.component';
+import { BreakpointService } from 'src/app/shared/services/breakpoint.service';
 
 @Component({
   selector: 'app-toolbar',
-  templateUrl: './toolbar.component.html',
-  styleUrls: ['./toolbar.component.scss']
+  templateUrl: './toolbar.component.html'
 })
 export class ToolbarComponent {
 
   constructor(
     public sidenavService: SidenavService,
     public authService: AuthService,
+    public breakpoints: BreakpointService,
     public dialog: MatDialog,
-    private router: Router,
-    public media$: MediaObserver) { }
+    private router: Router) { }
 
   logout() {
     this.authService.logout();

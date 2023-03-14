@@ -1,12 +1,12 @@
-<mat-toolbar color="primary" fxLayout="row" fxLayoutAlign="space-between center">
+<mat-toolbar color="primary" class="flex flex-row justify-between items-center content-center">
     <div>
-        <button mat-icon-button (click)="sidenavService.toggleNavigation()" *ngIf="media$.isActive('lt-md')"
+        <button mat-icon-button (click)="sidenavService.toggleNavigation()" *ngIf="(breakpoints.isSmall$| async)"
             [attr.aria-label]="'components.toolbar.buttons.menu' | translate">
             <mat-icon>menu</mat-icon>
         </button>
         LearningHouse Service
     </div>
-    <div fxLayoutAlign="end center">
+    <div class="flex justify-end items-center content-center">
         <learninghouse-session-timer *ngIf="(this.authService.refreshTokenExpireDate$| async)"
             [expires]="(this.authService.refreshTokenExpireDate$| async)" (refresh)="refresh()" (finished)="logout()">
         </learninghouse-session-timer>

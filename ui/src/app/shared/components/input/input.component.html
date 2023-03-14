@@ -1,4 +1,4 @@
-<mat-form-field fxFlex>
+<mat-form-field class="flex w-full">
     <mat-label>{{name | translate}}<span *ngIf="!required"> ({{'components.input.common.optional' | translate}})</span>
     </mat-label>
     <input matInput #input [type]="type" [required]="required" [formControl]="control" [maxlength]="maxlength!">

@@ -16,8 +16,7 @@ interface APIKeyTableModel extends APIKeyModel {
 
 @Component({
   selector: 'learninghouse-apikeys',
-  templateUrl: './apikeys.component.html',
-  styleUrls: ['./apikeys.component.scss']
+  templateUrl: './apikeys.component.html'
 })
 export class APIKeysComponent implements AfterViewInit, OnDestroy {
 

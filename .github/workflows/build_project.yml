@@ -25,9 +25,9 @@ jobs:
     - name: Build package
       run: python -m build
       working-directory: core
-    - name: Archive production artifacts
+    - name: Save python artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: Save python artifacts
+        name: python-artifacts.zip
         path: |
           core/dist

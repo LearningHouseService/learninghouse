@@ -18,6 +18,10 @@ jobs:
       run: npm install
       working-directory: ui
 
+    - name: Write version to file
+      run: node git-version.js
+      working-directory: ui
+
     - name: Build
       run: npm run build:core
       working-directory: ui

@@ -7,7 +7,7 @@
     "prestart": "node git-version.js",
     "start": "ng serve",
     "build": "ng build --delete-output-path",
-    "build_core": "ng build --delete-output-path --base-href=/ui/",
+    "build:core": "ng build --delete-output-path --base-href=/ui/",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

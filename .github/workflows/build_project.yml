@@ -29,6 +29,7 @@ jobs:
     
   build-core:
     runs-on: ubuntu-latest
+    need: build-ui
     strategy:
       matrix:
         python-version:

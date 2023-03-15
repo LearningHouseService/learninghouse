@@ -18,7 +18,7 @@ jobs:
       run: npm install ui
 
     - name: Build
-      run: npm run build:prod
+      run: npm run build:core
 
     - name: Save angular artifacts
       uses: actions/upload-artifact@v3

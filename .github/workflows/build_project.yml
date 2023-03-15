@@ -15,10 +15,12 @@ jobs:
         node-version: '18'
 
     - name: Install dependencies
-      run: npm install ui
+      run: npm install
+      working-directory: ui
 
     - name: Build
       run: npm run build:core
+      working-directory: ui
 
     - name: Save angular artifacts
       uses: actions/upload-artifact@v3

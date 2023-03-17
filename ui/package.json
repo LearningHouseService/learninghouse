@@ -34,7 +34,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.4",
     "@angular/cli": "~15.2.4",
-    "@angular/compiler-cli": "^15.2.2",
+    "@angular/compiler-cli": "^15.2.3",
     "@tailwindcss/aspect-ratio": "latest",
     "@tailwindcss/forms": "latest",
     "@tailwindcss/line-clamp": "latest",

@@ -89,7 +89,7 @@ jobs:
     - name: Load learninghouse wheel
       uses: actions/download-artifact@v3
       with:
-        name: python.artifacts-3.10
+        name: python-artifacts-3.10
         path: docker/container
 
     - name: Copy requirements.txt for core

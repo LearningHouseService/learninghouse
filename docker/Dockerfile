@@ -1,16 +1,14 @@
 FROM python:3.10-slim as buildimage
 
-ARG VERSION
+COPY container/requirements.txt requirements.txt
 
 RUN set -eux; \
     pip3 wheel \
         --wheel-dir=/root/wheels \
         --extra-index-url https://www.piwheels.org/simple \
-        learninghouse==${VERSION}
+        -r requirements.txt
 
 FROM python:3.10-slim
-
-ARG VERSION
 
 ENV LHS_HOME=/learninghouse \
     USER_ID=9002 \
@@ -19,6 +17,7 @@ ENV LHS_HOME=/learninghouse \
     LEARNINGHOUSE_PORT=5000
 
 COPY --from=buildimage /root/wheels /root/wheels
+COPY container/*.whl /root/wheels
 COPY entrypoint.sh /
 
 RUN set -eux; \
@@ -34,7 +33,7 @@ RUN set -eux; \
     pip3 install \
         --no-index \
         --find-links=/root/wheels \
-        learninghouse==${VERSION}; \
+        learninghouse; \
     chmod +x /entrypoint.sh; \
     rm -rf /root/wheels;
 

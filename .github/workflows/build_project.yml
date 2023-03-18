@@ -97,10 +97,10 @@ jobs:
     - name: Publish package to pypi
       if: ${{github.event_name == 'release' && matrix.python-version == '3.10'}}
       uses: pypa/gh-action-pypi-publish@37f50c210e3d2f9450da2cd423303d6a14a6e29f
-      working-directory: core
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+        packages-dir: core/dist/
 
     - name: Publish assets to github
       if: ${{github.event_name == 'release'}}

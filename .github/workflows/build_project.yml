@@ -1,6 +1,11 @@
 name: build-project
 
-on: [push, pull_request]
+on: 
+  push:
+  pull_request:
+    branches: master
+  release:
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
@@ -38,6 +43,16 @@ jobs:
         name: ui-artifacts
         path: |
           ui/dist/learninghouse
+
+    - name: Publish assets to github
+      if: ${{github.event_name == "release"}}
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ github.token }}
+        file: ui/dist/learninghouse*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
     
   build-core:
     runs-on: ubuntu-latest
@@ -78,6 +93,24 @@ jobs:
         name: python-artifacts-${{ matrix.python-version }}
         path: |
           core/dist
+    
+    - name: Publish package to pypi
+      if: ${{github.event_name == "release"}}
+      uses: pypa/gh-action-pypi-publish@37f50c210e3d2f9450da2cd423303d6a14a6e29f
+      working-directory: core
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+
+    - name: Publish assets to github
+      if: ${{github.event_name == "release"}}
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ github.token }}
+        file: core/dist/*
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
 
   build-docker:
     runs-on: ubuntu-latest
@@ -123,7 +156,7 @@ jobs:
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: docker
-        push: true
+        push: ${{github.event_name == "release" || (github.event_name == "push" && github.ref_name == "master")}}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 

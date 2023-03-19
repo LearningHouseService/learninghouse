@@ -2,7 +2,7 @@ from os import path
 from pathlib import Path
 
 from fastapi import APIRouter
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, PlainTextResponse
 
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
@@ -21,13 +21,12 @@ def is_ui_installed() -> bool:
 if is_ui_installed():
     ASSETS_DIRECTORY = f'{UI_DIRECTORY}/assets'
 
-    with open(f'{ASSETS_DIRECTORY}/env.template.js', 'r', encoding='utf-8') as template_file:
-        content = template_file.read()
-        content = content.replace(
-            '${LEARNINGHOUSE_API_URL}', f'{settings.base_url_calculated}/api')
+    env_js_content = ''
 
-        with open(f'{ASSETS_DIRECTORY}/env.js', 'w', encoding='utf-8') as dest_file:
-            dest_file.write(content)
+    with open(f'{ASSETS_DIRECTORY}/env.template.js', 'r', encoding='utf-8') as template_file:
+        env_js_content = template_file.read()
+        env_js_content = env_js_content.replace(
+            '${LEARNINGHOUSE_API_URL}', f'{settings.base_url_calculated}/api')
 
     @router.get('/')
     async def redirect_root():
@@ -40,6 +39,9 @@ if is_ui_installed():
             if not fullpath.startswith(UI_DIRECTORY):
                 raise LearningHouseSecurityException(
                     'Requested file name breaks directory structure')
+
+            if ui_path == '/assets/env.js':
+                return PlainTextResponse(env_js_content)
 
             if not path.exists(fullpath):
                 fullpath = f'{UI_DIRECTORY}/index.html'

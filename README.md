@@ -1,7 +1,7 @@
 # learningHouse Service 
-[![License](https://img.shields.io/github/license/LearningHouseService/learninghouse-monorepo)](https://github.com/LearningHouseService/learninghouse-monorepo/blob/master/LICENSE) [![Release](https://img.shields.io/github/v/release/LearningHouseService/learninghouse-monorepo)](https://github.com/LearningHouseService/learninghouse-monorepo/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/LearningHouseService/learninghouse-monorepo/build_project.yml?branch=master)](https://github.com/LearningHouseService/learninghouse-monorepo/actions/workflows/build_project.yml) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/)  [![Docker version](https://img.shields.io/docker/v/learninghouseservice/learninghouse/latest?label=docker)](https://hub.docker.com/r/learninghouseservice/learninghouse) [![Docker image size](https://img.shields.io/docker/image-size/learninghouseservice/learninghouse/latest)](https://hub.docker.com/r/learninghouseservice/learninghouse) [![Discord Chat](https://img.shields.io/discord/997393653758697482)](https://discord.gg/U9axHEYqqB)
+[![License](https://img.shields.io/github/license/LearningHouseService/learninghouse)](https://github.com/LearningHouseService/learninghouse/blob/master/LICENSE) [![Release](https://img.shields.io/github/v/release/LearningHouseService/learninghouse)](https://github.com/LearningHouseService/learninghouse/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/LearningHouseService/learninghouse/build_project.yml?branch=master)](https://github.com/LearningHouseService/learninghouse/actions/workflows/build_project.yml) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) [![Discord Chat](https://img.shields.io/discord/997393653758697482)](https://discord.gg/U9axHEYqqB)
 
-![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse-monorepo/master/artwork/learninghouse_logo.svg)
+![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/artwork/learninghouse_logo.svg)
 
 ## Introduction
 
@@ -13,7 +13,7 @@ If you have any questions please get in contact with us on discord.
 
 [![Discord Banner](https://discordapp.com/api/guilds/997393653758697482/widget.png?style=banner2)](https://discord.gg/U9axHEYqqB)
 
-Please share your ideas what you want to teach your home, suggestions or problems by opening an [issue](https://github.com/LearningHouseService/learninghouse-monorepo/issues). Really looking forward for your feedback.
+Please share your ideas what you want to teach your home, suggestions or problems by opening an [issue](https://github.com/LearningHouseService/learninghouse/issues). Really looking forward for your feedback.
 
 ## Installation and configuration
 
@@ -24,7 +24,7 @@ pip install -U learninghouse
 
 Install and update using docker
 ```
-docker pull learninghouseservice/learninghouse:latest
+docker pull ghcr.io/learninghouseservice/learninghouse:latest
 ```
 
 ### Prepare configuration directory
@@ -59,14 +59,14 @@ LEARNINGHOUSE_RELOAD             | (False/True)                     | Reload of 
 
 #### Example configuration
 
-You can download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-monorepo/core/master/.env.example) 
+You can download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/core/.env.example) 
 and rename it to `.env`. Inside you can modify default configuration values to your needs in this file.
 
 ## Run service 
 
 ### In console
 
-Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse-monorepo/core/master/.env.example)
+Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/core/.env.example)
 to .env and modify it to your needs.
 
 Then just run `learninghouse` to run the service. By default the service will listen to http://localhost:5000/

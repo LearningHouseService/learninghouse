@@ -68,9 +68,9 @@ jobs:
         name: ui-artifacts-${{github.ref_name}}
         path: core/learninghouse/ui
 
-    - name: Copy README LICENSE and THIRD-PARTY-NOTICES
+    - name: Copy README.md LICENSE and THIRD-PARTY-NOTICES
       run: |
-        cp README.md LICENSE and THIRD-PARTY-NOTICES core/
+        cp README.md LICENSE THIRD-PARTY-NOTICES core/
 
     - name: Install build package
       run: |

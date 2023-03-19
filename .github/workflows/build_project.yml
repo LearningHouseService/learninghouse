@@ -40,19 +40,9 @@ jobs:
     - name: Save angular artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: ui-artifacts
+        name: ui-artifacts-${{github.ref_name}}
         path: |
           ui/dist/learninghouse
-
-    - name: Publish assets to github
-      if: ${{github.event_name == 'release'}}
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ github.token }}
-        file: ui/dist/learninghouse*
-        tag: ${{ github.ref }}
-        overwrite: true
-        file_glob: true
     
   build-core:
     runs-on: ubuntu-latest
@@ -72,10 +62,10 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Integrate UI
+    - name: Download UI
       uses: actions/download-artifact@v3
       with:
-        name: ui-artifacts
+        name: ui-artifacts-${{github.ref_name}}
         path: core/learninghouse/ui
 
     - name: Install build package
@@ -90,7 +80,7 @@ jobs:
     - name: Save python artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: python-artifacts-${{ matrix.python-version }}
+        name: python-artifacts-${{ matrix.python-version }}-${{github.ref_name}}
         path: |
           core/dist
     
@@ -137,7 +127,6 @@ jobs:
       id: buildx
       uses: docker/setup-buildx-action@master
 
-    
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -147,12 +136,12 @@ jobs:
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      uses: docker/metadata-action@v4
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      uses: docker/build-push-action@v4
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: docker

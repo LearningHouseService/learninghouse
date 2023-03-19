@@ -4,6 +4,7 @@ import json
 from os import makedirs, path
 from typing import Dict, List, Optional, Type, Union
 
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
@@ -121,7 +122,7 @@ class BrainConfiguration(BaseModel):
         filename = sanitize_configuration_filename(
             name, BrainFileType.CONFIG_FILE)
         with open(filename, 'w', encoding='utf-8') as config_file:
-            config_file.write(self.json(indent=4))
+            config_file.write(json.dumps(jsonable_encoder(self), indent=4))
 
 
 class BrainConfigurations(DictModel):

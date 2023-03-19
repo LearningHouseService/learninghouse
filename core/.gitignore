@@ -11,6 +11,10 @@
 
 logging.yaml
 
+README.md
+LICENSE
+THIRD-PARTY-NOTICES
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

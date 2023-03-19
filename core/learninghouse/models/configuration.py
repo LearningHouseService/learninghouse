@@ -75,10 +75,6 @@ class BrainEstimatorConfiguration(BaseModel):
     max_depth: Optional[int] = Field(5, ge=4, le=10)
     random_state: Optional[int] = Field(0)
 
-    class Config:
-        # pylint: disable=too-few-public-methods
-        use_enum_values = True
-
 
 class BrainConfiguration(BaseModel):
     """

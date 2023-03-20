@@ -14,7 +14,7 @@ env:
 jobs:
   variables: 
     outputs:
-      tag_name: ${{ steps.var.outputs.ref_name}}
+      ref_name: ${{ steps.var.outputs.ref_name}}
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables

@@ -1,16 +1,13 @@
-import json
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 
 class EnumModel(Enum):
     def __new__(cls, *args):
-        obj = str.__new__(cls)
+        obj = object.__new__(cls)
         obj._value_ = args[0]
-        obj.__eq__ = EnumModel.equals
         return obj
 
     def __str__(self) -> str:
@@ -19,9 +16,8 @@ class EnumModel(Enum):
     def __repr__(self) -> str:
         return str(self._value_)
 
-    @staticmethod
-    def equals(obj1, obj2) -> bool:
-        return isinstance(obj2, obj1.__class__) and obj1.value == obj2.value
+    def __eq__(self, obj) -> bool:
+        return isinstance(obj, self.__class__) and self.value == obj.value
 
     @classmethod
     def from_string(cls, value: str):
@@ -33,12 +29,15 @@ class EnumModel(Enum):
 
 class LHBaseModel(BaseModel):
 
-    def to_json(self, indent: Optional[int] = None) -> str:
-        return json.dumps(jsonable_encoder(self), indent=indent)
-
     def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
         with open(filename, 'w', encoding="utf-8") as file_pointer:
-            file_pointer.write(self.to_json(indent=indent))
+            file_pointer.write(self.json(indent=indent))
+
+    class Config:
+        # pylint: disable=too-few-public-methods
+        json_encoders = {
+            EnumModel: str
+        }
 
 
 class ListModel(LHBaseModel):
@@ -102,6 +101,3 @@ class DictModel(LHBaseModel):
         if "__root__" in ret:
             ret = ret["__root__"]
         return ret
-
-    def to_json(self, indent: Optional[int] = None):
-        return json.dumps(jsonable_encoder(self.dict()), indent=indent)

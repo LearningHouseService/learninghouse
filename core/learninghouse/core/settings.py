@@ -121,7 +121,7 @@ class DevelopmentSettings(ServiceSettings):
         env_prefix = 'learninghouse_'
 
 
-class ServiceEnvironment(str, EnumModel):
+class ServiceEnvironment(EnumModel):
     PROD = 'production', ServiceSettings
     DEV = 'development', DevelopmentSettings
 

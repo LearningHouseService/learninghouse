@@ -10,7 +10,7 @@ from loguru._defaults import LOGURU_FORMAT
 from learninghouse.models.base import EnumModel
 
 
-class LoggingLevelEnum(str, EnumModel):
+class LoggingLevelEnum(EnumModel):
     DEBUG = 'DEBUG', logging.DEBUG
     INFO = 'INFO', logging.INFO
     WARNING = 'WARNING', logging.WARNING

@@ -53,7 +53,7 @@ class TokenPayload(LHBaseModel):
         )
 
 
-class APIKeyRole(str, EnumModel):
+class APIKeyRole(EnumModel):
     USER = 'user'
     TRAINER = 'trainer'
 
@@ -66,7 +66,7 @@ class APIKeyRole(str, EnumModel):
         return self._role
 
 
-class UserRole(str, EnumModel):
+class UserRole(EnumModel):
     USER = 'user'
     TRAINER = 'trainer'
     ADMIN = 'admin'

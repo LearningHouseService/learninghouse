@@ -13,7 +13,7 @@ from learninghouse.core.settings import service_settings
 from learninghouse.models.base import DictModel, EnumModel, LHBaseModel
 
 
-class BrainEstimatorType(str, EnumModel):
+class BrainEstimatorType(EnumModel):
     """
         **LearningHouse Service** can predict values using an estimator. An estimator can be
         of type `classifier` which fits best for your needs if you have somekind of categorical
@@ -128,7 +128,7 @@ class BrainConfigurations(DictModel):
     __root__: Dict[str, BrainConfiguration]
 
 
-class BrainFileType(str, EnumModel):
+class BrainFileType(EnumModel):
     """
         Enumeration which holds the filetypes which are used for a brain
     """
@@ -151,15 +151,12 @@ class BrainFileType(str, EnumModel):
     def filename(self) -> str:
         return self._filename
 
-    def __eq__(self, other) -> bool:
-        return EnumModel.equals(self, other)
-
 
 class SensorDeleteResult(LHBaseModel):
     name: str = Field(None, example='azimuth')
 
 
-class SensorType(str, EnumModel):
+class SensorType(EnumModel):
     NUMERICAL = 'numerical'
     CATEGORICAL = 'categorical'
 
@@ -170,9 +167,6 @@ class SensorType(str, EnumModel):
     @property
     def typed(self) -> str:
         return self._typed
-
-    def __eq__(self, other) -> bool:
-        return EnumModel.equals(self, other)
 
 
 class Sensor(LHBaseModel):
@@ -212,12 +206,12 @@ class Sensors(DictModel):
     @property
     def numericals(self) -> List[str]:
         return list(map(lambda x: x[0], filter(
-            lambda x: x[1] == str(SensorType.NUMERICAL), self.items())))
+            lambda x: x[1] == SensorType.NUMERICAL, self.items())))
 
     @ property
     def categoricals(self) -> List[str]:
         return list(map(lambda x: x[0], filter(
-            lambda x: x[1] == str(SensorType.CATEGORICAL), self.items())))
+            lambda x: x[1] == SensorType.CATEGORICAL, self.items())))
 
 
 class BrainDeleteResult(LHBaseModel):

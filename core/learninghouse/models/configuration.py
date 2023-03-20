@@ -4,14 +4,13 @@ import json
 from os import makedirs, path
 from typing import Dict, List, Optional, Type, Union
 
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field
+from pydantic import Field
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.logging import logger
 from learninghouse.core.settings import service_settings
-from learninghouse.models.base import DictModel, EnumModel
+from learninghouse.models.base import DictModel, EnumModel, LHBaseModel
 
 
 class BrainEstimatorType(str, EnumModel):
@@ -43,7 +42,7 @@ class BrainEstimatorType(str, EnumModel):
         return self._estimator_class
 
 
-class BrainEstimatorConfiguration(BaseModel):
+class BrainEstimatorConfiguration(LHBaseModel):
     """
     **LearningHouse Service** can predict values using an estimator.
     An estimator can be of type `classifier` which fits best for your
@@ -77,7 +76,7 @@ class BrainEstimatorConfiguration(BaseModel):
     random_state: Optional[int] = Field(0)
 
 
-class BrainConfiguration(BaseModel):
+class BrainConfiguration(LHBaseModel):
     """
         Estimator:
         See BrainEstimatorConfiguration
@@ -121,8 +120,8 @@ class BrainConfiguration(BaseModel):
 
         filename = sanitize_configuration_filename(
             name, BrainFileType.CONFIG_FILE)
-        with open(filename, 'w', encoding='utf-8') as config_file:
-            config_file.write(json.dumps(jsonable_encoder(self), indent=4))
+
+        self.write_to_file(filename, indent=4)
 
 
 class BrainConfigurations(DictModel):
@@ -156,7 +155,7 @@ class BrainFileType(str, EnumModel):
         return EnumModel.equals(self, other)
 
 
-class SensorDeleteResult(BaseModel):
+class SensorDeleteResult(LHBaseModel):
     name: str = Field(None, example='azimuth')
 
 
@@ -176,7 +175,7 @@ class SensorType(str, EnumModel):
         return EnumModel.equals(self, other)
 
 
-class Sensor(BaseModel):
+class Sensor(LHBaseModel):
     name: str = Field(None, example='azimuth')
     typed: SensorType = Field(None, example=SensorType.NUMERICAL)
 
@@ -208,8 +207,7 @@ class Sensors(DictModel):
 
     def write_config(self) -> None:
         filename = service_settings().brains_directory / 'sensors.json'
-        with open(filename, 'w', encoding='utf-8') as sensorfile:
-            json.dump(self.dict(), sensorfile, indent=4)
+        self.write_to_file(filename, indent=4)
 
     @property
     def numericals(self) -> List[str]:
@@ -222,7 +220,7 @@ class Sensors(DictModel):
             lambda x: x[1] == str(SensorType.CATEGORICAL), self.items())))
 
 
-class BrainDeleteResult(BaseModel):
+class BrainDeleteResult(LHBaseModel):
     name: str = Field(None, example='darkness')
 
 

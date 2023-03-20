@@ -1,6 +1,8 @@
+import json
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 
@@ -29,7 +31,17 @@ class EnumModel(Enum):
         raise ValueError(f'No enum value {value} found.')
 
 
-class ListModel(BaseModel):
+class LHBaseModel(BaseModel):
+
+    def to_json(self, indent: Optional[int] = None) -> str:
+        return json.dumps(jsonable_encoder(self), indent=indent)
+
+    def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
+        with open(filename, 'w', encoding="utf-8") as file_pointer:
+            file_pointer.write(self.to_json(indent=indent))
+
+
+class ListModel(LHBaseModel):
     @property
     def root(self) -> List[Any]:
         return getattr(self, '__root__')
@@ -58,12 +70,8 @@ class ListModel(BaseModel):
     def append(self, newvalue: Any):
         self.root.append(newvalue)
 
-    class Config:
-        # pylint: disable=too-few-public-methods
-        use_enum_values = True
 
-
-class DictModel(BaseModel):
+class DictModel(LHBaseModel):
     @property
     def root(self) -> Dict[str, Any]:
         return getattr(self, '__root__')
@@ -95,6 +103,5 @@ class DictModel(BaseModel):
             ret = ret["__root__"]
         return ret
 
-    class Config:
-        # pylint: disable=too-few-public-methods
-        use_enum_values = True
+    def to_json(self, indent: Optional[int] = None):
+        return json.dumps(jsonable_encoder(self.dict()), indent=indent)

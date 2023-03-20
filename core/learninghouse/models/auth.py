@@ -7,31 +7,31 @@ from secrets import token_hex
 from typing import Dict, List, Union
 
 from passlib.hash import sha512_crypt
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from learninghouse.api.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.core.settings import service_settings
-from learninghouse.models.base import EnumModel
+from learninghouse.models.base import EnumModel, LHBaseModel
 
 settings = service_settings()
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(LHBaseModel):
     password: str = Field(None, example='MY_PASSWORD')
 
 
-class PasswordRequest(BaseModel):
+class PasswordRequest(LHBaseModel):
     old_password: str = Field(None, example='MY_OLD_PASSWORD')
     new_password: str = Field(None, example='MY_NEW_PASSWORD')
 
 
-class Token(BaseModel):
+class Token(LHBaseModel):
     access_token: str
     refresh_token: str
     token_type: str = Field('Bearer')
 
 
-class TokenPayload(BaseModel):
+class TokenPayload(LHBaseModel):
     sub: str
     iss: str
     aud: str
@@ -80,7 +80,7 @@ class UserRole(str, EnumModel):
         return self._role
 
 
-class APIKeyRequest(BaseModel):
+class APIKeyRequest(LHBaseModel):
     description: str = Field(
         None,
         min_length=3,
@@ -88,10 +88,6 @@ class APIKeyRequest(BaseModel):
         regex=r'^[A-Za-z]\w{1,13}[A-Za-z0-9]$',
         example='app_as_user')
     role: APIKeyRole = Field(None, example=APIKeyRole.USER)
-
-    class Config:
-        # pylint: disable=too-few-public-methods
-        use_enum_values = True
 
 
 class APIKeyInfo(APIKeyRequest):
@@ -116,7 +112,7 @@ class APIKey(APIKeyRequest):
 SECURITY_FILENAME = settings.brains_directory / 'security.json'
 
 
-class SecurityDatabase(BaseModel):
+class SecurityDatabase(LHBaseModel):
     admin_password: str
     api_keys: Dict[str, APIKey] = {}
     salt: str = token_hex(8)
@@ -135,8 +131,7 @@ class SecurityDatabase(BaseModel):
         return database
 
     def write(self):
-        with open(SECURITY_FILENAME, 'w', encoding='utf-8') as securityfile:
-            securityfile.write(self.json(indent=4))
+        self.write_to_file(SECURITY_FILENAME, 4)
 
     def authenticate_password(self, password: str) -> bool:
         return sha512_crypt.verify(password, self.admin_password)

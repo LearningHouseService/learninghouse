@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Dict, List, Union
 
-from pydantic import BaseModel, Field, StrictBool, StrictInt, StrictFloat
+from pydantic import Field, StrictBool, StrictInt, StrictFloat
 
 from learninghouse import versions
 from learninghouse.models import LearningHouseVersions
-from learninghouse.models.base import DictModel
+from learninghouse.models.base import DictModel, LHBaseModel
 from learninghouse.models.configuration import BrainConfiguration
 
 
-class BrainInfo(BaseModel):
+class BrainInfo(LHBaseModel):
     """
     Information of the trained brain.
     """
@@ -43,33 +43,35 @@ class BrainTrainingRequest(DictModel):
     for this `feature` will be assumed.
     """
 
-    __root__: Dict[str, Union[StrictBool, StrictInt, StrictFloat, str, None]] = Field(None, example={
-        'azimuth': 321.4441223144531,
-        'elevation': -19.691608428955078,
-        'rain_gauge': 0.0,
-        'pressure': 971.0,
-        'pressure_trend_1h': "falling",
-        'temperature_outside': 23.0,
-        'temperature_trend_1h': "rising",
-        'light_state': False,
-        'darkness': True
-    })
+    __root__: Dict[str, Union[StrictBool, StrictInt, StrictFloat, str, None]] = \
+        Field(None, example={
+            'azimuth': 321.4441223144531,
+            'elevation': -19.691608428955078,
+            'rain_gauge': 0.0,
+            'pressure': 971.0,
+            'pressure_trend_1h': "falling",
+            'temperature_outside': 23.0,
+            'temperature_trend_1h': "rising",
+            'light_state': False,
+            'darkness': True
+        })
 
 
 class BrainPredictionRequest(DictModel):
-    __root__: Dict[str,  Union[StrictBool, StrictInt, StrictFloat, str, None]] = Field(None, example={
-        'azimuth': 321.4441223144531,
-        'elevation': -19.691608428955078,
-        'rain_gauge': 0.0,
-        'pressure': 971.0,
-        'pressure_trend_1h': "falling",
-        'temperature_outside': 23.0,
-        'temperature_trend_1h': "rising",
-        'light_state': False
-    })
+    __root__: Dict[str,  Union[StrictBool, StrictInt, StrictFloat, str, None]] = \
+        Field(None, example={
+            'azimuth': 321.4441223144531,
+            'elevation': -19.691608428955078,
+            'rain_gauge': 0.0,
+            'pressure': 971.0,
+            'pressure_trend_1h': "falling",
+            'temperature_outside': 23.0,
+            'temperature_trend_1h': "rising",
+            'light_state': False
+        })
 
 
-class BrainPredictionResult(BaseModel):
+class BrainPredictionResult(LHBaseModel):
     brain: BrainInfo
     preprocessed: Dict[str, Union[StrictBool, StrictInt, StrictFloat, str]] = Field(None, example={
         'azimuth': 321.4441223144531,

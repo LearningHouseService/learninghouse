@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from os import path, stat
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import joblib
 import pandas as pd
-from fastapi.encoders import jsonable_encoder
 from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import accuracy_score
 
@@ -102,8 +100,8 @@ class Brain():
 
         filename = sanitize_configuration_filename(
             self.name, BrainFileType.INFO_FILE)
-        with open(filename, 'w', encoding='utf-8') as infofile:
-            infofile.write(json.dumps(jsonable_encoder(self.info), indent=4))
+
+        self.info.write_to_file(filename, 4)
 
 
 class BrainService():

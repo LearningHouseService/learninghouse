@@ -1,10 +1,11 @@
 from __future__ import annotations
 from typing import Any, Dict, List
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+from learninghouse.models.base import LHBaseModel
 
 
-class LearningHouseVersions(BaseModel):
+class LearningHouseVersions(LHBaseModel):
     service: str = Field(None, example='1.0.0')
     fastapi: str = Field(None, example='1.0.0')
     pydantic: str = Field(None, example='1.0.0')
@@ -24,7 +25,7 @@ class LearningHouseVersions(BaseModel):
             f'passlib: {self.passlib}, loguru: {self.loguru}'
 
 
-class LearningHouseErrorMessage(BaseModel):
+class LearningHouseErrorMessage(LHBaseModel):
     error: str
     description: str = ''
 

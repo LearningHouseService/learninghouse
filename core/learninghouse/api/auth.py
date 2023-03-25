@@ -64,8 +64,7 @@ if not auth.is_initial_admin_password:
         return auth.create_apikey(request)
 
     @router_protected.delete('/apikey/{description}', response_model=str)
-    async def delete_apikey(description: str = Path(None,
-                                                    min_length=3,
+    async def delete_apikey(description: str = Path(min_length=3,
                                                     max_length=15,
                                                     regex=r'^[A-Za-z]\w{1,13}[A-Za-z0-9]$',
                                                     example='app_as_user')):

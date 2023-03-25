@@ -6,7 +6,8 @@ const { writeFileSync, existsSync, mkdirSync } = require('fs-extra');
 
 const gitInfo = gitDescribeSync({
     dirtyMark: false,
-    dirtySemver: false
+    dirtySemver: false,
+    match: '[0-9]\.[0-9]\.[0-9]'
 });
 
 gitInfo.version = version;

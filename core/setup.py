@@ -1,3 +1,5 @@
+from os import path
+
 import setuptools
 
 import versioneer
@@ -12,10 +14,11 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 packages = setuptools.find_packages(exclude=['tests'])
 packages.append('learninghouse.static')
 packages.append('learninghouse.static.docs')
-packages.append('learninghouse.ui')
-packages.append('learninghouse.ui.assets')
-packages.append('learninghouse.ui.assets.fonts')
-packages.append('learninghouse.ui.assets.i18n')
+if path.exists('learninghouse/ui'):
+    packages.append('learninghouse.ui')
+    packages.append('learninghouse.ui.assets')
+    packages.append('learninghouse.ui.assets.fonts')
+    packages.append('learninghouse.ui.assets.i18n')
 
 setuptools.setup(
     name='learninghouse',

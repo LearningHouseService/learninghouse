@@ -19,10 +19,19 @@
         "--rcfile=${workspaceFolder}/core/.pylintrc"
     ],
     "python.linting.enabled": true,
-    "python.pythonPath": "/usr/bin/python3",
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
     "git.alwaysSignOff": true,
-    "python.sortImports.args": [
-        "--src=${workspaceFolder}/core"
+    "isort.args": [
+        "--src",
+        "${workspaceFolder}/core",
+        "--multi-line",
+        "3",
+        "--trailing-comma"
     ],
-    "python.envFile": "${workspaceFolder}/core/.env"
+    "python.envFile": "${workspaceFolder}/core/.env",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none"
 }

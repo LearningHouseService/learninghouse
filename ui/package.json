@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.6",
-    "@angular/cli": "~15.2.6",
+    "@angular/cli": "~15.2.7",
     "@angular/compiler-cli": "^15.2.8",
     "@tailwindcss/aspect-ratio": "0.4.2",
     "@tailwindcss/forms": "0.5.3",

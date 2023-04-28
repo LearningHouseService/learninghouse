@@ -1,7 +1,7 @@
 # learningHouse Service 
-[![License](https://img.shields.io/github/license/LearningHouseService/learninghouse)](https://github.com/LearningHouseService/learninghouse/blob/master/LICENSE) [![Release](https://img.shields.io/github/v/release/LearningHouseService/learninghouse)](https://github.com/LearningHouseService/learninghouse/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/LearningHouseService/learninghouse/build_project.yml?branch=master)](https://github.com/LearningHouseService/learninghouse/actions/workflows/build_project.yml) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) [![Discord Chat](https://img.shields.io/discord/997393653758697482)](https://discord.gg/U9axHEYqqB)
+[![License](https://img.shields.io/github/license/LearningHouseService/learninghouse)](https://github.com/LearningHouseService/learninghouse/blob/main/LICENSE) [![Release](https://img.shields.io/github/v/release/LearningHouseService/learninghouse)](https://github.com/LearningHouseService/learninghouse/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/LearningHouseService/learninghouse/build_project.yml?branch=main)](https://github.com/LearningHouseService/learninghouse/actions/workflows/build_project.yml) [![PyPI version](https://img.shields.io/pypi/v/learninghouse.svg)](https://pypi.org/project/learninghouse/) [![Discord Chat](https://img.shields.io/discord/997393653758697482)](https://discord.gg/U9axHEYqqB)
 
-![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/artwork/learninghouse_logo.svg)
+![learningHouse Logo](https://raw.githubusercontent.com/LearningHouseService/learninghouse/main/artwork/learninghouse_logo.svg)
 
 ## Introduction
 
@@ -59,14 +59,14 @@ LEARNINGHOUSE_RELOAD             | (False/True)                     | Reload of 
 
 #### Example configuration
 
-You can download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/core/.env.example) 
+You can download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/main/core/.env.example) 
 and rename it to `.env`. Inside you can modify default configuration values to your needs in this file.
 
 ## Run service 
 
 ### In console
 
-Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/core/.env.example)
+Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/main/core/.env.example)
 to .env and modify it to your needs.
 
 Then just run `learninghouse` to run the service. By default the service will listen to http://localhost:5000/

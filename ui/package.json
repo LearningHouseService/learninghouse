@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "prebuild": "node git-version.js",
+    "prebuild:core": "node git-version.js",
     "prestart": "node git-version.js",
     "start": "ng serve",
     "build": "ng build --delete-output-path",

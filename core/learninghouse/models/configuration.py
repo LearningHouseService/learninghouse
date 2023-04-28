@@ -15,30 +15,36 @@ from learninghouse.models.base import DictModel, EnumModel, LHBaseModel
 
 class BrainEstimatorType(EnumModel):
     """
-        **LearningHouse Service** can predict values using an estimator. An estimator can be
-        of type `classifier` which fits best for your needs if you have somekind of categorical
-        output like in the darkness example true and false. If you want to predict a numerical
-        value for example the setpoint of an heating equipment use the type `regressor` instead.
+    **LearningHouse Service** can predict values using an estimator. An estimator can be
+    of type `classifier` which fits best for your needs if you have somekind of categorical
+    output like in the darkness example true and false. If you want to predict a numerical
+    value for example the setpoint of an heating equipment use the type `regressor` instead.
     """
-    CLASSIFIER = 'classifier', RandomForestClassifier
-    REGRESSOR = 'regressor', RandomForestRegressor
 
-    def __init__(self,
-                 typed: str,
-                 estimator_class: Union[Type[RandomForestClassifier],
-                                        Type[RandomForestRegressor]]):
+    CLASSIFIER = "classifier", RandomForestClassifier
+    REGRESSOR = "regressor", RandomForestRegressor
+
+    def __init__(
+        self,
+        typed: str,
+        estimator_class: Union[
+            Type[RandomForestClassifier], Type[RandomForestRegressor]
+        ],
+    ):
         # pylint: disable=super-init-not-called
         self._typed: str = typed
-        self._estimator_class: Union[Type[RandomForestClassifier],
-                                     Type[RandomForestRegressor]] = estimator_class
+        self._estimator_class: Union[
+            Type[RandomForestClassifier], Type[RandomForestRegressor]
+        ] = estimator_class
 
     @property
     def typed(self) -> str:
         return self._typed
 
     @property
-    def estimator_class(self) -> Union[Type[RandomForestClassifier],
-                                       Type[RandomForestRegressor]]:
+    def estimator_class(
+        self,
+    ) -> Union[Type[RandomForestClassifier], Type[RandomForestRegressor]]:
         return self._estimator_class
 
 
@@ -69,8 +75,8 @@ class BrainEstimatorConfiguration(LHBaseModel):
     `max_depth` (default: 5) option. Both options are optional. Try to
     resize this value to optimize the accuracy of your model.
     """  # pylint: disable=line-too-long
-    typed: BrainEstimatorType = Field(
-        None, example=BrainEstimatorType.CLASSIFIER)
+
+    typed: BrainEstimatorType = Field(None, example=BrainEstimatorType.CLASSIFIER)
     estimators: Optional[int] = Field(100, ge=100, le=1000)
     max_depth: Optional[int] = Field(5, ge=4, le=10)
     random_state: Optional[int] = Field(0)
@@ -78,48 +84,45 @@ class BrainEstimatorConfiguration(LHBaseModel):
 
 class BrainConfiguration(LHBaseModel):
     """
-        Estimator:
-        See BrainEstimatorConfiguration
+    Estimator:
+    See BrainEstimatorConfiguration
 
-        Dependent variable:
-        The `dependent` variable is the one that have to be in the training data and which is predicted by the trained brain.
+    Dependent variable:
+    The `dependent` variable is the one that have to be in the training data and which is predicted by the trained brain.
 
-        The `dependent` variable has to be a number. If it is not a number, but a string or boolean (true/false) like in the example. For this set `dependent_encode` to true.
+    The `dependent` variable has to be a number. If it is not a number, but a string or boolean (true/false) like in the example. For this set `dependent_encode` to true.
 
-        Test size:
-        LearningHouse service only uses a part of your training data to train the brain. The other part specified by `test_size` will be used to score the accuracy of your brain.
+    Test size:
+    LearningHouse service only uses a part of your training data to train the brain. The other part specified by `test_size` will be used to score the accuracy of your brain.
 
-        Give a percentage by using floating point numbers between 0.01 and 0.99 or a absolute number of data points by using integer numbers.
+    Give a percentage by using floating point numbers between 0.01 and 0.99 or a absolute number of data points by using integer numbers.
 
-        For the beginning a `test_size` of 20 % (0.2) like the example should be fine.
+    For the beginning a `test_size` of 20 % (0.2) like the example should be fine.
     """  # pylint: disable=line-too-long
 
-    name: str = Field(None, example='darkness')
+    name: str = Field(None, example="darkness")
     estimator: BrainEstimatorConfiguration
-    dependent: str = Field(None, example='darkness')
+    dependent: str = Field(None, example="darkness")
     dependent_encode: Optional[bool] = Field(False)
     test_size: Optional[float] = Field(0.2, gt=0.0, examples=[0.2, 20])
 
     @classmethod
     def from_json_file(cls, name: str) -> BrainConfiguration:
-        filename = sanitize_configuration_filename(
-            name, BrainFileType.CONFIG_FILE)
+        filename = sanitize_configuration_filename(name, BrainFileType.CONFIG_FILE)
 
-        with open(filename, 'r', encoding='utf-8') as config_file:
+        with open(filename, "r", encoding="utf-8") as config_file:
             return BrainConfiguration(**json.load(config_file))
 
     @classmethod
     def json_config_file_exists(cls, name: str) -> bool:
-        filename = sanitize_configuration_filename(
-            name, BrainFileType.CONFIG_FILE)
+        filename = sanitize_configuration_filename(name, BrainFileType.CONFIG_FILE)
         return path.exists(filename)
 
     def to_json_file(self, name: str) -> None:
         brainpath = sanitize_configuration_directory(name)
         makedirs(brainpath, exist_ok=True)
 
-        filename = sanitize_configuration_filename(
-            name, BrainFileType.CONFIG_FILE)
+        filename = sanitize_configuration_filename(name, BrainFileType.CONFIG_FILE)
 
         self.write_to_file(filename, indent=4)
 
@@ -130,13 +133,14 @@ class BrainConfigurations(DictModel):
 
 class BrainFileType(EnumModel):
     """
-        Enumeration which holds the filetypes which are used for a brain
+    Enumeration which holds the filetypes which are used for a brain
     """
-    CONFIG_FILE = 'config', 'config.json'
-    TRAINED_FILE = 'trained', 'trained.pkl'
-    INFO_FILE = 'info', 'info.json'
-    TRAINING_DATA_FILE = 'data', 'training_data.csv'
-    ALL = 'all', ''
+
+    CONFIG_FILE = "config", "config.json"
+    TRAINED_FILE = "trained", "trained.pkl"
+    INFO_FILE = "info", "info.json"
+    TRAINING_DATA_FILE = "data", "training_data.csv"
+    ALL = "all", ""
 
     def __init__(self, typed: str, filename: str):
         # pylint: disable=super-init-not-called
@@ -153,12 +157,12 @@ class BrainFileType(EnumModel):
 
 
 class SensorDeleteResult(LHBaseModel):
-    name: str = Field(None, example='azimuth')
+    name: str = Field(None, example="azimuth")
 
 
 class SensorType(EnumModel):
-    NUMERICAL = 'numerical'
-    CATEGORICAL = 'categorical'
+    NUMERICAL = "numerical"
+    CATEGORICAL = "categorical"
 
     def __init__(self, typed: str):
         # pylint: disable=super-init-not-called
@@ -170,52 +174,63 @@ class SensorType(EnumModel):
 
 
 class Sensor(LHBaseModel):
-    name: str = Field(None, example='azimuth')
+    name: str = Field(None, example="azimuth")
     typed: SensorType = Field(None, example=SensorType.NUMERICAL)
 
 
 class Sensors(DictModel):
-    __root__: Dict[str, SensorType] = Field(None, example={
-        'azimuth': SensorType.NUMERICAL,
-        'elevation': SensorType.NUMERICAL,
-        'rain_gauge': SensorType.NUMERICAL,
-        'pressure': SensorType.NUMERICAL,
-        'pressure_trend_1h': SensorType.CATEGORICAL,
-        'temperature_outside': SensorType.NUMERICAL,
-        'temperature_trend_1h': SensorType.CATEGORICAL,
-        'light_state': SensorType.CATEGORICAL
-    })
+    __root__: Dict[str, SensorType] = Field(
+        None,
+        example={
+            "azimuth": SensorType.NUMERICAL,
+            "elevation": SensorType.NUMERICAL,
+            "rain_gauge": SensorType.NUMERICAL,
+            "pressure": SensorType.NUMERICAL,
+            "pressure_trend_1h": SensorType.CATEGORICAL,
+            "temperature_outside": SensorType.NUMERICAL,
+            "temperature_trend_1h": SensorType.CATEGORICAL,
+            "light_state": SensorType.CATEGORICAL,
+        },
+    )
 
     @classmethod
     def load_config(cls) -> Sensors:
-        filename = service_settings().brains_directory / 'sensors.json'
+        filename = service_settings().brains_directory / "sensors.json"
         sensors = {}
 
         if path.exists(filename):
-            with open(filename, 'r', encoding='utf-8') as sensorfile:
+            with open(filename, "r", encoding="utf-8") as sensorfile:
                 sensors = json.load(sensorfile)
         else:
-            logger.warning('No sensors.json found')
+            logger.warning("No sensors.json found")
 
         return Sensors.parse_obj(sensors)
 
     def write_config(self) -> None:
-        filename = service_settings().brains_directory / 'sensors.json'
+        filename = service_settings().brains_directory / "sensors.json"
         self.write_to_file(filename, indent=4)
 
     @property
     def numericals(self) -> List[str]:
-        return list(map(lambda x: x[0], filter(
-            lambda x: x[1] == SensorType.NUMERICAL, self.items())))
+        return list(
+            map(
+                lambda x: x[0],
+                filter(lambda x: x[1] == SensorType.NUMERICAL, self.items()),
+            )
+        )
 
-    @ property
+    @property
     def categoricals(self) -> List[str]:
-        return list(map(lambda x: x[0], filter(
-            lambda x: x[1] == SensorType.CATEGORICAL, self.items())))
+        return list(
+            map(
+                lambda x: x[0],
+                filter(lambda x: x[1] == SensorType.CATEGORICAL, self.items()),
+            )
+        )
 
 
 class BrainDeleteResult(LHBaseModel):
-    name: str = Field(None, example='darkness')
+    name: str = Field(None, example="darkness")
 
 
 def sanitize_configuration_directory(brainname: str) -> str:
@@ -225,7 +240,8 @@ def sanitize_configuration_directory(brainname: str) -> str:
 
     if not fullpath.startswith(str(service_settings().brains_directory)):
         raise LearningHouseSecurityException(
-            'Configuration file name breaks configuration directory')
+            "Configuration file name breaks configuration directory"
+        )
 
     return fullpath
 
@@ -237,6 +253,7 @@ def sanitize_configuration_filename(brainname: str, filetype: BrainFileType) -> 
 
     if not fullpath.startswith(str(service_settings().brains_directory)):
         raise LearningHouseSecurityException(
-            'Configuration file name breaks configuration directory')
+            "Configuration file name breaks configuration directory"
+        )
 
     return fullpath

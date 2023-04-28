@@ -2,7 +2,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, catchError, map, Observable } from 'rxjs';
-import { APIKeyModel, APIKeyRole, ChangePasswordRequestModel, LoginRequestModel, Role, TokenModel } from '../../shared/models/auth.model';
+import { APIKeyModel, ChangePasswordRequestModel, LoginRequestModel, Role, TokenModel } from '../../shared/models/auth.model';
 import { APIService } from '../../shared/services/api.service';
 
 

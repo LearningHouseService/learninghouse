@@ -29,9 +29,10 @@
             </ng-container>
 
             <ng-container matColumnDef="actions">
-                <mat-header-cell *matHeaderCellDef> {{'components.table.columns.actions' | translate}}
+                <mat-header-cell *matHeaderCellDef class="justify-end"> {{'components.table.columns.actions' |
+                    translate}}
                 </mat-header-cell>
-                <mat-cell *matCellDef="let row">
+                <mat-cell *matCellDef="let row" class="justify-end">
                     <button mat-icon-button
                         [matTooltip]="action.label | translate: {rowDescription: row[config.rowDescription!]}"
                         (click)="onRowAction(action.id, row)" *ngFor="let action of config.rowActions">

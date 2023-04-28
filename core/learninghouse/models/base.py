@@ -24,26 +24,23 @@ class EnumModel(Enum):
         for item in cls.__members__.values():
             if item.value == value:
                 return item
-        raise ValueError(f'No enum value {value} found.')
+        raise ValueError(f"No enum value {value} found.")
 
 
 class LHBaseModel(BaseModel):
-
     def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
-        with open(filename, 'w', encoding="utf-8") as file_pointer:
+        with open(filename, "w", encoding="utf-8") as file_pointer:
             file_pointer.write(self.json(indent=indent))
 
     class Config:
         # pylint: disable=too-few-public-methods
-        json_encoders = {
-            EnumModel: str
-        }
+        json_encoders = {EnumModel: str}
 
 
 class ListModel(LHBaseModel):
     @property
     def root(self) -> List[Any]:
-        return getattr(self, '__root__')
+        return getattr(self, "__root__")
 
     def __getitem__(self, key: int) -> Any:
         return self.root[key]
@@ -73,7 +70,7 @@ class ListModel(LHBaseModel):
 class DictModel(LHBaseModel):
     @property
     def root(self) -> Dict[str, Any]:
-        return getattr(self, '__root__')
+        return getattr(self, "__root__")
 
     def items(self):
         return self.root.items()

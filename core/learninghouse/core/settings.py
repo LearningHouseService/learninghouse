@@ -13,9 +13,7 @@ from learninghouse.api.errors import (
 from learninghouse.core.logging import LoggingLevelEnum
 from learninghouse.models.base import EnumModel
 
-LICENSE_URL = (
-    "https://github.com/LearningHouseService/learninghouse-monorepo/blob/main/LICENSE"
-)
+LICENSE_URL = "https://github.com/LearningHouseService/learninghouse/blob/main/LICENSE"
 
 
 class ServiceSettings(BaseSettings):
@@ -45,6 +43,7 @@ class ServiceSettings(BaseSettings):
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
+        validation_error = LearningHouseValidationError
         return {
             "debug": self.debug,
             "title": self.title,
@@ -53,7 +52,7 @@ class ServiceSettings(BaseSettings):
             "redoc_url": None,
             "version": versions.service,
             "responses": {
-                LearningHouseValidationError.STATUS_CODE: LearningHouseValidationError.api_description(),
+                validation_error.STATUS_CODE: validation_error.api_description(),
                 LearningHouseException.STATUS_CODE: LearningHouseException.api_description(),
             },
             "license_info": {"name": "MIT License", "url": LICENSE_URL},

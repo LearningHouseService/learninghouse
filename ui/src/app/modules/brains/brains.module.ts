@@ -1,10 +1,9 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TrainingComponent } from './pages/training/training.component';
-import { PredictionComponent } from './pages/prediction/prediction.component';
-import { BrainsRoutingModule } from './brains.routes';
-import { RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { BrainsRoutingModule } from './brains.routes';
+import { PredictionComponent } from './pages/prediction/prediction.component';
+import { TrainingComponent } from './pages/training/training.component';
 
 
 

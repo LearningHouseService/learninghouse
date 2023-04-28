@@ -107,11 +107,6 @@
 					"title": "Configuration",
 					"tooltip": "Configuration submenu"
 				},
-				"dashboard": {
-					"subtitle": "Get an overview",
-					"title": "Dashboard",
-					"tooltip": "Dashboard"
-				},
 				"prediction": {
 					"subtitle": "Use a brain",
 					"title": "Prediction",

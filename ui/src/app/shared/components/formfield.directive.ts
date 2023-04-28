@@ -1,7 +1,6 @@
-import { ThisReceiver } from '@angular/compiler';
 import { Directive, Input, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { TranslateCompiler, TranslateService } from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Directive()
 export class FormFieldDirective implements OnInit {

@@ -17,18 +17,18 @@ settings = service_settings()
 
 
 class LoginRequest(LHBaseModel):
-    password: str = Field(None, example='MY_PASSWORD')
+    password: str = Field(None, example="MY_PASSWORD")
 
 
 class PasswordRequest(LHBaseModel):
-    old_password: str = Field(None, example='MY_OLD_PASSWORD')
-    new_password: str = Field(None, example='MY_NEW_PASSWORD')
+    old_password: str = Field(None, example="MY_OLD_PASSWORD")
+    new_password: str = Field(None, example="MY_NEW_PASSWORD")
 
 
 class Token(LHBaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = Field('Bearer')
+    token_type: str = Field("Bearer")
 
 
 class TokenPayload(LHBaseModel):
@@ -40,22 +40,24 @@ class TokenPayload(LHBaseModel):
     iat: datetime
 
     @classmethod
-    def create(cls, subject: str, expire: datetime, issue_time: datetime) -> TokenPayload:
+    def create(
+        cls, subject: str, expire: datetime, issue_time: datetime
+    ) -> TokenPayload:
         payload_args = settings.jwt_payload_claims
 
         return cls(
             sub=subject,
-            iss=payload_args['issuer'],
-            aud=payload_args['audience'],
+            iss=payload_args["issuer"],
+            aud=payload_args["audience"],
             jti=token_hex(16),
             exp=expire,
-            iat=issue_time
+            iat=issue_time,
         )
 
 
 class APIKeyRole(EnumModel):
-    USER = 'user'
-    TRAINER = 'trainer'
+    USER = "user"
+    TRAINER = "trainer"
 
     def __init__(self, role: str):
         # pylint: disable=super-init-not-called
@@ -67,9 +69,9 @@ class APIKeyRole(EnumModel):
 
 
 class UserRole(EnumModel):
-    USER = 'user'
-    TRAINER = 'trainer'
-    ADMIN = 'admin'
+    USER = "user"
+    TRAINER = "trainer"
+    ADMIN = "admin"
 
     def __init__(self, role: str):
         # pylint: disable=super-init-not-called
@@ -85,17 +87,16 @@ class APIKeyRequest(LHBaseModel):
         None,
         min_length=3,
         max_length=15,
-        regex=r'^[A-Za-z]\w{1,13}[A-Za-z0-9]$',
-        example='app_as_user')
+        regex=r"^[A-Za-z]\w{1,13}[A-Za-z0-9]$",
+        example="app_as_user",
+    )
     role: APIKeyRole = Field(None, example=APIKeyRole.USER)
 
 
 class APIKeyInfo(APIKeyRequest):
     @classmethod
     def from_api_key(cls, api_key: APIKey) -> APIKeyInfo:
-        return cls(
-            description=api_key.description,
-            role=api_key.role)
+        return cls(description=api_key.description, role=api_key.role)
 
 
 class APIKey(APIKeyRequest):
@@ -104,12 +105,11 @@ class APIKey(APIKeyRequest):
     @classmethod
     def from_api_key_request(cls, api_key_request: APIKeyRequest, key: str):
         return cls(
-            description=api_key_request.description,
-            role=api_key_request.role,
-            key=key)
+            description=api_key_request.description, role=api_key_request.role, key=key
+        )
 
 
-SECURITY_FILENAME = settings.brains_directory / 'security.json'
+SECURITY_FILENAME = settings.brains_directory / "security.json"
 
 
 class SecurityDatabase(LHBaseModel):
@@ -123,9 +123,9 @@ class SecurityDatabase(LHBaseModel):
     def load_or_write_default(cls) -> SecurityDatabase:
         database = None
         if path.exists(SECURITY_FILENAME):
-            database = cls.parse_file(SECURITY_FILENAME, encoding='utf-8')
+            database = cls.parse_file(SECURITY_FILENAME, encoding="utf-8")
         else:
-            database = cls(admin_password=sha512_crypt.hash('learninghouse'))
+            database = cls(admin_password=sha512_crypt.hash("learninghouse"))
             database.write()
 
         return database
@@ -173,8 +173,8 @@ class SecurityDatabase(LHBaseModel):
         return api_key_info
 
     def find_apikey_by_description(
-            self, description: str,
-            full_api_key: bool = False) -> [APIKeyInfo, APIKey, None]:
+        self, description: str, full_api_key: bool = False
+    ) -> Union[APIKeyInfo, APIKey, None]:
         api_key_info = None
 
         for api_key in self.api_keys.values():

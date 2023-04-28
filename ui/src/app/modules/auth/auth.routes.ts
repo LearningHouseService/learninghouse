@@ -1,4 +1,4 @@
-import { NgModule } from "@angular/core";
+import { NgModule, inject } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuard } from "src/app/shared/guards/auth.guard";
 import { Role } from "src/app/shared/models/auth.model";
@@ -15,14 +15,12 @@ const routes: Routes = [
     {
         path: 'apikeys',
         component: APIKeysComponent,
-        canActivate: [AuthGuard],
-        data: { minimumRole: Role.ADMIN }
+        canActivate: [() => inject(AuthGuard).checkMinimumRole(Role.ADMIN)]
     },
     {
         path: 'change_password',
         component: ChangePasswordComponent,
-        canActivate: [AuthGuard],
-        data: { minimumRole: Role.ADMIN }
+        canActivate: [() => inject(AuthGuard).checkMinimumRole(Role.ADMIN)]
     }
 ];
 

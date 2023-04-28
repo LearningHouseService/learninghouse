@@ -6,8 +6,7 @@ import { TranslateService } from "@ngx-translate/core";
 import defaultLanguage from "./../assets/i18n/en.json";
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   title = 'learninghouse';

@@ -3,8 +3,7 @@ import { InputDirective } from '../input/input.directive';
 
 @Component({
   selector: 'learninghouse-password',
-  templateUrl: './password.component.html',
-  styleUrls: ['./password.component.scss']
+  templateUrl: './password.component.html'
 })
 export class PasswordComponent extends InputDirective {
   hide = true;

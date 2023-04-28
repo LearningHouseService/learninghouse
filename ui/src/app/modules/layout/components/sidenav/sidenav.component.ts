@@ -23,12 +23,6 @@ export class SidenavComponent {
 
   navItems: SidenavItem[] = [
     {
-      key: 'dashboard',
-      icon: 'dashboard',
-      route: '/dashboard',
-      minimumRole: Role.USER
-    },
-    {
       key: 'prediction',
       svg: 'learninghouse',
       route: '/brains/prediction',

@@ -11,15 +11,13 @@ from learninghouse.models.base import EnumModel
 
 
 class LoggingLevelEnum(EnumModel):
-    DEBUG = 'DEBUG', logging.DEBUG
-    INFO = 'INFO', logging.INFO
-    WARNING = 'WARNING', logging.WARNING
-    ERROR = 'ERROR', logging.ERROR
-    CRITICAL = 'CRITICAL', logging.CRITICAL
+    DEBUG = "DEBUG", logging.DEBUG
+    INFO = "INFO", logging.INFO
+    WARNING = "WARNING", logging.WARNING
+    ERROR = "ERROR", logging.ERROR
+    CRITICAL = "CRITICAL", logging.CRITICAL
 
-    def __init__(self,
-                 description: str,
-                 level: int):
+    def __init__(self, description: str, level: int):
         # pylint: disable=super-init-not-called
         self._description: str = description
         self._level: int = level
@@ -45,7 +43,7 @@ class LoggingHandler(logging.Handler):
             frame = cast(FrameType, frame.f_back)
             depth += 1
 
-        log = logger.bind(request_id='app')
+        log = logger.bind(request_id="app")
         log.opt(depth=depth, exception=record.exc_info).log(
             level,
             record.getMessage(),
@@ -53,7 +51,6 @@ class LoggingHandler(logging.Handler):
 
 
 def format_record(record: dict) -> str:
-
     format_string = LOGURU_FORMAT
     if record["extra"].get("payload") is not None:
         record["extra"]["payload"] = pformat(
@@ -70,15 +67,16 @@ def initialize_logging(logging_level: LoggingLevelEnum) -> None:
 
     logging.basicConfig(handlers=[logging_handler], level=0)
 
-    uvicorn_logger = logging.getLogger('uvicorn')
+    uvicorn_logger = logging.getLogger("uvicorn")
     uvicorn_logger.propagate = False
 
-    for uvicorn_logger_name in ('fastapi', 'uvicorn.asgi', 'uvicorn.access'):
+    for uvicorn_logger_name in ("fastapi", "uvicorn.asgi", "uvicorn.access"):
         logging.getLogger(uvicorn_logger_name).handlers = [logging_handler]
 
     logger.bind(request_id=None, method=None)
 
     logger.configure(
-        handlers=[{"sink": sys.stdout,
-                   "level": logging_level.level, "format": format_record}]
+        handlers=[
+            {"sink": sys.stdout, "level": logging_level.level, "format": format_record}
+        ]
     )

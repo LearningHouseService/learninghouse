@@ -1,27 +1,24 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { map, Observable, take } from 'rxjs';
-import { Role } from '../models/auth.model';
+import { Router, UrlTree } from '@angular/router';
+import { Observable, map, take } from 'rxjs';
 import { AuthService } from '../../modules/auth/auth.service';
+import { Role } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard {
   constructor(private authService: AuthService, private router: Router) { }
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    _: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+  checkMinimumRole(minimumRoleNeeded: Role): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     return this.authService.role$.pipe(
       take(1),
       map((role) => {
         if (role) {
-          const minimumRole = route.data['minimumRole'] as Role;
-          if (role.isMinimumRole(minimumRole)) {
+          if (role.isMinimumRole(minimumRoleNeeded)) {
             return true;
           } else {
-            return this.router.createUrlTree(['/dashboard']);
+            return this.router.createUrlTree(['/brains/prediction']);
           }
         } else {
           return this.router.createUrlTree(['/auth']);

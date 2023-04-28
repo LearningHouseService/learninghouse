@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { throwMatDuplicatedDrawerError } from '@angular/material/sidenav';
-import { BehaviorSubject, interval, ReplaySubject, takeUntil } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, interval, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'learninghouse-session-timer',
@@ -31,7 +30,7 @@ export class SessionTimerComponent implements OnInit, OnDestroy {
     let timeDifference = 0;
     if (this.expires) {
       timeDifference = this.expires.getTime() - new Date().getTime();
-      if (Math.floor(timeDifference / 1000) == 0) {
+      if (Math.floor(timeDifference / 1000) <= 0) {
         this.finished.emit();
       }
     }

@@ -54,7 +54,8 @@ const material = [
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: {
         floatLabel: 'always',
-        hideRequiredMarker: true
+        hideRequiredMarker: true,
+        subscriptSizing: 'dynamic'
       }
     }
   ]

@@ -1,5 +1,4 @@
 from os import listdir, path
-
 from shutil import rmtree
 
 from learninghouse.api.errors.brain import BrainExists, BrainNoConfiguration
@@ -7,12 +6,18 @@ from learninghouse.api.errors.sensor import NoSensor, SensorExists
 from learninghouse.core.logging import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.configuration import (
-    BrainConfiguration, BrainConfigurations, BrainDeleteResult,
-    Sensor, SensorDeleteResult, Sensors, SensorType,
-    sanitize_configuration_directory)
+    BrainConfiguration,
+    BrainConfigurations,
+    BrainDeleteResult,
+    Sensor,
+    SensorDeleteResult,
+    Sensors,
+    SensorType,
+    sanitize_configuration_directory,
+)
 
 
-class SensorConfigurationService():
+class SensorConfigurationService:
     @staticmethod
     def list_all() -> Sensors:
         return Sensors.load_config()
@@ -56,14 +61,13 @@ class SensorConfigurationService():
             raise NoSensor(name) from exc
 
 
-class BrainConfigurationService():
+class BrainConfigurationService:
     @staticmethod
     def list_all() -> BrainConfigurations:
         brains = {}
         for directory in listdir(service_settings().brains_directory):
             if BrainConfiguration.json_config_file_exists(directory):
-                brains[directory] = BrainConfiguration.from_json_file(
-                    directory)
+                brains[directory] = BrainConfiguration.from_json_file(directory)
 
         return BrainConfigurations.parse_obj(brains)
 
@@ -99,7 +103,7 @@ class BrainConfigurationService():
         if not path.exists(brainpath):
             raise BrainNoConfiguration(name)
 
-        logger.info(f'Remove brain: {name}')
+        logger.info(f"Remove brain: {name}")
         rmtree(brainpath)
 
         return BrainDeleteResult(name=name)

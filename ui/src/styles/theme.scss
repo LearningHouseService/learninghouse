@@ -1,8 +1,6 @@
-@use "sass:math";
-@import '@angular/material/theming';
+@use '@angular/material' as mat;
 
-
-@include mat-core();
+@include mat.core();
 
 $md-learninghouseprimary: (
     50 : #e0f0e0,
@@ -100,60 +98,16 @@ $md-learninghousewarn: (
     )
 );
 
-$learninghouse-primary: mat-palette($md-learninghouseprimary);
-$learninghouse-accent: mat-palette($md-learninghouseaccent);
-$learninghouse-warn: mat-palette($md-learninghousewarn);
+$learninghouse-primary: mat.define-palette($md-learninghouseprimary);
+$learninghouse-accent: mat.define-palette($md-learninghouseaccent);
+$learninghouse-warn: mat.define-palette($md-learninghousewarn);
 
-$learninghouse-theme: mat-light-theme($learninghouse-primary, $learninghouse-accent, $learninghouse-warn);
+$learninghouse-theme: mat.define-light-theme((color: (primary: $learninghouse-primary,
+                accent: $learninghouse-accent,
+                warn: $learninghouse-warn,
+            ),
+            typography: mat.define-typography-config(),
+            density: 0,
+        ));
 
-@include angular-material-theme($learninghouse-theme);
-
-
-// Workaround for https://github.com/angular/material2/issues/4580.
-@mixin mat-form-field-multiline-workaround($typography-config: null) {
-    @if $typography-config ==null {
-        $typography-config: mat-typography-config();
-    }
-
-    .mat-form-field {
-        // Copy-paste from @mat-form-field-typography();
-        $line-height: mat-line-height($typography-config, input);
-        $subscript-font-scale: 0.75;
-
-        & & {
-            &-underline {
-                position: static;
-            }
-
-            &-subscript-wrapper {
-                $subscript-margin-top: math.div(0.5em, $subscript-font-scale);
-                $subscript-min-height: $line-height * 1em;
-                $subscript-margin-bottom: -#{$subscript-margin-top + $line-height};
-
-                position: static;
-                min-height: $subscript-min-height;
-                margin-bottom: $subscript-margin-bottom;
-            }
-        }
-
-        &-appearance-legacy &-subscript-wrapper {
-            // Copy-paste from @mat-form-field-legacy-typography();
-            $line-spacing: math.div(($line-height - 1), 2);
-            $subscript-margin-top: math.div(0.5em, $subscript-font-scale - ($line-spacing * 2));
-
-            $subscript-min-height: $line-height * 1em;
-            $subscript-margin-bottom: -#{$subscript-margin-top + $line-height};
-
-            min-height: $subscript-min-height;
-            margin-bottom: $subscript-margin-bottom;
-        }
-    }
-
-
-    .mat-button-toggle-checked {
-        background-color: mat-color($learninghouse-primary);
-        color: mat-color($learninghouse-primary, default-contrast) !important;
-    }
-}
-
-@include mat-form-field-multiline-workaround();
+@include mat.all-component-themes($learninghouse-theme);

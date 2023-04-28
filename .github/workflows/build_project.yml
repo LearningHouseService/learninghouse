@@ -3,7 +3,7 @@ name: build-project
 on: 
   push:
   pull_request:
-    branches: master
+    branches: main
   release:
     types: [published]
 
@@ -42,10 +42,6 @@ jobs:
 
     - name: Install dependencies
       run: npm install
-      working-directory: ui
-
-    - name: Write version to file
-      run: node git-version.js
       working-directory: ui
 
     - name: Build
@@ -168,7 +164,7 @@ jobs:
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: docker
-        push: ${{github.event_name == 'release' || (github.event_name == 'push' && github.ref_name == 'master')}}
+        push: ${{github.event_name == 'release' || (github.event_name == 'push' && github.ref_name == 'main')}}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
 

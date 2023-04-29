@@ -24,7 +24,10 @@
         <mat-table [dataSource]="dataSource" [attr.aria-describedby]="title_id">
             <ng-container [matColumnDef]="column.attr" *ngFor="let column of config.columns">
                 <mat-header-cell *matHeaderCellDef mat-sort-header> {{column.label | translate}} </mat-header-cell>
-                <mat-cell *matCellDef="let row" [attr.data-label]="column.label | translate">{{row[column.attr]}}
+                <mat-cell *matCellDef="let row" [attr.data-label]="column.label | translate">
+                    {{row[column.attr]}}
+                    <mat-icon [matTooltip]="column.iconTooltip ? (column.iconTooltip | translate) : ''"
+                        *ngIf="column.icon && (!column.iconConditionFlag || row[column.iconConditionFlag])">{{column.icon}}</mat-icon>
                 </mat-cell>
             </ng-container>
 
@@ -33,13 +36,16 @@
                     translate}}
                 </mat-header-cell>
                 <mat-cell *matCellDef="let row" class="justify-end">
-                    <button mat-icon-button
-                        [matTooltip]="action.label | translate: {rowDescription: row[config.rowDescription!]}"
-                        (click)="onRowAction(action.id, row)" *ngFor="let action of config.rowActions">
-                        <mat-icon matListIcon [svgIcon]="action.svg ? action.svg : ''">{{action.icon ? action.icon:
-                            ''}}
-                        </mat-icon>
-                    </button>
+                    <ng-container *ngFor="let action of config.rowActions">
+                        <button mat-icon-button
+                            [matTooltip]="action.label | translate: {rowDescription: row[config.rowDescription!]}"
+                            (click)="onRowAction(action.id, row)"
+                            *ngIf="!action.conditionFlag || row[action.conditionFlag]">
+                            <mat-icon matListIcon [svgIcon]="action.svg ? action.svg : ''">{{action.icon ? action.icon:
+                                ''}}
+                            </mat-icon>
+                        </button>
+                    </ng-container>
                 </mat-cell>
             </ng-container>
 

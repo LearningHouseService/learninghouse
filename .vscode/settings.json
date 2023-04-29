@@ -33,5 +33,17 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
     },
-    "python.formatting.provider": "none"
+    "python.formatting.provider": "none",
+    "colorTabs.config": [
+        {
+            "regex": ".*/core/.*",
+            "color": "#FF0000",
+            "label": "CORE"
+        },
+        {
+            "regex": ".*/ui/.*",
+            "color": "#00FF00",
+            "label": "UI"
+        }
+    ]
 }

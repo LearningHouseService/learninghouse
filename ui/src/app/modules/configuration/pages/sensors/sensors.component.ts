@@ -5,12 +5,12 @@ import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { map, Subject, takeUntil } from 'rxjs';
 import { TableActionButton, TableConfig } from 'src/app/shared/components/table/table.component';
-import { SensorModel } from 'src/app/shared/models/configuration.model';
+import { SensorConfigurationModel } from 'src/app/modules/configuration/configuration.model';
 import { TableActionsService, TableRowAction } from 'src/app/shared/services/table-actions.service';
-import { ConfigurationService } from '../../configuration.service';
+import { SensorConfigurationService } from '../../services/sensor-configuration.service';
 import { AddEditSensorDialogComponent } from './add-edit-sensor-dialog/add-edit-sensor-dialog.component';
 
-interface SensorTableModel extends SensorModel {
+interface SensorTableModel extends SensorConfigurationModel {
   typedTranslated: string;
 }
 
@@ -36,8 +36,11 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('sort') sort!: MatSort;
 
-  constructor(public dialog: MatDialog, private configService: ConfigurationService,
-    private translateService: TranslateService, private tableActions: TableActionsService) {
+  constructor(
+    public dialog: MatDialog,
+    private configService: SensorConfigurationService,
+    private translateService: TranslateService,
+    private tableActions: TableActionsService) {
 
     this.tableActions.onTableAction
       .pipe(
@@ -49,7 +52,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
     this.tableActions.onTableRowAction
       .pipe(
         takeUntil(this.destroyed),
-        map((action: TableRowAction<SensorModel>) => {
+        map((action: TableRowAction<SensorConfigurationModel>) => {
           if (action.actionId === TableActionButton.EDIT_ROW.id) {
             this.onAddEdit(action.row);
           } else {
@@ -71,20 +74,20 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
     this.dataSource.sort = this.sort;
   }
 
-  onAddEdit(sensor: SensorModel | null): void {
+  onAddEdit(sensor: SensorConfigurationModel | null): void {
     const dialogRef = this.dialog.open(AddEditSensorDialogComponent, {
       width: '480px',
       data: sensor
     });
 
-    dialogRef.afterClosed().subscribe((sensor: SensorModel | null) => {
+    dialogRef.afterClosed().subscribe((sensor: SensorConfigurationModel | null) => {
       if (sensor) {
         this.loadData();
       }
     });
   }
 
-  onDelete(sensor: SensorModel): void {
+  onDelete(sensor: SensorConfigurationModel): void {
     this.configService.deleteSensor(sensor)
       .pipe(
         map(() => {

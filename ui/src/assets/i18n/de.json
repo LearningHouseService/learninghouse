@@ -83,16 +83,16 @@
 				"main": "Hauptmenü"
 			},
 			"navigation": {
+				"brains": {
+					"subtitle": "Überblick über alle Gehirne",
+					"title": "Gehirne",
+					"tooltip": "Überblick über alle Gehirne"
+				},
 				"configuration": {
 					"apikeys": {
 						"subtitle": "Erstellen oder löschen",
 						"title": "API-Schlüssel",
 						"tooltip": "API-Schlüssel: erstellen oder löschen"
-					},
-					"brains": {
-						"subtitle": "Erstellen oder bearbeiten",
-						"title": "Gehirne",
-						"tooltip": "Gehirne: Erstellen oder bearbeiten"
 					},
 					"password": {
 						"subtitle": "Ändere das Kennwort",
@@ -106,16 +106,6 @@
 					},
 					"title": "Konfiguration",
 					"tooltip": "Untermenü Konfiguration"
-				},
-				"prediction": {
-					"subtitle": "Benutze ein Gehirn",
-					"title": "Prognose",
-					"tooltip": "Prognose"
-				},
-				"training": {
-					"subtitle": "Trainiere ein Gehirn",
-					"title": "Ausbildung",
-					"tooltip": "Ausbildung"
 				}
 			}
 		},
@@ -204,25 +194,32 @@
 				}
 			}
 		},
-		"configuration": {
-			"brains": {
-				"common": {
-					"add_dialog_title": "Gehirnkonfiguration hinzufügen",
-					"advanced_configuration": "Erweiterte Schätzerkonfiguration",
-					"edit_dialog_title": "Gehirnkonfiguration bearbeiten",
-					"success": "Erfolgreich",
-					"title": "Konfiguration der Gehirne"
-				},
-				"fields": {
-					"dependent": "Abhängige Variable",
-					"dependent_encode": "Abhängige Variable codieren",
-					"estimators": "Anzahl",
-					"max_depth": "Maximale Tiefe",
-					"name": "Name",
-					"test_size": "Testgröße",
-					"typed": "Schätzertyp"
-				}
+		"brains": {
+			"actions": {
+				"prediction_row_description": "Verwenden Sie {{rowDescription}}",
+				"retrain_row_description": "{{rowDescription}} erneut trainieren",
+				"training_row_description": "{{rowDescription}} trainieren"
 			},
+			"common": {
+				"add_dialog_title": "Gehirnkonfiguration hinzufügen",
+				"advanced_configuration": "Erweiterte Schätzerkonfiguration",
+				"edit_dialog_title": "Gehirnkonfiguration bearbeiten",
+				"not_enough_training_data": "Das Gehirn benötigt mindestens 10 Trainingsdatensätze",
+				"success": "Erfolgreich",
+				"title": "Gehirne"
+			},
+			"fields": {
+				"dependent": "Abhängige Variable",
+				"dependent_encode": "Abhängige Variable codieren",
+				"estimators": "Anzahl",
+				"max_depth": "Maximale Tiefe",
+				"name": "Name",
+				"test_size": "Testgröße",
+				"training_data_size": "Anzahl Trainingsdaten",
+				"typed": "Schätzertyp"
+			}
+		},
+		"configuration": {
 			"sensors": {
 				"columns": {
 					"name": "Name",

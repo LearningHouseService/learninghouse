@@ -1,10 +1,13 @@
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import List, Optional, TYPE_CHECKING
 
 import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder
 
-from learninghouse.models.configuration import BrainConfiguration
+if TYPE_CHECKING:
+    from learninghouse.models.brain import BrainConfiguration
 
 
 class DatasetConfiguration:

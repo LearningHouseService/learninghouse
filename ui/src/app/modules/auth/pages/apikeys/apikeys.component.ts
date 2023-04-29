@@ -5,7 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { TranslateService } from '@ngx-translate/core';
 import { map, Subject, takeUntil } from 'rxjs';
 import { TableActionButton, TableConfig } from 'src/app/shared/components/table/table.component';
-import { APIKeyModel } from 'src/app/shared/models/auth.model';
+import { APIKeyModel } from 'src/app/modules/auth/auth.model';
 import { TableActionsService, TableRowAction } from 'src/app/shared/services/table-actions.service';
 import { AuthService } from '../../auth.service';
 import { AddAPIKeyDialogComponent } from './add-apikey-dialog/add-apikey-dialog.component';

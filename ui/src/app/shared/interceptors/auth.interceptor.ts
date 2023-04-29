@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, Observable, switchMap } from 'rxjs';
 import { AuthService } from '../../modules/auth/auth.service';
-import { Role, TokenModel } from '../models/auth.model';
+import { Role, TokenModel } from '../../modules/auth/auth.model';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {

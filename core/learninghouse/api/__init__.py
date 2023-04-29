@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from learninghouse import versions
-from learninghouse.api import auth, brain, configuration
+from learninghouse.api import auth, brain, sensor
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
 from learninghouse.models import LearningHouseVersions
-from learninghouse.services.auth import auth_service
+from learninghouse.services.auth import authservice
 
 api = APIRouter(
     prefix="/api",
@@ -15,7 +15,7 @@ api = APIRouter(
 )
 
 api.include_router(brain.router)
-api.include_router(configuration.router)
+api.include_router(sensor.router)
 
 api.include_router(auth.router)
 
@@ -23,7 +23,7 @@ api.include_router(auth.router)
 @api.get("/mode", response_model=str, tags=["service"])
 def get_mode():
     mode = service_settings().environment
-    if auth_service().is_initial_admin_password:
+    if authservice.is_initial_admin_password:
         mode = "initial"
 
     return mode

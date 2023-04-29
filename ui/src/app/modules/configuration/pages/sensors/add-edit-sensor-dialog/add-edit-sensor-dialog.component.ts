@@ -5,8 +5,8 @@ import { BehaviorSubject, catchError, map, Subject, takeUntil } from 'rxjs';
 import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/edit-dialog/edit-dialog.component';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
-import { SensorModel, SensorType } from 'src/app/shared/models/configuration.model';
-import { ConfigurationService } from '../../../configuration.service';
+import { SensorConfigurationModel, SensorType } from 'src/app/modules/configuration/configuration.model';
+import { SensorConfigurationService } from '../../../services/sensor-configuration.service';
 
 interface SensorForm {
   name: FormControl<string>;
@@ -36,7 +36,7 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
 
   public form: FormGroup<SensorForm>
 
-  public sensor?: SensorModel;
+  public sensor?: SensorConfigurationModel;
 
   private isEdit: boolean;
 
@@ -50,9 +50,9 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
   public dialogConfig$ = new BehaviorSubject<EditDialogConfig>(AddEditSensorDialogComponent.ADD_DIALOG_CONFIG);
 
   constructor(public dialogRef: MatDialogRef<AddEditSensorDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: SensorModel | null,
+    @Inject(MAT_DIALOG_DATA) public data: SensorConfigurationModel | null,
     private fb: NonNullableFormBuilder,
-    private configService: ConfigurationService,
+    private configService: SensorConfigurationService,
     private dialogActions: EditDialogActionsService) {
 
     super();
@@ -115,7 +115,7 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
     } else {
       this.configService.createSensor(this.form.getRawValue())
         .pipe(
-          map((sensor: SensorModel) => {
+          map((sensor: SensorConfigurationModel) => {
             this.isEdit = true;
             this.data = sensor;
             this.form.controls.name.disable();
@@ -130,7 +130,7 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
 
   onClose(): void {
     if (this.isSuccess) {
-      this.dialogRef.close(this.form.value as SensorModel);
+      this.dialogRef.close(this.form.value as SensorConfigurationModel);
     } else {
       this.dialogRef.close(null);
     }

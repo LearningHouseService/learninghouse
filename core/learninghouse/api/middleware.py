@@ -8,10 +8,9 @@ from learninghouse.api.errors import (
 )
 from learninghouse.core.logging import logger
 from learninghouse.core.settings import service_settings
-from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, auth_service
+from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, authservice
 
 settings = service_settings()
-auth = auth_service()
 
 UNKNOWN_EXCEPTION_MESSAGE = """
 An unknown error occured which is not handled by the service yet:
@@ -40,7 +39,7 @@ class EnforceInitialPasswordChange(BaseHTTPMiddleware):
 
     async def dispatch(self, request, call_next):
         endpoint = request.url.path
-        if auth.is_initial_admin_password and not (
+        if authservice.is_initial_admin_password and not (
             endpoint in self.endpoints
             or endpoint.startswith("/static/")
             or endpoint.startswith("/ui")
@@ -60,7 +59,7 @@ class CatchAllException(BaseHTTPMiddleware):
             return await call_next(request)
         except Exception as exc:  # pylint: disable=broad-except
             logger.error(UNKNOWN_EXCEPTION_MESSAGE.format(exception=exc))
-            logger.debug(exc)
+            logger.exception(exc)
             return LearningHouseException().response()
 
 

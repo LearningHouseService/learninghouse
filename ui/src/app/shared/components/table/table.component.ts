@@ -11,6 +11,9 @@ let nextId = 0;
 export interface TableColumn {
   attr: string;
   label: string;
+  icon?: string;
+  iconTooltip?: string;
+  iconConditionFlag?: string;
 }
 
 export class TableActionButton {
@@ -23,7 +26,8 @@ export class TableActionButton {
   constructor(public id: string,
     public label: string,
     public icon?: string,
-    public svg?: string) { }
+    public svg?: string,
+    public conditionFlag?: string) { }
 }
 
 

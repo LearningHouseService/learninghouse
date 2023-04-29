@@ -3,7 +3,7 @@ export enum SensorType {
     CATEGORICAL = 'categorical'
 }
 
-export interface SensorModel {
+export interface SensorConfigurationModel {
     name: string;
     typed: SensorType;
 }
@@ -23,7 +23,6 @@ export interface BrainEstimatorConfigurationModel {
 export interface BrainConfigurationModel {
     name: string;
     estimator: BrainEstimatorConfigurationModel;
-    dependent: string;
     dependent_encode?: boolean;
     test_size: number;
 }

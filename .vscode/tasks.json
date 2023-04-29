@@ -4,10 +4,25 @@
 		{
 			"type": "npm",
 			"script": "start",
-			"path": "ui",
-			"problemMatcher": [],
-			"label": "npm: start - ui",
-			"detail": "ng serve"
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "typescript",
+				"source": "ts",
+				"severity": "error",
+				"pattern": {
+					"regexp": "^(.*)\\((\\d+),(\\d+)\\):\\s+(error|warning)\\s+(TS\\d+):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"code": 5,
+					"message": 6
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		},
 		{
 			"type": "npm",

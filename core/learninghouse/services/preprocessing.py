@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from learninghouse.models.configuration import Sensors
+from learninghouse.models.sensor import Sensors
 
 if TYPE_CHECKING:
     from learninghouse.models.brain import Brain
@@ -89,7 +89,7 @@ class DatasetPreprocessing:
             brain, data, only_features
         )
 
-        y_vector = data[brain.configuration.dependent]
+        y_vector = data[brain.configuration.name]
 
         if brain.configuration.dependent_encode:
             y_vector = brain.dataset.dependent_encoder.fit_transform(y_vector)

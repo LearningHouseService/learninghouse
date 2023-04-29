@@ -5,7 +5,7 @@ import { BehaviorSubject, catchError, map, Subject, takeUntil } from 'rxjs';
 import { AlertType } from 'src/app/shared/components/alert/alert.component';
 import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/edit-dialog/edit-dialog.component';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
-import { APIKeyModel, APIKeyRole } from 'src/app/shared/models/auth.model';
+import { APIKeyModel, APIKeyRole } from 'src/app/modules/auth/auth.model';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
 import { AuthService } from '../../../auth.service';
 import { AuthValidators } from '../../../auth.validators';

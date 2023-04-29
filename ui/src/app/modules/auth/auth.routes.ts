@@ -1,7 +1,7 @@
 import { NgModule, inject } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { AuthGuard } from "src/app/shared/guards/auth.guard";
-import { Role } from "src/app/shared/models/auth.model";
+import { Role } from "./auth.model";
 import { APIKeysComponent } from "./pages/apikeys/apikeys.component";
 import { ChangePasswordComponent } from "./pages/change-password/change-password.component";
 import { LoginComponent } from "./pages/login/login.component";

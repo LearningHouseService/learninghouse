@@ -1,137 +1,109 @@
 from __future__ import annotations
 
-from datetime import datetime
-from os import path, stat
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from os import listdir, path, stat
+from shutil import rmtree
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
-import joblib
 import pandas as pd
 from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import accuracy_score
 
-from learninghouse import versions
 from learninghouse.api.errors.brain import (
+    BrainBadRequest,
+    BrainExists,
     BrainNoConfiguration,
     BrainNotActual,
     BrainNotEnoughData,
     BrainNotTrained,
 )
 from learninghouse.core.logging import logger
-from learninghouse.models import LearningHouseVersions
-from learninghouse.models.brain import BrainInfo, BrainPredictionResult
-from learninghouse.models.configuration import (
+from learninghouse.core.settings import service_settings
+from learninghouse.models.brain import (
+    Brain,
     BrainConfiguration,
+    BrainDeleteResult,
     BrainEstimatorType,
     BrainFileType,
-    sanitize_configuration_filename,
+    BrainInfo,
+    BrainInfos,
+    BrainPredictionResult,
 )
-from learninghouse.models.preprocessing import DatasetConfiguration
 from learninghouse.services.preprocessing import DatasetPreprocessing
 
 if TYPE_CHECKING:
     from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 
-class Brain:
-    def __init__(self, name: str):
-        self.name: str = name
-        self.configuration: BrainConfiguration = BrainConfiguration.from_json_file(name)
-
-        self.dataset: DatasetConfiguration = DatasetConfiguration(self.configuration)
-
-        self._estimator: Optional[
-            Union[RandomForestClassifier, RandomForestRegressor]
-        ] = None
-
-        self.score: Optional[float] = 0.0
-
-        self.versions: LearningHouseVersions = versions
-
-        self.trained_at: Optional[datetime] = None
-
-    def estimator(self) -> Union[RandomForestClassifier, RandomForestRegressor]:
-        if self._estimator is None:
-            self._estimator = self.configuration.estimator.typed.estimator_class(
-                n_estimators=self.configuration.estimator.estimators,
-                max_depth=self.configuration.estimator.max_depth,
-                random_state=self.configuration.estimator.random_state,
-            )
-
-        return self._estimator
-
-    @property
-    def actual_versions(self) -> bool:
-        return self.versions == versions
-
-    @property
-    def info(self) -> BrainInfo:
-        info = BrainInfo(
-            name=self.name,
-            configuration=self.configuration,
-            features=self.dataset.features,
-            training_data_size=self.dataset.data_size,
-            score=self.score,
-            trained_at=self.trained_at,
-            versions=self.versions,
-            actual_versions=self.actual_versions,
-        )
-
-        return info
-
-    @classmethod
-    def load_trained(cls, name: str) -> Brain:
-        try:
-            filename = sanitize_configuration_filename(name, BrainFileType.TRAINED_FILE)
-            brain_config = joblib.load(filename)
-
-            return brain_config
-        except FileNotFoundError as exc:
-            raise BrainNotTrained(name) from exc
-
-    def store_trained(
-        self, columns: List[str], training_data_size: int, score: float
-    ) -> None:
-        self.dataset.columns = columns
-        self.dataset.data_size = training_data_size
-        self.score = score
-        self.trained_at = datetime.now()
-
-        filename = sanitize_configuration_filename(
-            self.name, BrainFileType.TRAINED_FILE
-        )
-
-        joblib.dump(self, filename)
-
-        filename = sanitize_configuration_filename(self.name, BrainFileType.INFO_FILE)
-
-        self.info.write_to_file(filename, 4)
-
-
 class BrainService:
     brains: Dict[str, Dict[str, Union[int, Brain]]] = {}
 
     @classmethod
-    def request(
-        cls, name: str, request_data: Optional[Dict[str, Any]] = None
-    ) -> BrainInfo:
-        filename = sanitize_configuration_filename(
-            name, BrainFileType.TRAINING_DATA_FILE
-        )
+    def list_all(cls) -> BrainInfos:
+        brains: Dict[str, BrainInfo] = {}
+        for directory in listdir(service_settings().brains_directory):
+            try:
+                brains[directory] = cls.get_info(directory)
+            except BrainNoConfiguration:
+                pass
 
-        if request_data is None:
+        return BrainInfos.parse_obj(brains)
+
+    @staticmethod
+    def get_info(name: str) -> BrainInfo:
+        info: Optional[BrainInfo] = None
+        if Brain.is_trained(name):
+            try:
+                info = Brain.load_trained(name).info
+            except (AttributeError, BrainNotTrained):
+                pass
+
+        if info is None:
+            if BrainConfiguration.json_config_file_exists(name):
+                info = Brain(name).info
+                training_data_file = Brain.sanitize_filename(
+                    name, BrainFileType.TRAINING_DATA_FILE
+                )
+                if path.exists(training_data_file):
+                    data = pd.read_csv(training_data_file)
+                    info.training_data_size = len(data.index)
+            else:
+                raise BrainNoConfiguration(name)
+
+        return info
+
+    @classmethod
+    def request(
+        cls,
+        name: str,
+        dependent_value: Optional[Any] = None,
+        sensors_data: Optional[Dict[str, Any]] = None
+    ) -> BrainInfo:
+        filename = Brain.sanitize_filename(
+            name, BrainFileType.TRAINING_DATA_FILE)
+
+        trainings_data: Optional[Dict[str, Any]] = sensors_data
+
+        if sensors_data is not None:
+            if dependent_value is not None:
+                trainings_data[name] = dependent_value
+            else:
+                raise BrainBadRequest("Missing dependent variable!")
+
+        if trainings_data is None:
             if path.exists(filename):
                 data = pd.read_csv(filename)
             else:
                 raise BrainNotEnoughData()
         else:
-            logger.debug(request_data)
-            request_data = DatasetPreprocessing.add_time_information(request_data)
+            logger.debug(trainings_data)
+            trainings_data = DatasetPreprocessing.add_time_information(
+                trainings_data)
             if path.exists(filename):
                 data_temp = pd.read_csv(filename)
-                df_new_row = pd.DataFrame([request_data])
+                df_new_row = pd.DataFrame([trainings_data])
                 data = pd.concat([data_temp, df_new_row], ignore_index=True)
             else:
-                data = pd.DataFrame([request_data])
+                data = pd.DataFrame([trainings_data])
 
             data.to_csv(filename, sep=",", index=False)
 
@@ -178,7 +150,8 @@ class BrainService:
             else:
                 score = estimator.score(x_test, y_test)
 
-            brain.store_trained(x_train.columns.tolist(), len(data.index), score)
+            brain.store_trained(x_train.columns.tolist(),
+                                len(data.index), score)
 
             return brain.info
         except FileNotFoundError as exc:
@@ -189,12 +162,14 @@ class BrainService:
         try:
             brain = cls.load_brain(name)
             if not brain.actual_versions:
-                raise BrainNotActual(name, brain.versions)
+                raise BrainNotActual(name, brain.version)
 
-            request_data = DatasetPreprocessing.add_time_information(request_data)
+            request_data = DatasetPreprocessing.add_time_information(
+                request_data)
 
             data = pd.DataFrame([request_data])
-            prepared_data = DatasetPreprocessing.prepare_prediction(brain, data)
+            prepared_data = DatasetPreprocessing.prepare_prediction(
+                brain, data)
 
             prediction = brain.estimator().predict(prepared_data)
 
@@ -219,10 +194,50 @@ class BrainService:
 
     @classmethod
     def load_brain(cls, name: str) -> Brain:
-        filename = sanitize_configuration_filename(name, BrainFileType.TRAINED_FILE)
+        filename = Brain.sanitize_filename(name, BrainFileType.TRAINED_FILE)
         stamp = stat(filename).st_mtime
 
         if not (name in cls.brains and cls.brains[name]["stamp"] == stamp):
-            cls.brains[name] = {"stamp": stamp, "brain": Brain.load_trained(name)}
+            cls.brains[name] = {"stamp": stamp,
+                                "brain": Brain.load_trained(name)}
 
         return cls.brains[name]["brain"]
+
+
+class BrainConfigurationService:
+    @staticmethod
+    def get(name: str) -> BrainConfiguration:
+        try:
+            return BrainConfiguration.from_json_file(name)
+        except FileNotFoundError as exc:
+            raise BrainNoConfiguration(name) from exc
+
+    @staticmethod
+    def create(configuration: BrainConfiguration) -> BrainConfiguration:
+        if BrainConfiguration.json_config_file_exists(configuration.name):
+            raise BrainExists(configuration.name)
+
+        configuration.to_json_file(configuration.name)
+
+        return configuration
+
+    @staticmethod
+    def update(name: str, configuration: BrainConfiguration) -> BrainConfiguration:
+        if not BrainConfiguration.json_config_file_exists(name):
+            raise BrainNoConfiguration(name)
+
+        configuration.to_json_file(name)
+
+        return configuration
+
+    @staticmethod
+    def delete(name: str) -> BrainDeleteResult:
+        brainpath = Brain.sanitize_directory(name)
+
+        if not path.exists(brainpath):
+            raise BrainNoConfiguration(name)
+
+        logger.info(f"Remove brain: {name}")
+        rmtree(brainpath)
+
+        return BrainDeleteResult(name=name)

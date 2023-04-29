@@ -62,7 +62,8 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
     this.authService.loginAdmin(this.normal.getRawValue())
       .pipe(
         map(() => {
-          this.router.navigate(['/brains/prediction']);
+          this.router.navigate(['/brains'])
+            .catch((error) => console.error(error));
         }),
         catchError((error) => this.handleError(error))
       )
@@ -73,7 +74,8 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
     this.authService.loginAPIKey(this.normal.controls.password.value)
       .pipe(
         map(() => {
-          this.router.navigate(['/brains/prediction']);
+          this.router.navigate(['/brains'])
+            .catch((error) => console.error(error));
         }),
         catchError((error) => this.handleError(error))
       )
@@ -91,7 +93,8 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
                   .pipe(
                     map(() => {
                       this.handleSuccess();
-                      this.router.navigate(['/brains/prediction']);
+                      this.router.navigate(['/brains'])
+                        .catch((error) => console.error(error));;
                     }),
                     catchError((error) => this.handleError(error)))
                   .subscribe();
@@ -102,5 +105,4 @@ export class LoginComponent extends AbstractFormResponse implements OnInit {
         catchError((error) => this.handleError(error)))
       .subscribe();
   }
-
 }

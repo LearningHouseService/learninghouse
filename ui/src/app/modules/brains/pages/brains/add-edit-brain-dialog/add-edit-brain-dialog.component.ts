@@ -1,14 +1,14 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
-import { FormGroup, FormControl, NonNullableFormBuilder, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Subject, BehaviorSubject, takeUntil, map, catchError } from 'rxjs';
+import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { BehaviorSubject, Subject, catchError, map, takeUntil } from 'rxjs';
+import { BrainConfigurationModel, BrainEstimatorType } from 'src/app/modules/configuration/configuration.model';
 import { EditDialogConfig, SubmitButtonType } from 'src/app/shared/components/edit-dialog/edit-dialog.component';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
 import { SelectOption } from 'src/app/shared/components/select/select.component';
-import { BrainConfigurationModel, BrainEstimatorType } from 'src/app/shared/models/configuration.model';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
 import { GenericValidators } from 'src/app/shared/validators/generic.validators';
-import { ConfigurationService } from '../../../configuration.service';
+import { BrainsService } from '../../../brains.service';
 
 interface BrainConfigurationForm {
   name: FormControl<string>;
@@ -17,7 +17,6 @@ interface BrainConfigurationForm {
     estimators: FormControl<number>,
     max_depth: FormControl<number>
   }>;
-  dependent: FormControl<string>;
   dependent_encode: FormControl<boolean>;
   test_size: FormControl<number>;
 }
@@ -30,17 +29,17 @@ interface BrainConfigurationForm {
 export class AddEditBrainDialogComponent extends AbstractFormResponse implements OnInit, OnDestroy {
 
   private static readonly ADD_DIALOG_CONFIG: EditDialogConfig = {
-    title: 'pages.configuration.brains.common.add_dialog_title',
+    title: 'pages.brains.common.add_dialog_title',
     submitButton: SubmitButtonType.ADD,
     responseConfig: {
-      successMessage: 'pages.configuration.brains.common.success',
-      errorPrefix: 'pages.configuration.brains.errors'
+      successMessage: 'pages.brains.common.success',
+      errorPrefix: 'pages.brains.errors'
     }
   };
 
   private static readonly EDIT_DIALOG_CONFIG: EditDialogConfig = {
     ...AddEditBrainDialogComponent.ADD_DIALOG_CONFIG,
-    title: 'pages.configuration.brains.common.edit_dialog_title',
+    title: 'pages.brains.common.edit_dialog_title',
     submitButton: SubmitButtonType.EDIT
   };
 
@@ -67,7 +66,7 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
   constructor(public dialogRef: MatDialogRef<AddEditBrainDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: BrainConfigurationModel | null,
     private fb: NonNullableFormBuilder,
-    private configService: ConfigurationService,
+    private brainsService: BrainsService,
     private dialogActions: EditDialogActionsService) {
 
     super();
@@ -89,7 +88,6 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
           Validators.max(10)
         ])
       }),
-      dependent: this.fb.control<string>('', [Validators.required]),
       dependent_encode: this.fb.control<boolean>(false, [Validators.required]),
       test_size: this.fb.control<number>(0.2, [Validators.required, Validators.min(0.1)])
     })
@@ -131,7 +129,7 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
 
   onSubmit(): void {
     if (this.isEdit) {
-      this.configService.updateBrain(this.form.getRawValue())
+      this.brainsService.updateBrain(this.form.getRawValue())
         .pipe(
           map(() => {
             this.handleSuccess();
@@ -140,7 +138,7 @@ export class AddEditBrainDialogComponent extends AbstractFormResponse implements
         )
         .subscribe();
     } else {
-      this.configService.createBrain(this.form.getRawValue())
+      this.brainsService.createBrain(this.form.getRawValue())
         .pipe(
           map((brain: BrainConfigurationModel) => {
             this.isEdit = true;

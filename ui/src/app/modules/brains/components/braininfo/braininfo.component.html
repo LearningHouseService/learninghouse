@@ -1,0 +1,22 @@
+<mat-card class="mat-elevation-z8">
+    <mat-card-header>
+        <mat-card-title>{{brainInfo?.name}}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-list>
+            <mat-list-item>
+                <h3 matListItemTitle>{{'pages.brains.fields.typed' | translate}}</h3>
+                <span matListItemLine>{{'common.enums.estimatortype.' + brainInfo?.configuration?.estimator?.typed |
+                    translate}}</span>
+            </mat-list-item>
+            <mat-list-item>
+                <h3 matListItemTitle>{{'pages.brains.fields.dependent_encode' | translate}}</h3>
+                <span matListItemLine>{{brainInfo?.configuration?.dependent_encode}}</span>
+            </mat-list-item>
+            <mat-list-item>
+                <h3 matListItemTitle>{{'pages.brains.fields.training_data_size' | translate}}</h3>
+                <span matListItemLine>{{brainInfo?.training_data_size}}</span>
+            </mat-list-item>
+        </mat-list>
+    </mat-card-content>
+</mat-card>

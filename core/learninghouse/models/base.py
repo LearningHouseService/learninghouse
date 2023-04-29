@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_serializer, RootModel
 
 
 class EnumModel(Enum):
@@ -19,6 +19,9 @@ class EnumModel(Enum):
     def __eq__(self, obj) -> bool:
         return isinstance(obj, self.__class__) and self.value == obj.value
 
+    def __hash__(self):
+        return hash(self.value)
+
     @classmethod
     def from_string(cls, value: str):
         for item in cls.__members__.values():
@@ -26,51 +29,78 @@ class EnumModel(Enum):
                 return item
         raise ValueError(f"No enum value {value} found.")
 
+    @model_serializer
+    def serialize(self):
+        return self.value
+
 
 class LHBaseModel(BaseModel):
     def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
         with open(filename, "w", encoding="utf-8") as file_pointer:
-            file_pointer.write(self.json(indent=indent))
+            file_pointer.write(self.model_dump_json(indent=indent))
 
-    class Config:
-        # pylint: disable=too-few-public-methods
-        json_encoders = {EnumModel: str}
+    def __hash__(self):
+        return hash((type(self),) + tuple(self.__dict__.values()))
 
 
-class ListModel(LHBaseModel):
-    @property
-    def root(self) -> List[Any]:
-        return getattr(self, "__root__")
+class ListModel(RootModel):
+    root: list[Any]
 
-    def __getitem__(self, key: int) -> Any:
-        return self.root[key]
+    def append(self, item):
+        self.root.append(item)
 
-    def __setitem__(self, key: int, newvalue: Any):
-        self.root[key] = newvalue
+    def extend(self, items):
+        self.root.extend(items)
 
-    def __delitem__(self, key: int):
-        del self.root[key]
+    def insert(self, index, item):
+        self.root.insert(index, item)
 
-    def __str__(self) -> str:
-        return str(self.root)
+    def remove(self, item):
+        self.root.remove(item)
 
-    def __contains__(self, value: Any) -> bool:
-        return value in self.root
+    def pop(self, index=-1):
+        return self.root.pop(index)
+
+    def clear(self):
+        self.root.clear()
+
+    def index(self, item, start=0, end=None):
+        return self.root.index(item, start, end)
+
+    def count(self, item):
+        return self.root.count(item)
+
+    def sort(self, key=None, reverse=False):
+        self.root.sort(key=key, reverse=reverse)
+
+    def reverse(self):
+        self.root.reverse()
+
+    def __getitem__(self, index):
+        return self.root[index]
+
+    def __setitem__(self, index, value):
+        self.root[index] = value
+
+    def __delitem__(self, index):
+        del self.root[index]
+
+    def __len__(self):
+        return len(self.root)
 
     def __iter__(self):
         return iter(self.root)
 
-    def insert(self, key: int, newvalue: Any):
-        self.root.insert(key, newvalue)
+    def __contains__(self, item):
+        return item in self.root
 
-    def append(self, newvalue: Any):
-        self.root.append(newvalue)
+    def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
+        with open(filename, "w", encoding="utf-8") as file_pointer:
+            file_pointer.write(self.model_dump_json(indent=indent))
 
 
-class DictModel(LHBaseModel):
-    @property
-    def root(self) -> Dict[str, Any]:
-        return getattr(self, "__root__")
+class DictModel(RootModel):
+    root: dict[str, Any]
 
     def items(self):
         return self.root.items()
@@ -95,6 +125,10 @@ class DictModel(LHBaseModel):
 
     def dict(self, *args, **kwargs):
         ret = super().dict(*args, **kwargs)
-        if "__root__" in ret:
-            ret = ret["__root__"]
+        if "root" in ret:
+            ret = ret["root"]
         return ret
+
+    def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
+        with open(filename, "w", encoding="utf-8") as file_pointer:
+            file_pointer.write(self.model_dump_json(indent=indent))

@@ -87,7 +87,7 @@ class APIKeyRequest(LHBaseModel):
         None,
         min_length=3,
         max_length=15,
-        regex=r"^[A-Za-z]\w{1,13}[A-Za-z0-9]$",
+        pattern=r"^[A-Za-z]\w{1,13}[A-Za-z0-9]$",
         example="app_as_user",
     )
     role: APIKeyRole = Field(None, example=APIKeyRole.USER)

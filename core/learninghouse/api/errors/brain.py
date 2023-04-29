@@ -19,7 +19,8 @@ class BrainNotTrained(LearningHouseException):
 
     def __init__(self, name: str):
         super().__init__(
-            self.STATUS_CODE, self.NOT_TRAINED, self.DESCRIPTION.format(name=name)
+            self.STATUS_CODE, self.NOT_TRAINED, self.DESCRIPTION.format(
+                name=name)
         )
 
     @classmethod
@@ -108,7 +109,8 @@ class BrainNoConfiguration(LearningHouseException):
 
     def __init__(self, name: str):
         super().__init__(
-            self.STATUS_CODE, self.NO_CONFIGURATION, self.DESCRIPTION.format(name=name)
+            self.STATUS_CODE, self.NO_CONFIGURATION, self.DESCRIPTION.format(
+                name=name)
         )
 
     @classmethod

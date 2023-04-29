@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router, UrlTree } from '@angular/router';
 import { Observable, map, take } from 'rxjs';
 import { AuthService } from '../../modules/auth/auth.service';
-import { Role } from '../models/auth.model';
+import { Role } from '../../modules/auth/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +18,7 @@ export class AuthGuard {
           if (role.isMinimumRole(minimumRoleNeeded)) {
             return true;
           } else {
-            return this.router.createUrlTree(['/brains/prediction']);
+            return this.router.createUrlTree(['/brains']);
           }
         } else {
           return this.router.createUrlTree(['/auth']);

@@ -83,16 +83,16 @@
 				"main": "Main menu"
 			},
 			"navigation": {
+				"brains": {
+					"subtitle": "Overview over all brains",
+					"title": "Brains",
+					"tooltip": "Overview over all brains"
+				},
 				"configuration": {
 					"apikeys": {
 						"subtitle": "Create or delete",
 						"title": "API keys",
 						"tooltip": "API keys: create or delete"
-					},
-					"brains": {
-						"subtitle": "Create or edit",
-						"title": "Brains",
-						"tooltip": "Brains: Create or edit"
 					},
 					"password": {
 						"subtitle": "Change the password",
@@ -106,16 +106,6 @@
 					},
 					"title": "Configuration",
 					"tooltip": "Configuration submenu"
-				},
-				"prediction": {
-					"subtitle": "Use a brain",
-					"title": "Prediction",
-					"tooltip": "Prediction"
-				},
-				"training": {
-					"subtitle": "Train a brain",
-					"title": "Training",
-					"tooltip": "Training"
 				}
 			}
 		},
@@ -204,25 +194,32 @@
 				}
 			}
 		},
-		"configuration": {
-			"brains": {
-				"common": {
-					"add_dialog_title": "Add brain configuration",
-					"advanced_configuration": "Advanced estimator configuration",
-					"edit_dialog_title": "Edit brain configuration",
-					"success": "Successfully",
-					"title": "Brains configuration"
-				},
-				"fields": {
-					"dependent": "Dependent variable",
-					"dependent_encode": "Encode dependent variable",
-					"estimators": "Number",
-					"max_depth": "Maximum depth",
-					"name": "Name",
-					"test_size": "Test size",
-					"typed": "Estimator type"
-				}
+		"brains": {
+			"actions": {
+				"prediction_row_description": "Use {{rowDescription}}",
+				"retrain_row_description": "Train {{rowDescription}} again",
+				"training_row_description": "Train {{rowDescription}}"
 			},
+			"common": {
+				"add_dialog_title": "Add brain configuration",
+				"advanced_configuration": "Advanced estimator configuration",
+				"edit_dialog_title": "Edit brain configuration",
+				"not_enough_training_data": "The brain needs at least 10 sets of training data",
+				"success": "Successfully",
+				"title": "Brains"
+			},
+			"fields": {
+				"dependent": "Dependent variable",
+				"dependent_encode": "Encode dependent variable",
+				"estimators": "Number",
+				"max_depth": "Maximum depth",
+				"name": "Name",
+				"test_size": "Test size",
+				"training_data_size": "Training data count",
+				"typed": "Estimator type"
+			}
+		},
+		"configuration": {
 			"sensors": {
 				"columns": {
 					"name": "Name",

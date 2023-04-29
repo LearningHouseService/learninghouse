@@ -41,7 +41,7 @@ See https://github.com/LearningHouseService/learninghouse-monorepo/tree/main/lea
 """
 
 
-class AuthService:
+class AuthServiceInternal:
     def __init__(self):
         self.database = SecurityDatabase.load_or_write_default()
         self.refresh_tokens: Dict[str, datetime] = {}
@@ -278,6 +278,9 @@ class AuthService:
 
 
 @lru_cache()
-def auth_service() -> AuthService:
-    service = AuthService()
+def auth_service_cached() -> AuthServiceInternal:
+    service = AuthServiceInternal()
     return service
+
+
+authservice = auth_service_cached()

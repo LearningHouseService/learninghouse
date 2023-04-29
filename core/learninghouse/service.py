@@ -20,7 +20,7 @@ from learninghouse.api.middleware import (
 )
 from learninghouse.core.logging import initialize_logging, logger
 from learninghouse.core.settings import service_settings
-from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, auth_service
+from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, authservice
 
 APP_REFERENCE = "learninghouse.service:app"
 
@@ -40,12 +40,14 @@ def get_application() -> FastAPI:
 
     application.include_router(ui.router)
 
-    application.add_exception_handler(RequestValidationError, validation_error_handler)
+    application.add_exception_handler(
+        RequestValidationError, validation_error_handler)
     application.add_exception_handler(
         LearningHouseException, learninghouse_exception_handler
     )
 
-    application.add_middleware(uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware)
+    application.add_middleware(
+        uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware)
 
     application.add_middleware(
         CORSMiddleware,
@@ -55,13 +57,14 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    if auth_service().is_initial_admin_password:
+    if authservice.is_initial_admin_password:
         application.add_middleware(EnforceInitialPasswordChange)
 
     application.add_middleware(CatchAllException)
     application.add_middleware(CustomHeader)
 
-    application.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
+    application.mount(
+        "/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
 
     return application
 
@@ -71,12 +74,21 @@ app = get_application()
 
 def run():
     settings = service_settings()
-    auth = auth_service()
+
     logger.info(f"Running {settings.title} {versions.service}")
     logger.info(versions.libraries_versions)
     logger.info(f"Running in {settings.environment} mode")
     logger.info(f"Listening on {settings.host}:{settings.port}")
     logger.info(f"Configuration directory {settings.brains_directory}")
+
+    if settings.workers > 1:
+        if settings.reload:
+            logger.warning(
+                f"Reloading active. Workers {settings.workers} setting will be ignored."
+            )
+        else:
+            logger.info(f"Running with {settings.workers} workers")
+
     logger.info(f"URL to OpenAPI file {settings.openapi_url}")
 
     if settings.environment == "production":
@@ -91,14 +103,15 @@ def run():
             )
 
     if settings.documentation_url is not None:
-        logger.info(f"See interactive documentation {settings.documentation_url}")
+        logger.info(
+            f"See interactive documentation {settings.documentation_url}")
 
     if ui.is_ui_installed():
         logger.info(f"UI is reachable under {settings.base_url_calculated}/ui")
     else:
         logger.warning(f"UI is not installed under {ui.UI_DIRECTORY}")
 
-    if auth.is_initial_admin_password:
+    if authservice.is_initial_admin_password:
         logger.warning(INITIAL_PASSWORD_WARNING)
 
     uvicorn.run(app=APP_REFERENCE, log_config=None, **settings.uvicorn_kwargs)

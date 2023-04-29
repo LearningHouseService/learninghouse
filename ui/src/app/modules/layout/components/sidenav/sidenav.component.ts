@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/auth/auth.service';
-import { Role } from 'src/app/shared/models/auth.model';
+import { Role } from 'src/app/modules/auth/auth.model';
 import { BreakpointService } from 'src/app/shared/services/breakpoint.service';
 import { SidenavService } from './sidenav.service';
 
@@ -23,27 +23,16 @@ export class SidenavComponent {
 
   navItems: SidenavItem[] = [
     {
-      key: 'prediction',
+      key: 'brains',
       svg: 'learninghouse',
-      route: '/brains/prediction',
+      route: '/brains',
       minimumRole: Role.USER
-    },
-    {
-      key: 'training',
-      icon: 'model_training',
-      route: '/brains/training',
-      minimumRole: Role.TRAINER
     },
     {
       key: 'configuration',
       icon: 'settings',
       minimumRole: Role.ADMIN,
       children: [
-        {
-          key: 'brains',
-          svg: 'learninghouse',
-          route: '/configuration/brains'
-        },
         {
           key: 'sensors',
           icon: 'device_hub',

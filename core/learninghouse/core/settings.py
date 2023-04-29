@@ -3,7 +3,8 @@ from pathlib import Path
 from secrets import token_hex
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseSettings, DirectoryPath
+from pydantic import DirectoryPath
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from learninghouse import versions
 from learninghouse.api.errors import (
@@ -17,15 +18,18 @@ LICENSE_URL = "https://github.com/LearningHouseService/learninghouse/blob/main/L
 
 
 class ServiceSettings(BaseSettings):
-    debug: bool = False
+    debug: Optional[bool] = False
     docs_url: str = "/docs"
     openapi_file: str = "/learninghouse_api.json"
     title: str = "learningHouse Service"
 
     host: str = "127.0.0.1"
     port: int = 5000
+
+    workers: int = 5
+
     reload: bool = False
-    base_url: Optional[str]
+    base_url: str = ''
 
     environment: str = "production"
 
@@ -36,10 +40,8 @@ class ServiceSettings(BaseSettings):
     jwt_secret: str = token_hex(16)
     jwt_expire_minutes: int = 10
 
-    class Config:  # pylint: disable=too-few-public-methods
-        validate_assignment = True
-        env_file = ".env"
-        env_prefix = "learninghouse_"
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="learninghouse_", )
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
@@ -68,6 +70,8 @@ class ServiceSettings(BaseSettings):
 
         if self.reload:
             kwargs["reload"] = True
+        else:
+            kwargs["workers"] = self.workers
 
         return kwargs
 
@@ -111,9 +115,8 @@ class DevelopmentSettings(ServiceSettings):
     title: str = "learningHouse Service - Development"
     api_key_required: bool = False
 
-    class Config(ServiceSettings.Config):  # pylint: disable=too-few-public-methods
-        env_file = ".env"
-        env_prefix = "learninghouse_"
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="learninghouse_")
 
 
 class ServiceEnvironment(EnumModel):
@@ -135,11 +138,10 @@ class ServiceEnvironment(EnumModel):
 
 
 class ServiceBaseSettings(BaseSettings):
-    environment: ServiceEnvironment = ServiceEnvironment.PROD
+    environment: Optional[ServiceEnvironment] = ServiceEnvironment.PROD
 
-    class Config:  # pylint: disable=too-few-public-methods
-        env_file = ".env"
-        env_prefix = "learninghouse_"
+    model_config = SettingsConfigDict(
+        env_file=".env", env_prefix="learninghouse_", extra="ignore")
 
 
 @lru_cache()

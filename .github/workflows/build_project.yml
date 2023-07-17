@@ -62,6 +62,7 @@ jobs:
       REF_NAME: ${{ needs.variables.outputs.ref_name }}
     permissions:
       id-token: write
+      contents: write
     strategy:
       matrix:
         python-version:

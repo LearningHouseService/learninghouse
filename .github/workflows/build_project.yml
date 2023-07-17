@@ -60,6 +60,8 @@ jobs:
     needs: [variables, build-ui]
     env:
       REF_NAME: ${{ needs.variables.outputs.ref_name }}
+    permissions:
+      id-token: write
     strategy:
       matrix:
         python-version:
@@ -103,8 +105,6 @@ jobs:
       if: ${{github.event_name == 'release' && matrix.python-version == '3.10'}}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
         packages-dir: core/dist/
 
     - name: Publish assets to github

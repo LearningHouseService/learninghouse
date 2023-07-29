@@ -1,8 +1,8 @@
-fastapi==0.100.0
-uvicorn[standard]==0.22.0
+fastapi==0.100.1
+uvicorn[standard]==0.23.1
 python-jose[cryptography]==3.3.0
 passlib==1.7.4
-pydantic==2.0.3
+pydantic==2.1.1
 pydantic-settings==2.0.2
 loguru==0.7.0
 numpy==1.25.1

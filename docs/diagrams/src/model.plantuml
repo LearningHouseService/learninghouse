@@ -1,0 +1,95 @@
+@startuml Learninghouse Model
+class Connector {
+    uuid: str
+    name: str
+}
+
+class Resource {
+    uuid: str
+    connector: Connector
+    capabilities: List[Capability]
+}
+
+Connector <--* "1" Resource
+
+abstract class Capability{
+    name: str
+    value: CapabilityValue
+}
+
+Resource "0..*" *--> Capability
+
+class SensorCapability {
+    use_as_training_data: bool
+}
+
+SensorCapability --|> Capability
+
+class ActuatorCapability {
+    brain: Brain | None
+}
+
+ActuatorCapability --|> Capability
+
+interface CapabilityValue {
+    raw: Any
+    formatted: str
+    typed: CapabilityType
+}
+
+Capability "1" *--> CapabilityValue
+
+enum CapabilityValueType {
+    NUMERICAL
+    CATEGORICAL
+}
+
+CapabilityValue "1" *--> CapabilityValueType
+
+class GenericStringValue {
+    raw: str
+    typed: CapabilityValueType.CATEGORICAL
+}
+
+GenericStringValue ..|> CapabilityValue : implements
+
+class GenericNumberValue {
+    raw: float
+}
+
+GenericNumberValue ..|> CapabilityValue : implements
+
+class TemperatureValue {
+    typed: CapabilityValueType.NUMERICAL
+}
+
+TemperatureValue --|> GenericNumberValue
+
+class PressureValue {
+    typed: CapabilityValueType.NUMERICAL
+}
+
+PressureValue --|> GenericNumberValue
+
+class GenericBooleanValue {
+    raw: bool
+    typed: CapabilityValueType.CATEGORICAL
+}
+
+GenericBooleanValue ..|> CapabilityValue : implements
+
+class SwitchValue {
+}
+
+SwitchValue --|> GenericBooleanValue
+
+class ResourceGrouping {
+    name: str
+}
+
+ResourceGrouping <--* "1" Resource
+Location --|> ResourceGrouping
+Weatherstation --|> ResourceGrouping
+Person --|> ResourceGrouping
+
+@enduml

@@ -30,28 +30,28 @@
     "@w11k/git-info": "^1.1.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.2",
-    "zone.js": "~0.13.1"
+    "zone.js": "~0.14.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.2",
     "@angular/cli": "~16.2.2",
     "@angular/compiler-cli": "^16.2.5",
     "@tailwindcss/aspect-ratio": "0.4.2",
-    "@tailwindcss/forms": "0.5.4",
+    "@tailwindcss/forms": "0.5.6",
     "@tailwindcss/line-clamp": "0.4.4",
     "@tailwindcss/typography": "0.5.10",
-    "@types/jasmine": "~4.3.5",
+    "@types/jasmine": "~4.3.6",
     "autoprefixer": "^10.4.15",
     "fs-extra": "11.1.1",
     "git-describe": "4.1.1",
-    "jasmine-core": "~5.1.0",
+    "jasmine-core": "~5.1.1",
     "karma": "~6.4.2",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.1",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "ngx-tailwind": "^4.0.0",
-    "postcss": "^8.4.28",
+    "postcss": "^8.4.30",
     "tailwindcss": "^3.3.3",
     "typescript": "~5.1.6"
   }

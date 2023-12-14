@@ -77,7 +77,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Download UI
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: core/learninghouse/ui
@@ -128,7 +128,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Load learninghouse wheel
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: python-artifacts-3.10-${{ env.REF_NAME }}
         path: docker/container

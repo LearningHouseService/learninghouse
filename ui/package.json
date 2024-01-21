@@ -30,7 +30,7 @@
     "@w11k/git-info": "^1.1.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.6.2",
-    "zone.js": "~0.13.1"
+    "zone.js": "~0.13.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.2",

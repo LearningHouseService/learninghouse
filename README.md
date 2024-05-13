@@ -203,16 +203,18 @@ curl --location --request PUT 'http://localhost:5000/api/brain/darkness/training
     --header 'Content-Type: application/json' \
     --header 'X-LEARNINGHOUSE-API-KEY: YOURSECRETKEY' \
     --data-raw '{
-        "azimuth": 321.4441223144531,
-        "elevation": -19.691608428955078,
-        "rain_gauge": 0.0,
-        "pressure": 971.0,
-        "pressure_trend_1h": "falling",
-        "temperature_outside": 23.0,
-        "temperature_trend_1h": "rising",
-        "light_state": false,
-        "darkness": true
-}'
+        "dependent_value": true,
+        "sensors_data": {
+            "azimuth": 321.4441223144531,
+            "elevation": -19.691608428955078,
+            "rain_gauge": 0.0,
+            "pressure": 971.0,
+            "pressure_trend_1h": "falling",
+            "temperature_outside": 23.0,
+            "temperature_trend_1h": "rising",
+            "light_state": false
+        }
+    }'
 ```
 
 You can send either a field `timestamp` with your dataset containing a UNIX-Timestamp or the service will add this information with its current time. The service generates some further time-relevant fields inside the training dataset that you can also use as `features`. These are `month_of_year`, `day_of_month`, `day_of_week`, `hour_of_day`, and `minute_of_hour`.

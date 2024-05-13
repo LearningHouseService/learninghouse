@@ -1,44 +1,42 @@
-FROM python:3.10-slim AS buildimage
+FROM python:3.11 AS buildimage
 
-COPY container/requirements.txt requirements.txt
+WORKDIR /learninghouse
 
-RUN set -eux; \
-    pip3 wheel \
-    --wheel-dir=/root/wheels \
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/venv/bin:$PATH"
+
+COPY requirements.txt .
+
+RUN python3 -m venv /venv && \
+    . /venv/bin/activate && \
+    pip install --upgrade pip && \
+    pip install \
+    --no-cache-dir \
     --extra-index-url https://www.piwheels.org/simple \
     -r requirements.txt
 
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-ENV LHS_HOME=/learninghouse \
-    USER_ID=9002 \
-    GROUP_ID=9002 \
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/venv/bin:$PATH" \
+    LHS_HOME=/learninghouse \
     LEARNINGHOUSE_HOST=0.0.0.0 \
     LEARNINGHOUSE_PORT=5000
 
-COPY --from=buildimage /root/wheels /root/wheels
-COPY container/*.whl /root/wheels
-COPY entrypoint.sh /
+WORKDIR /learninghouse
 
-RUN set -eux; \
-    apt-get update; \
-    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    gosu \
-    tini; \
-    ln -s -f $(which gosu) /usr/local/bin/gosu; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/*; \
-    mkdir -p ${LHS_HOME}/brains; \
-    cd ${LHS_HOME}; \
-    pip3 install \
-    --no-index \
-    --find-links=/root/wheels \
-    learninghouse; \
-    chmod +x /entrypoint.sh; \
-    rm -rf /root/wheels;
+RUN adduser --uid 1000 --disabled-password --gecos '' --no-create-home learninghouse; \
+    mkdir -p ${LHS_HOME}/brains
+
+COPY --chown=learninghouse:learninghouse --from=buildimage /venv /venv
+COPY --chown=learninghouse:learninghouse . .
 
 EXPOSE 5000
-WORKDIR ${LHS_HOME}
+
 VOLUME ["${LHS_HOME}/brains"]
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gosu", "learninghouse", "tini", "-s", "learninghouse"]
+
+USER learninghouse
+
+CMD ["python3", "-m", "learninghouse"]

@@ -87,6 +87,7 @@ class BrainService:
             if dependent_value is not None:
                 trainings_data[name] = dependent_value
             else:
+                # Todo this is never thrown because of if 86
                 raise BrainBadRequest("Missing dependent variable!")
 
         if trainings_data is None:
@@ -162,7 +163,7 @@ class BrainService:
         try:
             brain = cls.load_brain(name)
             if not brain.actual_versions:
-                raise BrainNotActual(name, brain.version)
+                raise BrainNotActual(name, brain.versions)
 
             request_data = DatasetPreprocessing.add_time_information(
                 request_data)

@@ -143,14 +143,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Copy core learninghouse to docker
-      run: cp -r core/* docker/
-
     - name: Download UI
       uses: actions/download-artifact@v4
       with:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: core/learninghouse/ui
+
+    - name: Copy core learninghouse to docker
+      run: cp -r core/* docker/
 
     - name: Generate static _version.py
       run: python freeze_version.py

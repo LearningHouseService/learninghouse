@@ -63,7 +63,7 @@ class Sensors(ListModel):
         else:
             logger.warning("No sensors.json found")
 
-        return Sensors.parse_obj(sensors)
+        return Sensors(sensors)
 
     def write_config(self) -> None:
         filename = service_settings().brains_directory / "sensors.json"

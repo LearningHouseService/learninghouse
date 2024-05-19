@@ -46,7 +46,7 @@ class BrainService:
             except BrainNoConfiguration:
                 pass
 
-        return BrainInfos.parse_obj(brains)
+        return BrainInfos(**brains)
 
     @staticmethod
     def get_info(name: str) -> BrainInfo:

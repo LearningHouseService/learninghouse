@@ -258,8 +258,8 @@ class AuthServiceInternal:
         payload_args = settings.jwt_payload_claims
 
         try:
-            payload = TokenPayload.parse_obj(
-                jwt.decode(
+            payload = TokenPayload(
+                **jwt.decode(
                     access_token,
                     settings.jwt_secret,
                     algorithms=["HS256"],

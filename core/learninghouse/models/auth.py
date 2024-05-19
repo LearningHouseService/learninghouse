@@ -54,6 +54,9 @@ class TokenPayload(LHBaseModel):
             iat=issue_time,
         )
 
+    def verify_subject(self, subject: str) -> bool:
+        return self.sub == subject
+
 
 class APIKeyRole(EnumModel):
     USER = "user"

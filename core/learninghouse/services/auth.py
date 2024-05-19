@@ -1,11 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from typing import Dict, List, Tuple, Union
 
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.security.api_key import APIKeyHeader, APIKeyQuery
-from jose import JWTError, jwt
+import jwt
 
 from learninghouse.api.errors import (
     LearningHouseSecurityException,
@@ -94,21 +94,25 @@ class AuthServiceInternal:
     def cleanup_refresh_tokens(self):
         del_tokens = []
         for jti, expire in self.refresh_tokens.items():
-            if expire < datetime.utcnow():
+            if expire < datetime.now(timezone.utc):
                 del_tokens.append(jti)
 
         for jti in del_tokens:
             del self.refresh_tokens[jti]
 
     def create_new_token(self) -> Token:
-        issuetime = datetime.utcnow()
+        issuetime = datetime.now(timezone.utc)
         access_expire = issuetime + timedelta(minutes=1)
         access_payload = TokenPayload.create("admin", access_expire, issuetime)
-        access_token = jwt.encode(access_payload.dict(), settings.jwt_secret, "HS256")
+        access_token = jwt.encode(
+            access_payload.model_dump(), settings.jwt_secret, algorithm="HS256")
 
-        refresh_expire = issuetime + timedelta(minutes=settings.jwt_expire_minutes)
-        refresh_payload = TokenPayload.create("refresh", refresh_expire, issuetime)
-        refresh_token = jwt.encode(refresh_payload.dict(), settings.jwt_secret, "HS256")
+        refresh_expire = issuetime + \
+            timedelta(minutes=settings.jwt_expire_minutes)
+        refresh_payload = TokenPayload.create(
+            "refresh", refresh_expire, issuetime)
+        refresh_token = jwt.encode(
+            refresh_payload.model_dump(), settings.jwt_secret, algorithm="HS256")
 
         self.refresh_tokens[refresh_payload.jti] = refresh_expire
 
@@ -161,7 +165,8 @@ class AuthServiceInternal:
     async def get_refresh(
         self, credentials: HTTPAuthorizationCredentials = Security(jwt_bearer)
     ) -> Union[str, None]:
-        is_valid, jti = self.validate_credentials(credentials, False, "refresh")
+        is_valid, jti = self.validate_credentials(
+            credentials, False, "refresh")
 
         return jti if is_valid else None
 
@@ -234,7 +239,8 @@ class AuthServiceInternal:
 
         else:
             is_valid = False
-            self.raise_error_conditionally("Invalid authorization code.", auto_error)
+            self.raise_error_conditionally(
+                "Invalid authorization code.", auto_error)
 
         return is_valid, jti
 
@@ -248,21 +254,27 @@ class AuthServiceInternal:
     ) -> Tuple[bool, Union[str, None]]:
         verified = False
         jti = None
+
+        payload_args = settings.jwt_payload_claims
+
         try:
             payload = TokenPayload.parse_obj(
                 jwt.decode(
                     access_token,
                     settings.jwt_secret,
-                    "HS256",
-                    subject=subject,
-                    **settings.jwt_payload_claims,
+                    algorithms=["HS256"],
+                    audience=payload_args["audience"],
+                    issuer=payload_args["issuer"]
                 )
             )
+
+            if not payload.verify_subject(subject):
+                raise jwt.InvalidTokenError("Invalid subject")
 
             if subject == "refresh":
                 verified = (
                     payload.jti in self.refresh_tokens
-                    and self.refresh_tokens[payload.jti] > datetime.utcnow()
+                    and self.refresh_tokens[payload.jti] > datetime.now(timezone.utc)
                 )
 
                 if not verified:
@@ -271,8 +283,8 @@ class AuthServiceInternal:
                 verified = True
 
             jti = payload.jti
-        except JWTError as exc:
-            logger.info(exc)
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as err:
+            logger.info(err)
 
         return verified, jti
 

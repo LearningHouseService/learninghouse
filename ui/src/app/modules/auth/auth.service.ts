@@ -4,6 +4,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { BehaviorSubject, catchError, map, Observable } from 'rxjs';
 import { APIKeyModel, ChangePasswordRequestModel, LoginRequestModel, Role, TokenModel } from './auth.model';
 import { APIService } from '../../shared/services/api.service';
+import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -15,7 +16,7 @@ export class AuthService {
 
   private jwtService = new JwtHelperService();
 
-  constructor(private api: APIService) {
+  constructor(private api: APIService, private router: Router) {
   }
 
   loginAdmin(loginPayload: LoginRequestModel) {

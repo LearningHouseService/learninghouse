@@ -30,9 +30,6 @@
         "--trailing-comma"
     ],
     "python.envFile": "${workspaceFolder}/core/.env",
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8"
-    },
     "python.formatting.provider": "none",
     "colorTabs.config": [
         {

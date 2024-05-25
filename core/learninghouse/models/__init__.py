@@ -15,7 +15,7 @@ class LearningHouseVersions(LHBaseModel):
     sklearn: str = Field(None, example="1.0.0")
     numpy: str = Field(None, example="1.0.0")
     pandas: str = Field(None, example="1.0.0")
-    jose: str = Field(None, example="1.0.0")
+    jwt: str = Field(None, example="1.0.0")
     passlib: str = Field(None, example="1.0.0")
     loguru: str = Field(None, example="1.0.0")
 
@@ -24,7 +24,7 @@ class LearningHouseVersions(LHBaseModel):
         return (
             f"Libraries FastAPI: {self.fastapi}, uvicorn: {self.uvicorn}, "
             + f"pydantic: {self.pydantic}, scikit-learn: {self.sklearn}, "
-            + f"numpy: {self.numpy}, pandas: {self.pandas}, python-jose: {self.jose}, "
+            + f"numpy: {self.numpy}, pandas: {self.pandas}, pyjwt: {self.jwt}, "
             + f"passlib: {self.passlib}, loguru: {self.loguru}"
         )
 

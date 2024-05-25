@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
+import { HttpClient, HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,36 +17,28 @@ import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-pagin
 
 
 
-@NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: HttpLoaderFactory,
-        deps: [HttpClient, LocationStrategy]
-      }
-    }),
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    LayoutModule,
-    HttpClientModule,
-  ],
-  providers: [{
-    provide: HTTP_INTERCEPTORS,
-    useClass: AuthInterceptor,
-    multi: true
-  },
-  {
-    provide: MatPaginatorIntl,
-    useClass: TranslateMatPaginatorIntl,
-  }
-  ],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient, LocationStrategy]
+            }
+        }),
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        LayoutModule], providers: [{
+            provide: HTTP_INTERCEPTORS,
+            useClass: AuthInterceptor,
+            multi: true
+        },
+        {
+            provide: MatPaginatorIntl,
+            useClass: TranslateMatPaginatorIntl,
+        }, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule { }
 
 export function HttpLoaderFactory(http: HttpClient, locationStrategy: LocationStrategy): TranslateHttpLoader {

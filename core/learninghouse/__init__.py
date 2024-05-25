@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import __version__ as fastapi_version
-from jose import __version__ as jose_version
+from jwt import __version__ as jwt_version
 from loguru import __version__ as loguru_version
 from numpy.version import version as np_version
 from pandas import __version__ as pd_version
@@ -25,7 +25,7 @@ versions = LearningHouseVersions(
     sklearn=skl_version,
     numpy=np_version,
     pandas=pd_version,
-    jose=jose_version,
+    jwt=jwt_version,
     passlib=passlib_version,
     loguru=loguru_version,
 )

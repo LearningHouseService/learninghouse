@@ -134,7 +134,8 @@ export class APIService {
             { label: 'scikit-learn', version: versions.sklearn },
             { label: 'FastAPI', version: versions.fastapi },
             { label: 'Uvicorn', version: versions.uvicorn },
-            { label: 'Pydantic', version: versions.pydantic }
+            { label: 'Pydantic', version: versions.pydantic },
+            { label: 'PyJWT', version: versions.jwt }
           ]
         })
       );

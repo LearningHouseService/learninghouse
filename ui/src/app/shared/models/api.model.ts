@@ -23,7 +23,7 @@ export interface LearningHouseVersions {
     sklearn: string;
     numpy: string;
     pandas: string;
-    jose: string;
+    jwt: string;
     passlib: string;
     loguru: string;
 }

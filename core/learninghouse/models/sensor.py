@@ -18,6 +18,8 @@ from learninghouse.models.base import (
 class SensorType(EnumModel):
     NUMERICAL = "numerical"
     CATEGORICAL = "categorical"
+    CYCLICAL = "cyclical"
+    TIME = "time"
 
     def __init__(self, typed: str):
         # pylint: disable=super-init-not-called
@@ -31,6 +33,8 @@ class SensorType(EnumModel):
 class SensorConfiguration(LHBaseModel):
     name: str = Field(None, example="azimuth")
     typed: SensorType = Field(None, example=SensorType.NUMERICAL)
+    cycles: int = Field(0, examples=360)
+    calc_sun_position: bool = Field(False, examples=False)
 
 
 class Sensor(SensorConfiguration):

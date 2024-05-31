@@ -63,7 +63,7 @@ async def post_sensor_configuration(sensor: Sensor):
     },
 )
 async def put_sensor_configuration(name: str, sensor: Sensor = Body()):
-    return SensorConfigurationService.update(name, sensor.typed)
+    return SensorConfigurationService.update(name, sensor.typed, sensor.cycles, sensor.calc_sun_position)
 
 
 @router_admin.delete(

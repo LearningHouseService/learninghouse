@@ -37,11 +37,13 @@ class SensorConfigurationService:
         return new_sensor
 
     @staticmethod
-    def update(name: str, typed: SensorType) -> Sensor:
+    def update(name: str, typed: SensorType, cycles: int, calc_sun_position: bool) -> Sensor:
         sensors = Sensors.load_config()
         for sensor in sensors:  # type: Sensor
             if sensor.name == name:
                 sensor.typed = typed
+                sensor.cycles = cycles
+                sensor.calc_sun_position = calc_sun_position
                 sensors.write_config()
                 return sensor
 

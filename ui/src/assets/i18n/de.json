@@ -24,7 +24,9 @@
 			},
 			"sensortype": {
 				"categorical": "Kategorial",
-				"numerical": "Numerisch"
+				"numerical": "Numerisch",
+				"cyclical": "Zyklisch",
+				"time": "Zeitpunkt"
 			}
 		},
 		"errors": {
@@ -223,7 +225,9 @@
 			"sensors": {
 				"columns": {
 					"name": "Name",
-					"typed": "Sensorart"
+					"typed": "Sensorart",
+					"cycles": "Zyklen",
+					"calc_sun_position": "Sonnenposition berechnen"
 				},
 				"common": {
 					"add_dialog_title": "Sensor hinzufügen",

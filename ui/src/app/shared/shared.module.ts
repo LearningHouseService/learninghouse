@@ -13,6 +13,7 @@ import { DeleteDialogComponent } from './components/table/delete-dialog/delete-d
 import { TableComponent } from './components/table/table.component';
 import { MaterialModule } from './material/material.module';
 import { ButtonGroupComponent } from './components/button-group/button-group.component';
+import { YesNoComponent } from './components/yes-no/yes-no.component';
 
 const components = [
   AlertComponent,
@@ -21,6 +22,7 @@ const components = [
   InputComponent,
   PasswordComponent,
   SelectComponent,
+  YesNoComponent,
   SessionTimerComponent,
   TableComponent
 ]

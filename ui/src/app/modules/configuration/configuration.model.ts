@@ -1,11 +1,15 @@
 export enum SensorType {
     NUMERICAL = 'numerical',
-    CATEGORICAL = 'categorical'
+    CATEGORICAL = 'categorical',
+    CYCLICAL = 'cyclical',
+    TIME = 'time'
 }
 
 export interface SensorConfigurationModel {
     name: string;
     typed: SensorType;
+    cycles: number;
+    calc_sun_position: boolean;
 }
 
 export enum BrainEstimatorType {

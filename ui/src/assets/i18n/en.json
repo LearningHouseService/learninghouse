@@ -24,7 +24,9 @@
 			},
 			"sensortype": {
 				"categorical": "Categorical",
-				"numerical": "numerical"
+				"numerical": "Numerical",
+				"cyclical": "Cyclical",
+				"time": "Time"
 			}
 		},
 		"errors": {

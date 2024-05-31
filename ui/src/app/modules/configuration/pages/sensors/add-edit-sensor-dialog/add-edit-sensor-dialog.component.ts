@@ -10,7 +10,9 @@ import { SensorConfigurationService } from '../../../services/sensor-configurati
 
 interface SensorForm {
   name: FormControl<string>;
-  typed: FormControl<SensorType>
+  typed: FormControl<SensorType>;
+  cycles: FormControl<number>;
+  calc_sun_position: FormControl<boolean>;
 }
 
 @Component({
@@ -34,6 +36,8 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
     submitButton: SubmitButtonType.EDIT
   };
 
+  public SensorType = SensorType;
+
   public form: FormGroup<SensorForm>
 
   public sensor?: SensorConfigurationModel;
@@ -44,7 +48,9 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
 
   public typedOptions = [
     { value: SensorType.NUMERICAL, label: 'common.enums.sensortype.numerical' },
-    { value: SensorType.CATEGORICAL, label: 'common.enums.sensortype.categorical' }
+    { value: SensorType.CATEGORICAL, label: 'common.enums.sensortype.categorical' },
+    { value: SensorType.CYCLICAL, label: 'common.enums.sensortype.cyclical' },
+    { value: SensorType.TIME, label: 'common.enums.sensortype.time' }
   ]
 
   public dialogConfig$ = new BehaviorSubject<EditDialogConfig>(AddEditSensorDialogComponent.ADD_DIALOG_CONFIG);
@@ -61,7 +67,9 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
 
     this.form = this.fb.group<SensorForm>({
       name: this.fb.control<string>('', [Validators.required]),
-      typed: this.fb.control<SensorType>(SensorType.NUMERICAL, [Validators.required])
+      typed: this.fb.control<SensorType>(SensorType.NUMERICAL, [Validators.required]),
+      cycles: this.fb.control<number>(0),
+      calc_sun_position: this.fb.control<boolean>(false)
     })
 
     if (this.data) {
@@ -92,6 +100,14 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
       this.form.patchValue(this.data!)
       this.form.controls.name.disable();
     }
+
+    this.form.controls.typed.valueChanges
+      .pipe(takeUntil(this.destroyed))
+      .subscribe(value => {
+        this.setConditionalValidators(value);
+      });
+
+    this.setConditionalValidators(this.form.controls.typed.value);
   }
 
   ngOnDestroy(): void {
@@ -99,11 +115,32 @@ export class AddEditSensorDialogComponent extends AbstractFormResponse implement
     this.destroyed.complete();
   }
 
+  private setConditionalValidators(typed: SensorType): void {
+    const cyclesControl = this.form.controls.cycles;
+    const calcSunPositionControl = this.form.controls.calc_sun_position;
+
+    cyclesControl.clearValidators();
+    calcSunPositionControl.clearValidators();
+
+    if (typed === SensorType.CYCLICAL) {
+      cyclesControl.setValidators([Validators.required]);
+    } else if (typed === SensorType.TIME) {
+      calcSunPositionControl.setValidators([Validators.required]);
+    }
+
+    cyclesControl.updateValueAndValidity();
+    calcSunPositionControl.updateValueAndValidity();
+  }
+
+
+
   onSubmit(): void {
     if (this.isEdit) {
       this.configService.updateSensor({
         name: this.data!.name,
-        typed: this.form.controls.typed.value
+        typed: this.form.controls.typed.value,
+        cycles: this.form.controls.cycles.value,
+        calc_sun_position: this.form.controls.calc_sun_position.value
       })
         .pipe(
           map(() => {

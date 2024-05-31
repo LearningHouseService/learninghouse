@@ -1,9 +1,10 @@
-import { Directive, Input, OnInit } from '@angular/core';
+import { Directive, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
+import { Subject, takeUntil } from 'rxjs';
 
 @Directive()
-export class FormFieldDirective implements OnInit {
+export class FormFieldDirective implements OnInit, OnDestroy {
     @Input()
     control: FormControl = new FormControl();
 
@@ -13,12 +14,36 @@ export class FormFieldDirective implements OnInit {
     @Input()
     name = '';
 
+    private destroyed = new Subject<void>();
+
     constructor(private translate: TranslateService) { }
 
     ngOnInit(): void {
-        if (this.control.validator) {
-            this.required = this.control.hasValidator(Validators.required);
-        }
+        this.updateRequiredStatus()
+
+        this.control.valueChanges
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(value => {
+                this.updateRequiredStatus();
+            });
+
+
+        this.control.statusChanges
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(value => {
+                this.updateRequiredStatus();
+            });
+
+    }
+
+    ngOnDestroy(): void {
+        this.destroyed.next();
+        this.destroyed.complete();
+    }
+
+
+    private updateRequiredStatus(): void {
+        this.required = this.control.validator != null && this.control.hasValidator(Validators.required);
     }
 
     errorTranslations(): string[] {

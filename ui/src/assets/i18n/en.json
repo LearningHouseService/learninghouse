@@ -225,7 +225,9 @@
 			"sensors": {
 				"columns": {
 					"name": "Name",
-					"typed": "Sensor type"
+					"typed": "Sensor type",
+					"cycles": "Cycles",
+					"calc_sun_position": "Calculate sun position"
 				},
 				"common": {
 					"add_dialog_title": "Add sensor",

@@ -29,7 +29,7 @@
     "@ngx-translate/http-loader": "^8.0.0",
     "@w11k/git-info": "^1.1.2",
     "rxjs": "~7.8.1",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "zone.js": "~0.14.5"
   },
   "devDependencies": {

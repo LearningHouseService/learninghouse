@@ -277,11 +277,6 @@ class AuthServiceInternal:
                     and self.refresh_tokens[payload.jti] > datetime.now(timezone.utc)
                 )
 
-                logger.info(payload.jti)
-                logger.info(self.refresh_tokens.keys())
-                logger.info(self.refresh_tokens[payload.jti])
-                logger.info(datetime.now(timezone.utc))
-
                 if not verified:
                     logger.error("No valid refresh token")
             else:

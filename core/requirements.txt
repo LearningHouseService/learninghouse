@@ -3,7 +3,7 @@ uvicorn[standard]==0.30.0
 PyJWT==2.8.0
 passlib==1.7.4
 pydantic==2.7.2
-pydantic-settings==2.2.1
+pydantic-settings==2.3.2
 loguru==0.7.2
 numpy==1.26.4
 pandas==2.2.2

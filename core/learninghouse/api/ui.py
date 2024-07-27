@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
-from learninghouse.core.logging import logger
+from learninghouse.core.logger import logger
 
 settings = service_settings()
 

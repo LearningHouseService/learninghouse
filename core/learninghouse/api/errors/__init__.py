@@ -4,7 +4,7 @@ from fastapi import Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from learninghouse.core.logging import logger
+from learninghouse.core.logger import logger
 from learninghouse.models import (
     LearningHouseErrorMessage,
     LearningHouseValidationErrorMessage,

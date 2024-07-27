@@ -6,7 +6,7 @@ from learninghouse.api.errors import (
     LearningHouseException,
     LearningHouseUnauthorizedException,
 )
-from learninghouse.core.logging import logger
+from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, authservice
 

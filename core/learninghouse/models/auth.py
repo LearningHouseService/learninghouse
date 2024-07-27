@@ -106,7 +106,7 @@ class APIKey(APIKeyRequest):
     key: str
 
     @classmethod
-    def from_api_key_request(cls, api_key_request: APIKeyRequest, key: str):
+    def from_api_key_request(cls, api_key_request: APIKeyRequest, key: str) -> APIKey:
         return cls(
             description=api_key_request.description, role=api_key_request.role, key=key
         )

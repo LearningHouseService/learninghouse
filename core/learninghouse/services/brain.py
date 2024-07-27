@@ -16,7 +16,7 @@ from learninghouse.api.errors.brain import (
     BrainNotEnoughData,
     BrainNotTrained,
 )
-from learninghouse.core.logging import logger
+from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.brain import (
     Brain,

@@ -10,7 +10,7 @@ from learninghouse.api.errors import (
     LearningHouseException,
     LearningHouseValidationError,
 )
-from learninghouse.core.logging import LoggingLevelEnum
+from learninghouse.core.logger.models import LoggingLevelEnum
 
 DOCKER_SECRETS_DIR = "/run/secrets"
 

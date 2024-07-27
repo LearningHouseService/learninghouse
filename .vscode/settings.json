@@ -15,7 +15,21 @@
     "pylint.args": [
         "--rcfile=${workspaceFolder}/core/.pylintrc"
     ],
+    "pylint.cwd": "${workspaceFolder}/core",
     "git.alwaysSignOff": true,
     "python.analysis.typeCheckingMode": "off",
     "python.analysis.autoImportCompletions": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+    },
+    "isort.args": [
+        "--profile",
+        "black",
+        "--settings-file",
+        "${workspaceFolder}/core/.isort.cfg"
+    ],
 }

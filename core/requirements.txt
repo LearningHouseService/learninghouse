@@ -1,4 +1,4 @@
-fastapi==0.111.0
+fastapi==0.112.0
 loguru==0.7.2
 numpy==2.0.0
 pandas==2.2.2

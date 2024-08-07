@@ -18,7 +18,7 @@ from learninghouse.api.middleware import (
     CustomHeader,
     EnforceInitialPasswordChange,
 )
-from learninghouse.core.logging import initialize_logging, logger
+from learninghouse.core.logger import initialize_logging, logger
 from learninghouse.core.settings import service_settings
 from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, authservice
 

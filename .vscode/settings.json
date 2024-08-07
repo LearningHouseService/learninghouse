@@ -1,6 +1,6 @@
 {
     "search.exclude": {
-        "**/versioneer.py": true,
+        "versioneer.py": true,
         "**/_version.py": true,
         "**/*.po": true
     },
@@ -12,35 +12,24 @@
         "**/.DS_Store": true,
         "**/__pycache__": true
     },
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintArgs": [
-        "--enable=W0611",
-        "--disable=C0111",
+    "pylint.args": [
         "--rcfile=${workspaceFolder}/core/.pylintrc"
     ],
-    "python.linting.enabled": true,
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
-    "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
+    "pylint.cwd": "${workspaceFolder}/core",
     "git.alwaysSignOff": true,
-    "isort.args": [
-        "--src",
-        "${workspaceFolder}/core",
-        "--multi-line",
-        "3",
-        "--trailing-comma"
-    ],
-    "python.envFile": "${workspaceFolder}/core/.env",
-    "python.formatting.provider": "none",
-    "colorTabs.config": [
-        {
-            "regex": ".*/core/.*",
-            "color": "#FF0000",
-            "label": "CORE"
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.autoImportCompletions": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
         },
-        {
-            "regex": ".*/ui/.*",
-            "color": "#00FF00",
-            "label": "UI"
-        }
-    ]
+    },
+    "isort.args": [
+        "--profile",
+        "black",
+        "--settings-file",
+        "${workspaceFolder}/core/.isort.cfg"
+    ],
 }

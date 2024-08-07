@@ -34,7 +34,9 @@
 				"ms-python.pylint",
 				"ms-python.python",
 				"donjayamanne.python-environment-manager",
-				"github.vscode-github-actions"
+				"github.vscode-github-actions",
+				"ms-python.black-formatter",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	}

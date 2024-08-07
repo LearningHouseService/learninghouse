@@ -12,7 +12,7 @@ from learninghouse.api.errors import (
     LearningHouseUnauthorizedException,
 )
 from learninghouse.api.errors.auth import InvalidPassword
-from learninghouse.core.logging import logger
+from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.auth import (
     APIKey,

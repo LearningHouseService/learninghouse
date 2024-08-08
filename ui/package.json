@@ -22,7 +22,7 @@
     "@angular/forms": "^18.1.0",
     "@angular/material": "^18.1.0",
     "@angular/platform-browser": "^18.1.0",
-    "@angular/platform-browser-dynamic": "^18.1.0",
+    "@angular/platform-browser-dynamic": "^18.1.4",
     "@angular/router": "^18.1.0",
     "@auth0/angular-jwt": "^5.2.0",
     "@ngx-translate/core": "^15.0.0",

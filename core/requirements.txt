@@ -6,4 +6,4 @@ passlib==1.7.4
 pydantic==2.8.2
 PyJWT==2.8.0
 scikit-learn==1.5.1
-uvicorn[standard]==0.30.5
+uvicorn[standard]==0.30.6

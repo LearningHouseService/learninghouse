@@ -19,7 +19,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         id: var
         with:
           script: |
@@ -32,7 +32,7 @@ jobs:
       REF_NAME: ${{ needs.variables.outputs.ref_name }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -67,14 +67,13 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - '3.10'
-          - '3.11'
+          - '3.13'
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -93,7 +92,7 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Download UI
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: core/learninghouse/ui
@@ -119,13 +118,13 @@ jobs:
           core/dist
     
     - name: Publish package to pypi
-      if: ${{github.event_name == 'release' && matrix.python-version == '3.11'}}
+      if: ${{github.event_name == 'release' && matrix.python-version == '3.13'}}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: core/dist/
 
     - name: Publish assets to github
-      if: ${{github.event_name == 'release' && matrix.python-version == '3.11'}}
+      if: ${{github.event_name == 'release' && matrix.python-version == '3.13'}}
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ github.token }}
@@ -135,16 +134,19 @@ jobs:
         file_glob: true
 
   build-docker:
+    permissions:
+      packages: write
+      contents: read
     runs-on: ubuntu-latest
     needs: [variables, build-core]
     env:
       REF_NAME: ${{ needs.variables.outputs.ref_name }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Download UI
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: core/learninghouse/ui
@@ -183,7 +185,7 @@ jobs:
     - name: Extract metadata (tags, labels) for Docker (No Release)
       id: meta
       if: ${{github.event_name != 'release'}}
-      uses: docker/metadata-action@v5
+      uses: docker/metadata-action@v6
       with:
         images: |
           ${{ env.REGISTRY_GITHUB }}/${{ env.IMAGE_NAME }}
@@ -191,14 +193,14 @@ jobs:
     - name: Extract metadata (tags, labels) for Docker (Release)
       id: meta_release
       if: ${{github.event_name == 'release'}}
-      uses: docker/metadata-action@v5
+      uses: docker/metadata-action@v6
       with:
         images: |
           ${{ env.IMAGE_NAME }}
           ${{ env.REGISTRY_GITHUB }}/${{ env.IMAGE_NAME }}
 
     - name: Build and push Docker image
-      uses: docker/build-push-action@v6
+      uses: docker/build-push-action@v7
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: docker

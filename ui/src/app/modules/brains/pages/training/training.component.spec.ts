@@ -1,4 +1,9 @@
+import { CommonModule } from '@angular/common';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
+import { of } from 'rxjs';
 
 import { TrainingComponent } from './training.component';
 
@@ -8,7 +13,15 @@ describe('TrainingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TrainingComponent ]
+      imports: [
+        CommonModule,
+        TranslateModule.forRoot()
+      ],
+      declarations: [TrainingComponent],
+      providers: [
+        { provide: ActivatedRoute, useValue: { data: of({}) } }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
     .compileComponents();
 

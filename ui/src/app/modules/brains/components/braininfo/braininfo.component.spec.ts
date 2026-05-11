@@ -1,4 +1,7 @@
+import { CommonModule } from '@angular/common';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { BraininfoComponent } from './braininfo.component';
 
@@ -8,7 +11,12 @@ describe('BraininfoComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ BraininfoComponent ]
+      imports: [
+        CommonModule,
+        TranslateModule.forRoot()
+      ],
+      declarations: [BraininfoComponent],
+      schemas: [NO_ERRORS_SCHEMA]
     })
     .compileComponents();
 

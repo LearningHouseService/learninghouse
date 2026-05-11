@@ -1,4 +1,10 @@
+import { CommonModule } from '@angular/common';
+import { FocusMonitor } from '@angular/cdk/a11y';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MAT_FORM_FIELD } from '@angular/material/form-field';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { ButtonGroupComponent } from './button-group.component';
 
@@ -8,7 +14,22 @@ describe('ButtonGroupComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ButtonGroupComponent ]
+      imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        TranslateModule.forRoot()
+      ],
+      declarations: [ButtonGroupComponent],
+      providers: [
+        {
+          provide: FocusMonitor, useValue: {
+            stopMonitoring: () => undefined,
+            focusVia: () => undefined
+          }
+        },
+        { provide: MAT_FORM_FIELD, useValue: { getLabelId: () => 'button-group-label' } }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     })
     .compileComponents();
 

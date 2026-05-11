@@ -8,6 +8,7 @@ import { SelectOption } from '../select/select.component';
 
 @Component({
   selector: 'learninghouse-button-group',
+  standalone: false,
   templateUrl: './button-group.component.html',
   styleUrls: ['./button-group.component.scss'],
   providers: [{ provide: MatFormFieldControl, useExisting: ButtonGroupComponent }],

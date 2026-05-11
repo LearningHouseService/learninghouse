@@ -4,6 +4,7 @@ import { SelectOption } from "../select/select.component";
 
 @Component({
     selector: 'learninghouse-yes-no',
+    standalone: false,
     templateUrl: './yes-no.component.html'
 })
 export class YesNoComponent extends InputDirective {

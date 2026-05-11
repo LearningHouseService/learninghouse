@@ -8,6 +8,7 @@ import { AppService } from 'src/app/shared/services/app.service';
 
 @Component({
   selector: 'lh-info-dialog',
+  standalone: false,
   templateUrl: './info-dialog.component.html',
   styleUrls: ['./info-dialog.component.scss']
 })

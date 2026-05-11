@@ -16,6 +16,7 @@ export class AlertType {
 
 @Component({
   selector: 'learninghouse-alert',
+  standalone: false,
   templateUrl: './alert.component.html',
   styleUrls: ['./alert.component.scss']
 })

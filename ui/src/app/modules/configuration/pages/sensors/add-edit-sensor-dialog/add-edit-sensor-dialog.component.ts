@@ -17,6 +17,7 @@ interface SensorForm {
 
 @Component({
   selector: 'app-add-edit-sensor-dialog',
+  standalone: false,
   templateUrl: './add-edit-sensor-dialog.component.html'
 })
 export class AddEditSensorDialogComponent extends AbstractFormResponse implements OnInit, OnDestroy {

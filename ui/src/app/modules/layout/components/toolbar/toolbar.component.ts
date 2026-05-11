@@ -8,6 +8,7 @@ import { BreakpointService } from 'src/app/shared/services/breakpoint.service';
 
 @Component({
   selector: 'app-toolbar',
+  standalone: false,
   templateUrl: './toolbar.component.html'
 })
 export class ToolbarComponent {

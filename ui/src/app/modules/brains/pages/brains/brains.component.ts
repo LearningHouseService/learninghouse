@@ -24,6 +24,7 @@ interface BrainsTableModel extends BrainInfoModel {
 
 @Component({
   selector: 'app-brains',
+  standalone: false,
   templateUrl: './brains.component.html'
 })
 export class BrainsComponent implements AfterViewInit, OnDestroy {

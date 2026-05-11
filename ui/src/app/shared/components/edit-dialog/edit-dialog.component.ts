@@ -20,6 +20,7 @@ export interface EditDialogConfig {
 
 @Component({
   selector: 'learninghouse-edit-dialog',
+  standalone: false,
   templateUrl: './edit-dialog.component.html',
   styleUrls: ['./edit-dialog.component.scss']
 })

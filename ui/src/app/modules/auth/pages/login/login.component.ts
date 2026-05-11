@@ -18,6 +18,7 @@ interface NormalPasswordForm {
 
 @Component({
   selector: 'learninghouse-login',
+  standalone: false,
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

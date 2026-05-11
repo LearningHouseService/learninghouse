@@ -16,6 +16,7 @@ interface SensorTableModel extends SensorConfigurationModel {
 
 @Component({
   selector: 'app-sensors',
+  standalone: false,
   templateUrl: './sensors.component.html'
 })
 export class SensorsComponent implements AfterViewInit, OnDestroy {

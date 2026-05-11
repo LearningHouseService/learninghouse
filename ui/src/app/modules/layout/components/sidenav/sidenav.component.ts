@@ -16,6 +16,7 @@ export interface SidenavItem {
 
 @Component({
   selector: 'app-sidenav',
+  standalone: false,
   templateUrl: './sidenav.component.html',
   styleUrls: ['./sidenav.component.scss']
 })

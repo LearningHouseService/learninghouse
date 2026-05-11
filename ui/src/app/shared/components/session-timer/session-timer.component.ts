@@ -3,6 +3,7 @@ import { BehaviorSubject, ReplaySubject, interval, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'learninghouse-session-timer',
+  standalone: false,
   templateUrl: './session-timer.component.html',
   styleUrls: ['./session-timer.component.scss']
 })

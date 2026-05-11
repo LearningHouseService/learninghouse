@@ -17,6 +17,7 @@ interface APIKeyForm {
 }
 @Component({
   selector: 'learninghouse-add-apikey',
+  standalone: false,
   templateUrl: './add-apikey-dialog.component.html'
 })
 export class AddAPIKeyDialogComponent extends AbstractFormResponse implements OnDestroy {

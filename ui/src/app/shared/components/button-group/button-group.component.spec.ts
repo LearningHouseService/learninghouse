@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ButtonGroupComponent } from './button-group.component';
 
 describe('ButtonGroupComponent', () => {
-  let component: ButtonGroupComponent;
-  let fixture: ComponentFixture<ButtonGroupComponent>;
+  let component: ButtonGroupComponent<unknown>;
+  let fixture: ComponentFixture<ButtonGroupComponent<unknown>>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

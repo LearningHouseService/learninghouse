@@ -6,6 +6,7 @@ import { TranslateService } from "@ngx-translate/core";
 import defaultLanguage from "./../assets/i18n/en.json";
 @Component({
   selector: 'app-root',
+  standalone: false,
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {

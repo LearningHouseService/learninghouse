@@ -43,6 +43,7 @@ export interface TableConfig {
 
 @Component({
   selector: 'learninghouse-table',
+  standalone: false,
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss']
 })

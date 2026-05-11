@@ -8,6 +8,7 @@ export interface SelectOption<T> {
 
 @Component({
   selector: 'learninghouse-select',
+  standalone: false,
   templateUrl: './select.component.html',
   styleUrls: ['./select.component.scss']
 })

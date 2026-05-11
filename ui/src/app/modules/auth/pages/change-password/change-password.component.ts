@@ -18,6 +18,7 @@ export interface ChangePasswordForm {
 
 @Component({
   selector: 'learninghouse-change-password',
+  standalone: false,
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })

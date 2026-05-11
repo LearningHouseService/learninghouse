@@ -23,6 +23,7 @@ interface BrainConfigurationForm {
 
 @Component({
   selector: 'app-add-edit-brain-dialog',
+  standalone: false,
   templateUrl: './add-edit-brain-dialog.component.html',
   styleUrls: ['./add-edit-brain-dialog.component.scss']
 })

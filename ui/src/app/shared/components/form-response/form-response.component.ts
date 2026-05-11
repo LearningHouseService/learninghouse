@@ -7,6 +7,7 @@ export interface FormResponseConfig {
 }
 @Component({
   selector: 'learninghouse-form-response',
+  standalone: false,
   templateUrl: './form-response.component.html',
   styleUrls: ['./form-response.component.scss']
 })

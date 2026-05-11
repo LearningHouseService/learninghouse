@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-training',
+  standalone: false,
   templateUrl: './training.component.html',
   styleUrls: ['./training.component.scss']
 })

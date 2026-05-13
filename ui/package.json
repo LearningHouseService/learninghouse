@@ -40,7 +40,7 @@
     "@tailwindcss/forms": "0.5.7",
     "@tailwindcss/line-clamp": "0.4.4",
     "@tailwindcss/typography": "0.5.13",
-    "@types/jasmine": "~5.1.4",
+    "@types/jasmine": "~6.0.0",
     "autoprefixer": "^10.5.0",
     "fs-extra": "11.2.0",
     "git-describe": "4.1.1",

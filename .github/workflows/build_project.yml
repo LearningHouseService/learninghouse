@@ -50,7 +50,7 @@ jobs:
       working-directory: ui
 
     - name: Save angular artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: |
@@ -111,7 +111,7 @@ jobs:
       working-directory: core
 
     - name: Save python artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: python-artifacts-${{ matrix.python-version }}-${{ env.REF_NAME }}
         path: |

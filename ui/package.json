@@ -42,7 +42,7 @@
     "@tailwindcss/typography": "0.5.13",
     "@types/jasmine": "~5.1.4",
     "autoprefixer": "^10.5.0",
-    "fs-extra": "11.2.0",
+    "fs-extra": "11.3.5",
     "git-describe": "4.1.1",
     "jasmine-core": "~6.2.0",
     "karma": "~6.4.3",

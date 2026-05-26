@@ -1,11 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
-@use 'tailwindcss/base';
-
-@use 'tailwindcss/components';
-
-@use 'tailwindcss/utilities';
-
 @use 'styles/fonts' as *;
+
+@config "../tailwind.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 html,
 body {

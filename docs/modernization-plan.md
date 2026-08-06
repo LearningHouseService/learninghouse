@@ -98,11 +98,12 @@ whole codebase, and CI enforces it.
 - Decide on the Developer Certificate of Origin (`git commit -s`), as enforced in `pvlearn`.
 
 **Acceptance**
-- [ ] `pip install -e ".[dev]"`, `ruff check .`, `pyright` and `pytest` all run from a clean clone.
-- [ ] CI fails on a deliberately introduced lint error and on a deliberately introduced type error.
-- [ ] The wheel built from `pyproject.toml` installs and `learninghouse` still starts from the
+- [x] `pip install -e ".[dev]"`, `ruff check .`, `pyright` and `pytest` all run from a clean clone.
+- [x] CI fails on a deliberately introduced lint error and on a deliberately introduced type error.
+      Verified locally by introducing both and running the same commands the workflow runs.
+- [x] The wheel built from `pyproject.toml` installs and `learninghouse` still starts from the
       console script entry point.
-- [ ] `versioneer.py`, `_version.py` and `freeze_version.py` are gone and the Docker image still
+- [x] `versioneer.py`, `_version.py` and `freeze_version.py` are gone and the Docker image still
       reports a correct version at `/api/versions`.
 
 **Note on ordering:** this phase comes first because `AGENTS.md` will document commands

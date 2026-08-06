@@ -64,7 +64,9 @@ ruff check .
 ruff check . --fix    # auto-fix
 ruff format .
 
-# Type check
+# Type check — resolves against .venv at the repository root if there is one,
+# otherwise against the interpreter on PATH, which has to be the one the
+# package is installed into
 pyright
 
 # Tests (parallel via pytest-xdist, -v --tb=short set in pyproject.toml)

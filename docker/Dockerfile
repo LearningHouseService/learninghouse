@@ -1,12 +1,14 @@
 FROM python:3.13 AS buildimage
 
-WORKDIR /learninghouse
+WORKDIR /build
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/venv/bin:$PATH"
 
-COPY requirements.txt .
+# The wheel carries the pinned dependencies, the UI and the version determined
+# by setuptools-scm, so the image needs neither a source tree nor git history.
+COPY dist/*.whl /build/
 
 RUN python3 -m venv /venv && \
     . /venv/bin/activate && \
@@ -14,7 +16,7 @@ RUN python3 -m venv /venv && \
     pip install \
     --no-cache-dir \
     --extra-index-url https://www.piwheels.org/simple \
-    -r requirements.txt
+    /build/*.whl
 
 FROM python:3.13-slim
 
@@ -28,10 +30,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /learninghouse
 
 RUN adduser --uid 1000 --disabled-password --gecos '' --no-create-home learninghouse; \
-    mkdir -p ${LHS_HOME}/brains
+    mkdir -p ${LHS_HOME}/brains; \
+    chown -R learninghouse:learninghouse ${LHS_HOME}
 
 COPY --chown=learninghouse:learninghouse --from=buildimage /venv /venv
-COPY --chown=learninghouse:learninghouse . .
 
 EXPOSE 5000
 

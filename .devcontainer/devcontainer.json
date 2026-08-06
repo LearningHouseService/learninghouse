@@ -30,19 +30,16 @@
 				"Angular.ng-template",
 				"dbaeumer.vscode-eslint",
 				"SonarSource.sonarlint-vscode",
-				"ms-python.isort",
+				"charliermarsh.ruff",
 				"ms-python.vscode-pylance",
-				"ms-python.pylint",
 				"ms-python.python",
 				"donjayamanne.python-environment-manager",
 				"github.vscode-github-actions",
-				"ms-python.black-formatter",
 				"ms-azuretools.vscode-docker"
 			]
 		}
-	}
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip3 install --user -r requirements.txt",
+	},
+	"postCreateCommand": "pip3 install -e core[dev]",
 	// Configure tool-specific properties.
 	// "customizations": {},
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.

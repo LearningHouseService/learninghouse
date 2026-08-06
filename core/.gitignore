@@ -11,9 +11,8 @@
 
 logging.yaml
 
-README.md
-LICENSE
-THIRD-PARTY-NOTICES
+# README.md, LICENSE and THIRD-PARTY-NOTICES are symlinks to the monorepo root
+# so that `pip install -e .` works from a plain checkout without a copy step.
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,135 @@
+[project]
+name = "learninghouse"
+dynamic = ["version"]
+description = "learningHouse - Teach your smart home everything"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.13,<4"
+license = "MIT"
+authors = [
+    { name = "Johannes Ott", email = "info@johannes-ott.net" }
+]
+keywords = ["smart home", "machine learning", "house automation"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Topic :: Home Automation",
+    "Framework :: FastAPI",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.13",
+]
+# Runtime dependencies are pinned exactly, matching pvlearn and
+# solaredge2mqtt. Updates arrive as individual dependabot pull requests that
+# run the full test suite, rather than silently on whatever day a transitive
+# resolve changes. The build-system requirements below stay on lower bounds:
+# they shape how the wheel is built, not how the installed package behaves.
+#
+# The shared pins with pvlearn (numpy, pandas, scikit-learn, pydantic) are
+# deliberately still on learninghouse's own versions here — aligning them with
+# pvlearn's is Phase 3 of docs/modernization-plan.md, and doing it in this
+# phase would mean changing predictions before any test pins them down.
+dependencies = [
+    "fastapi==0.141.1",
+    "loguru==0.7.3",
+    "numpy==2.5.1",
+    "pandas==3.0.5",
+    "passlib==1.7.4",
+    "pydantic==2.13.4",
+    "PyJWT==2.13.0",
+    "scikit-learn==1.8.0",
+    "uvicorn[standard]==0.51.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/LearningHouseService/learninghouse"
+Documentation = "https://github.com/LearningHouseService/learninghouse/blob/main/README.md"
+Repository = "https://github.com/LearningHouseService/learninghouse"
+Issues = "https://github.com/LearningHouseService/learninghouse/issues"
+
+[project.optional-dependencies]
+dev = [
+    "setuptools-scm[toml]==10.2.1",
+    "ruff==0.16.1",
+    "pyright==1.1.411",
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "pytest-cov==7.1.0",
+    "pytest-xdist==3.8.0",
+    "httpx==0.28.1",
+]
+
+[project.scripts]
+learninghouse = "learninghouse.service:run"
+
+[build-system]
+requires = [
+    "setuptools>=64",
+    "wheel",
+    "setuptools-scm[toml]>=8"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+include-package-data = true
+
+# `namespaces = true` is what picks up learninghouse/static and the
+# learninghouse/ui tree, which carry no __init__.py. The UI is built
+# separately and copied in before the wheel is built, so it is present in CI
+# and absent in a plain local checkout — a find must tolerate both.
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["learninghouse*"]
+exclude = ["tests*", "*.egg-info*"]
+namespaces = true
+
+# The git repository is the monorepo root, one level above this file. The
+# version therefore comes from tags on that repository, not from this
+# directory.
+[tool.setuptools_scm]
+root = ".."
+version_scheme = "post-release"
+local_scheme = "node-and-date"
+tag_regex = "^v(?P<version>[vV]?[0-9]+[^\\+]*)(\\+.*)?$"
+fallback_version = "0.0.0"
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.format]
+quote-style = "double"
+skip-magic-trailing-comma = false
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-v --tb=short -n auto --dist=worksteal"
+markers = [
+    "slow"
+]
+
+[tool.coverage.run]
+source = ["learninghouse"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+]
+
+# No threshold yet: the characterization suite that would give this number a
+# meaning arrives in Phase 2 of docs/modernization-plan.md, which then sets the
+# floor to whatever it actually reaches and ratchets it upward per phase.
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

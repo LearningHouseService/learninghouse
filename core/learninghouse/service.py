@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from learninghouse import versions
 from learninghouse.api import api, docs, ui
@@ -40,14 +41,12 @@ def get_application() -> FastAPI:
 
     application.include_router(ui.router)
 
-    application.add_exception_handler(
-        RequestValidationError, validation_error_handler)
+    application.add_exception_handler(RequestValidationError, validation_error_handler)
     application.add_exception_handler(
         LearningHouseException, learninghouse_exception_handler
     )
 
-    application.add_middleware(
-        uvicorn.middleware.proxy_headers.ProxyHeadersMiddleware)
+    application.add_middleware(ProxyHeadersMiddleware)
 
     application.add_middleware(
         CORSMiddleware,
@@ -63,8 +62,7 @@ def get_application() -> FastAPI:
     application.add_middleware(CatchAllException)
     application.add_middleware(CustomHeader)
 
-    application.mount(
-        "/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
+    application.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="static")
 
     return application
 
@@ -103,8 +101,7 @@ def run():
             )
 
     if settings.documentation_url is not None:
-        logger.info(
-            f"See interactive documentation {settings.documentation_url}")
+        logger.info(f"See interactive documentation {settings.documentation_url}")
 
     if ui.is_ui_installed():
         logger.info(f"UI is reachable under {settings.base_url_calculated}/ui")

@@ -6,7 +6,7 @@ from random import randint
 from secrets import token_hex
 from typing import Dict, List, Union
 
-from passlib.hash import sha512_crypt
+from passlib.hash import sha512_crypt  # pyright: ignore[reportAttributeAccessIssue]
 from pydantic import Field
 
 from learninghouse.api.errors.auth import APIKeyExists, NoAPIKey
@@ -17,18 +17,18 @@ settings = service_settings()
 
 
 class LoginRequest(LHBaseModel):
-    password: str = Field(None, example="MY_PASSWORD")
+    password: str = Field(..., examples=["MY_PASSWORD"])
 
 
 class PasswordRequest(LHBaseModel):
-    old_password: str = Field(None, example="MY_OLD_PASSWORD")
-    new_password: str = Field(None, example="MY_NEW_PASSWORD")
+    old_password: str = Field(..., examples=["MY_OLD_PASSWORD"])
+    new_password: str = Field(..., examples=["MY_NEW_PASSWORD"])
 
 
 class Token(LHBaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = Field("Bearer")
+    token_type: str = Field(default="Bearer")
 
 
 class TokenPayload(LHBaseModel):
@@ -87,13 +87,13 @@ class UserRole(EnumModel):
 
 class APIKeyRequest(LHBaseModel):
     description: str = Field(
-        None,
+        ...,
         min_length=3,
         max_length=15,
         pattern=r"^[A-Za-z]\w{1,13}[A-Za-z0-9]$",
-        example="app_as_user",
+        examples=["app_as_user"],
     )
-    role: APIKeyRole = Field(None, example=APIKeyRole.USER)
+    role: APIKeyRole = Field(..., examples=[APIKeyRole.USER])
 
 
 class APIKeyInfo(APIKeyRequest):
@@ -156,7 +156,7 @@ class SecurityDatabase(LHBaseModel):
 
     def delete_apikey(self, description: str) -> str:
         api_key = self.find_apikey_by_description(description, True)
-        if not api_key:
+        if not isinstance(api_key, APIKey):
             raise NoAPIKey(description)
 
         del self.api_keys[api_key.key]

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 from fastapi import status
 
@@ -19,12 +19,11 @@ class BrainNotTrained(LearningHouseException):
 
     def __init__(self, name: str):
         super().__init__(
-            self.STATUS_CODE, self.NOT_TRAINED, self.DESCRIPTION.format(
-                name=name)
+            self.STATUS_CODE, self.NOT_TRAINED, self.DESCRIPTION.format(name=name)
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "No trained brain with this name found.",
@@ -60,7 +59,7 @@ class BrainNotActual(LearningHouseException):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "If brain was not trained with actual versions "
@@ -87,7 +86,7 @@ class BrainNotEnoughData(LearningHouseException):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "Response if there are not enough data points.",
@@ -109,12 +108,11 @@ class BrainNoConfiguration(LearningHouseException):
 
     def __init__(self, name: str):
         super().__init__(
-            self.STATUS_CODE, self.NO_CONFIGURATION, self.DESCRIPTION.format(
-                name=name)
+            self.STATUS_CODE, self.NO_CONFIGURATION, self.DESCRIPTION.format(name=name)
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "No brain configuration found.",
@@ -137,7 +135,7 @@ class BrainBadRequest(LearningHouseException):
         super().__init__(self.STATUS_CODE, self.BAD_REQUEST, description)
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "Brain received a bad request.",
@@ -160,7 +158,7 @@ class BrainExists(LearningHouseException):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "An existing brain can not be recreated. Use PUT to update.",

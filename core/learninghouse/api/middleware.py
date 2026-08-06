@@ -30,8 +30,8 @@ class EnforceInitialPasswordChange(BaseHTTPMiddleware):
         "/api/versions",
     ]
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, app, **kwargs):
+        super().__init__(app, **kwargs)
         self.endpoints = self.ALLOWED_ENDPOINTS
         self.endpoints.append(settings.openapi_file)
         if settings.docs_url:

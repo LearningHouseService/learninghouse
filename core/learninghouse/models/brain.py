@@ -22,10 +22,11 @@ settings = service_settings()
 
 class BrainEstimatorType(EnumModel):
     """
-    **LearningHouse Service** can predict values using an estimator. An estimator can be
-    of type `classifier` which fits best for your needs if you have somekind of categorical
-    output like in the darkness example true and false. If you want to predict a numerical
-    value for example the setpoint of an heating equipment use the type `regressor` instead.
+    **LearningHouse Service** can predict values using an estimator. An
+    estimator can be of type `classifier` which fits best for your needs if you
+    have somekind of categorical output like in the darkness example true and
+    false. If you want to predict a numerical value for example the setpoint of
+    an heating equipment use the type `regressor` instead.
     """
 
     CLASSIFIER = "classifier", RandomForestClassifier
@@ -34,11 +35,12 @@ class BrainEstimatorType(EnumModel):
     def __init__(
         self,
         typed: str,
-        estimator_class: Type[RandomForestClassifier] | Type[RandomForestRegressor]
+        estimator_class: Type[RandomForestClassifier] | Type[RandomForestRegressor],
     ):
         self._typed: str = typed
-        self._estimator_class: Type[RandomForestClassifier] | Type[RandomForestRegressor] \
-            = estimator_class
+        self._estimator_class: (
+            Type[RandomForestClassifier] | Type[RandomForestRegressor]
+        ) = estimator_class
 
     @property
     def typed(self) -> str:
@@ -77,13 +79,12 @@ class BrainEstimatorConfiguration(LHBaseModel):
     (default: 100) option. And the maximum depth of each tree by using
     `max_depth` (default: 5) option. Both options are optional. Try to
     resize this value to optimize the accuracy of your model.
-    """  # pylint: disable=line-too-long
+    """  # noqa: E501 — the reference table renders as markdown, do not rewrap
 
-    typed: BrainEstimatorType = Field(
-        None, example=BrainEstimatorType.CLASSIFIER)
-    estimators: Optional[int] = Field(100, ge=100, le=1000)
-    max_depth: Optional[int] = Field(5, ge=4, le=10)
-    random_state: Optional[int] = Field(0)
+    typed: BrainEstimatorType = Field(..., examples=[BrainEstimatorType.CLASSIFIER])
+    estimators: int = Field(default=100, ge=100, le=1000)
+    max_depth: int = Field(default=5, ge=4, le=10)
+    random_state: int = Field(default=0)
 
 
 class BrainConfiguration(LHBaseModel):
@@ -92,22 +93,29 @@ class BrainConfiguration(LHBaseModel):
     See BrainEstimatorConfiguration
 
     Dependent variable:
-    The `dependent` variable is the one that have to be in the training data and which is predicted by the trained brain.
+    The `dependent` variable is the one that have to be in the training data
+    and which is predicted by the trained brain.
 
-    The `dependent` variable has to be a number. If it is not a number, but a string or boolean (true/false) like in the example. For this set `dependent_encode` to true.
+    The `dependent` variable has to be a number. If it is not a number, but a
+    string or boolean (true/false) like in the example. For this set
+    `dependent_encode` to true.
 
     Test size:
-    LearningHouse service only uses a part of your training data to train the brain. The other part specified by `test_size` will be used to score the accuracy of your brain.
+    LearningHouse service only uses a part of your training data to train the
+    brain. The other part specified by `test_size` will be used to score the
+    accuracy of your brain.
 
-    Give a percentage by using floating point numbers between 0.01 and 0.99 or a absolute number of data points by using integer numbers.
+    Give a percentage by using floating point numbers between 0.01 and 0.99 or
+    a absolute number of data points by using integer numbers.
 
-    For the beginning a `test_size` of 20 % (0.2) like the example should be fine.
-    """  # pylint: disable=line-too-long
+    For the beginning a `test_size` of 20 % (0.2) like the example should be
+    fine.
+    """
 
-    name: str = Field(None, example="darkness")
+    name: str = Field(..., examples=["darkness"])
     estimator: BrainEstimatorConfiguration
-    dependent_encode: Optional[bool] = Field(False)
-    test_size: Optional[float] = Field(0.2, gt=0.0, examples=[0.2, 20])
+    dependent_encode: bool = Field(default=False)
+    test_size: float = Field(default=0.2, gt=0.0, examples=[0.2, 20])
 
     @classmethod
     def from_json_file(cls, name: str) -> BrainConfiguration:
@@ -144,20 +152,19 @@ class BrainInfo(LHBaseModel):
     trained at and versions.
     """
 
-    name: str = Field(None, example="darkness")
-    configuration: BrainConfiguration = Field(None)
+    name: str = Field(..., examples=["darkness"])
+    configuration: BrainConfiguration
     features: Optional[List[str]] = Field(
-        None,
-        example=["azimuth", "elevation", "rain_gauge",
-                 "pressure_trend_1h_falling"],
+        default=None,
+        examples=[["azimuth", "elevation", "rain_gauge", "pressure_trend_1h_falling"]],
     )
-    training_data_size: int = Field(None, example=1234)
-    score: float = Field(None, example=0.85)
+    training_data_size: int = Field(..., examples=[1234])
+    score: float = Field(..., examples=[0.85])
     trained_at: Optional[datetime] = Field(
-        None, example=datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+        default=None, examples=[datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")]
     )
-    versions: LearningHouseVersions = Field(None, example=versions)
-    actual_versions: bool = Field(True)
+    versions: LearningHouseVersions
+    actual_versions: bool = Field(default=True)
 
 
 class BrainInfos(DictModel):
@@ -194,17 +201,13 @@ class BrainFileType(EnumModel):
 class Brain:
     def __init__(self, name: str):
         self.name: str = name
-        self.configuration: BrainConfiguration = BrainConfiguration.from_json_file(
-            name)
+        self.configuration: BrainConfiguration = BrainConfiguration.from_json_file(name)
 
-        self.dataset: DatasetConfiguration = DatasetConfiguration(
-            self.configuration)
+        self.dataset: DatasetConfiguration = DatasetConfiguration(self.configuration)
 
-        self._estimator: Optional[
-            RandomForestClassifier | RandomForestRegressor
-        ] = None
+        self._estimator: Optional[RandomForestClassifier | RandomForestRegressor] = None
 
-        self.score: Optional[float] = 0.0
+        self.score: float = 0.0
 
         self.versions: LearningHouseVersions = versions
 
@@ -245,8 +248,7 @@ class Brain:
             if not cls.is_trained(name):
                 raise BrainNotTrained(name)
 
-            filename = Brain.sanitize_filename(
-                name, BrainFileType.TRAINED_FILE)
+            filename = Brain.sanitize_filename(name, BrainFileType.TRAINED_FILE)
 
             loaded_brain = joblib.load(filename)
 
@@ -267,8 +269,7 @@ class Brain:
         self.score = score
         self.trained_at = datetime.now()
 
-        filename = Brain.sanitize_filename(
-            self.name, BrainFileType.TRAINED_FILE)
+        filename = Brain.sanitize_filename(self.name, BrainFileType.TRAINED_FILE)
 
         joblib.dump(self, filename)
 
@@ -314,21 +315,22 @@ class BrainTrainingRequest(LHBaseModel):
     for this `feature` will be assumed.
     """
 
-    dependent_value: StrictBool | StrictInt | StrictFloat = Field(
-        None, example=True)
-    sensors_data: Dict[str, StrictBool | StrictInt | StrictFloat | str | None] = \
-        Field(None,
-              example={
-                  "azimuth": 321.4441223144531,
-                  "elevation": -19.691608428955078,
-                  "rain_gauge": 0.0,
-                  "pressure": 971.0,
-                  "pressure_trend_1h": "falling",
-                  "temperature_outside": 23.0,
-                  "temperature_trend_1h": "rising",
-                  "light_state": False
-              },
-              )
+    dependent_value: StrictBool | StrictInt | StrictFloat = Field(..., examples=[True])
+    sensors_data: Dict[str, StrictBool | StrictInt | StrictFloat | str | None] = Field(
+        ...,
+        examples=[
+            {
+                "azimuth": 321.4441223144531,
+                "elevation": -19.691608428955078,
+                "rain_gauge": 0.0,
+                "pressure": 971.0,
+                "pressure_trend_1h": "falling",
+                "temperature_outside": 23.0,
+                "temperature_trend_1h": "rising",
+                "light_state": False,
+            }
+        ],
+    )
 
 
 class BrainPredictionRequest(DictModel):
@@ -337,17 +339,19 @@ class BrainPredictionRequest(DictModel):
     """
 
     root: Dict[str, StrictBool | StrictInt | StrictFloat | str | None] = Field(
-        None,
-        example={
-            "azimuth": 321.4441223144531,
-            "elevation": -19.691608428955078,
-            "rain_gauge": 0.0,
-            "pressure": 971.0,
-            "pressure_trend_1h": "falling",
-            "temperature_outside": 23.0,
-            "temperature_trend_1h": "rising",
-            "light_state": False,
-        },
+        ...,
+        examples=[
+            {
+                "azimuth": 321.4441223144531,
+                "elevation": -19.691608428955078,
+                "rain_gauge": 0.0,
+                "pressure": 971.0,
+                "pressure_trend_1h": "falling",
+                "temperature_outside": 23.0,
+                "temperature_trend_1h": "rising",
+                "light_state": False,
+            }
+        ],
     )
 
 
@@ -357,20 +361,21 @@ class BrainPredictionResult(LHBaseModel):
 
     brain: BrainInfo
     preprocessed: Dict[str, StrictBool | StrictInt | StrictFloat | str] = Field(
-        None,
-        example={
-            "azimuth": 321.4441223144531,
-            "elevation": -19.691608428955078,
-            "rain_gauge": 0.0,
-            "pressure_trend_1h_falling": 1,
-        },
+        ...,
+        examples=[
+            {
+                "azimuth": 321.4441223144531,
+                "elevation": -19.691608428955078,
+                "rain_gauge": 0.0,
+                "pressure_trend_1h_falling": 1,
+            }
+        ],
     )
-    prediction: StrictBool | StrictInt | StrictFloat = Field(
-        None, example=False)
+    prediction: StrictBool | StrictInt | StrictFloat = Field(..., examples=[False])
 
 
 class BrainDeleteResult(LHBaseModel):
     """
     The result of a delete request."""
 
-    name: str = Field(None, example="darkness")
+    name: str = Field(..., examples=["darkness"])

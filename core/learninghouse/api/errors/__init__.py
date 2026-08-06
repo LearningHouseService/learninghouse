@@ -40,11 +40,11 @@ class LearningHouseException(Exception):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
-            "description": "An exception occured which is not handled by the service now. "
-            + "Please write an issue on GitHub.",
+            "description": "An exception occured which is not handled by the "
+            + "service now. Please write an issue on GitHub.",
             "content": {
                 MIMETYPE_JSON: {
                     "example": {"error": cls.UNKNOWN, "description": cls.DESCRIPTION}
@@ -64,7 +64,7 @@ class LearningHouseSecurityException(LearningHouseException):
         super().__init__(self.STATUS_CODE, key, description or self.DESCRIPTION)
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "The request didn't pass security checks.",
@@ -93,7 +93,7 @@ class LearningHouseUnauthorizedException(LearningHouseException):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "The request didn't pass security checks.",
@@ -117,10 +117,12 @@ class LearningHouseValidationError(LearningHouseException):
         super().__init__(
             self.STATUS_CODE, self.VALIDATION_ERROR, str(error) or self.DESCRIPTION
         )
-        self.validations: List[Dict[str, Any]] = error.errors()
+        self.validations: List[Dict[str, Any]] = (
+            list(error.errors()) if error is not None else []
+        )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseValidationErrorMessage,
             "description": "The request didn't pass input validation",
@@ -151,13 +153,17 @@ class LearningHouseValidationError(LearningHouseException):
         )
 
 
-async def validation_error_handler(
-    _: Request, exc: RequestValidationError
-) -> JSONResponse:
+async def validation_error_handler(_: Request, exc: Exception) -> JSONResponse:
+    if not isinstance(exc, RequestValidationError):  # pragma: no cover
+        raise exc
+
     return LearningHouseValidationError(exc).response()
 
 
-async def learninghouse_exception_handler(_: Request, exc: LearningHouseException):
+async def learninghouse_exception_handler(_: Request, exc: Exception) -> JSONResponse:
+    if not isinstance(exc, LearningHouseException):  # pragma: no cover
+        raise exc
+
     response = exc.response()
 
     if isinstance(

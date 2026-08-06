@@ -1,3 +1,5 @@
+from typing import Any, Dict, Union
+
 from fastapi import APIRouter
 
 from learninghouse import versions
@@ -7,12 +9,13 @@ from learninghouse.core.settings import service_settings
 from learninghouse.models import LearningHouseVersions
 from learninghouse.services.auth import authservice
 
-api = APIRouter(
-    prefix="/api",
-    responses={
-        LearningHouseSecurityException.STATUS_CODE: LearningHouseSecurityException.api_description()
-    },
-)
+SECURITY_RESPONSE: Dict[Union[int, str], Dict[str, Any]] = {
+    LearningHouseSecurityException.STATUS_CODE: (
+        LearningHouseSecurityException.api_description()
+    )
+}
+
+api = APIRouter(prefix="/api", responses=SECURITY_RESPONSE)
 
 api.include_router(brain.router)
 api.include_router(sensor.router)

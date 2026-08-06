@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 from fastapi import status
 
@@ -26,10 +26,11 @@ class APIKeyExists(LearningHouseException):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
-            "description": "An existing api key can not be recreated. Use DELETE and recreate.",
+            "description": "An existing api key can not be recreated. "
+            + "Use DELETE and recreate.",
             "content": {
                 MIMETYPE_JSON: {
                     "example": {"error": cls.EXISTS, "description": cls.DESCRIPTION}
@@ -51,7 +52,7 @@ class NoAPIKey(LearningHouseException):
         )
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": "No API key with given description found",
@@ -71,7 +72,7 @@ class InvalidPassword(LearningHouseSecurityException):
         super().__init__(self.DESCRIPTION, self.INVALID_PASSWORD)
 
     @classmethod
-    def api_description(cls) -> Dict:
+    def api_description(cls) -> Dict[str, Any]:
         return {
             "model": LearningHouseErrorMessage,
             "description": cls.DESCRIPTION,

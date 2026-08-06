@@ -2,7 +2,7 @@ import logging
 import sys
 from pprint import pformat
 from types import FrameType
-from typing import cast
+from typing import Any, cast
 
 from loguru import logger
 from loguru._defaults import LOGURU_FORMAT
@@ -30,7 +30,9 @@ class LoggingHandler(logging.Handler):
 
 
 def format_record(record: dict) -> str:
-    format_string = LOGURU_FORMAT
+    # LOGURU_FORMAT is typed as the union of everything loguru's env parser can
+    # return; here it is always the default format string.
+    format_string = str(LOGURU_FORMAT)
     if record["extra"].get("payload") is not None:
         record["extra"]["payload"] = pformat(
             record["extra"]["payload"], indent=4, compact=True, width=88
@@ -54,8 +56,12 @@ def initialize_logging(logging_level: LoggingLevelEnum) -> None:
 
     logger.bind(request_id=None, method=None)
 
-    logger.configure(
-        handlers=[
-            {"sink": sys.stdout, "level": logging_level.level, "format": format_record}
-        ]
-    )
+    # loguru types the handler dictionaries as TypedDicts whose "format" key
+    # does not accept a callable, although the runtime does.
+    handler: Any = {
+        "sink": sys.stdout,
+        "level": logging_level.level,
+        "format": format_record,
+    }
+
+    logger.configure(handlers=[handler])

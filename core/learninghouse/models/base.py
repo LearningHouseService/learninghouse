@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Any, Optional
+from pathlib import Path
+from typing import Any, Optional, Self, Union
 
-from pydantic import BaseModel, model_serializer, RootModel
+from pydantic import BaseModel, RootModel, model_serializer
 
 
 class EnumModel(Enum):
@@ -23,7 +24,7 @@ class EnumModel(Enum):
         return hash(self.value)
 
     @classmethod
-    def from_string(cls, value: str):
+    def from_string(cls, value: str) -> Self:
         for item in cls.__members__.values():
             if item.value == value:
                 return item
@@ -35,7 +36,9 @@ class EnumModel(Enum):
 
 
 class LHBaseModel(BaseModel):
-    def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
+    def write_to_file(
+        self, filename: Union[str, Path], indent: Optional[int] = None
+    ) -> None:
         with open(filename, "w", encoding="utf-8") as file_pointer:
             file_pointer.write(self.model_dump_json(indent=indent))
 
@@ -65,6 +68,9 @@ class ListModel(RootModel):
         self.root.clear()
 
     def index(self, item, start=0, end=None):
+        if end is None:
+            return self.root.index(item, start)
+
         return self.root.index(item, start, end)
 
     def count(self, item):
@@ -88,13 +94,17 @@ class ListModel(RootModel):
     def __len__(self):
         return len(self.root)
 
-    def __iter__(self):
+    # Iterating the list itself instead of pydantic's (field, value) tuples is
+    # the whole point of this wrapper.
+    def __iter__(self):  # pyright: ignore[reportIncompatibleMethodOverride]
         return iter(self.root)
 
     def __contains__(self, item):
         return item in self.root
 
-    def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
+    def write_to_file(
+        self, filename: Union[str, Path], indent: Optional[int] = None
+    ) -> None:
         with open(filename, "w", encoding="utf-8") as file_pointer:
             file_pointer.write(self.model_dump_json(indent=indent))
 
@@ -129,6 +139,8 @@ class DictModel(RootModel):
             ret = ret["root"]
         return ret
 
-    def write_to_file(self, filename: str, indent: Optional[int] = None) -> None:
+    def write_to_file(
+        self, filename: Union[str, Path], indent: Optional[int] = None
+    ) -> None:
         with open(filename, "w", encoding="utf-8") as file_pointer:
             file_pointer.write(self.model_dump_json(indent=indent))

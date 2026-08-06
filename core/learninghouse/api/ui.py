@@ -6,7 +6,6 @@ from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
-from learninghouse.core.logger import logger
 
 settings = service_settings()
 
@@ -36,7 +35,7 @@ if is_ui_installed():
                 )
 
             if ui_path == "/assets/env.js":
-                return PlainTextResponse(get_env(request.base_url))
+                return PlainTextResponse(get_env(str(request.base_url)))
 
             if not path.exists(fullpath):
                 fullpath = f"{UI_DIRECTORY}/index.html"
@@ -45,7 +44,7 @@ if is_ui_installed():
 
         return FileResponse(fullpath)
 
-    def get_env(base_url:str) -> str:
+    def get_env(base_url: str) -> str:
         env_js_content: str = ""
 
         with open(

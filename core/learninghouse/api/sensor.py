@@ -2,14 +2,14 @@ from fastapi import APIRouter, Body, Depends, status
 
 from learninghouse.api.errors.sensor import NoSensor, SensorExists
 from learninghouse.models.sensor import Sensor, SensorDeleteResult, Sensors
-from learninghouse.services.auth import authservice
+from learninghouse.services.auth import protect_admin, protect_user
 from learninghouse.services.sensor import SensorConfigurationService
 
 router = APIRouter(prefix="/sensor", tags=["sensor"])
 
-router_usage = APIRouter(dependencies=[Depends(authservice.protect_user)])
+router_usage = APIRouter(dependencies=[Depends(protect_user)])
 
-router_admin = APIRouter(dependencies=[Depends(authservice.protect_admin)])
+router_admin = APIRouter(dependencies=[Depends(protect_admin)])
 
 
 @router_usage.get(

@@ -21,15 +21,19 @@ from learninghouse.api.middleware import (
 )
 from learninghouse.core.logger import initialize_logging, logger
 from learninghouse.core.settings import service_settings
-from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, authservice
+from learninghouse.core.settings.models import ServiceSettings
+from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, auth_service_cached
 
 APP_REFERENCE = "learninghouse.service:app"
 
 STATIC_DIRECTORY = str(Path(__file__).parent / "static")
 
 
-def get_application() -> FastAPI:
-    settings = service_settings()
+def get_application(settings: ServiceSettings | None = None) -> FastAPI:
+    if settings is None:
+        settings = service_settings()
+
+    auth_service = auth_service_cached()
 
     initialize_logging(settings.logging_level)
 
@@ -37,7 +41,7 @@ def get_application() -> FastAPI:
     application.include_router(api)
 
     if settings.docs_url:
-        application.include_router(docs.router)
+        application.include_router(docs.build_router(settings))
 
     application.include_router(ui.router)
 
@@ -56,8 +60,10 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    if authservice.is_initial_admin_password:
-        application.add_middleware(EnforceInitialPasswordChange)
+    if auth_service.is_initial_admin_password:
+        application.add_middleware(
+            EnforceInitialPasswordChange, settings=settings, auth_service=auth_service
+        )
 
     application.add_middleware(CatchAllException)
     application.add_middleware(CustomHeader)
@@ -72,6 +78,7 @@ app = get_application()
 
 def run():
     settings = service_settings()
+    auth_service = auth_service_cached()
 
     logger.info(f"Running {settings.title} {versions.service}")
     logger.info(versions.libraries_versions)
@@ -108,7 +115,7 @@ def run():
     else:
         logger.warning(f"UI is not installed under {ui.UI_DIRECTORY}")
 
-    if authservice.is_initial_admin_password:
+    if auth_service.is_initial_admin_password:
         logger.warning(INITIAL_PASSWORD_WARNING)
 
     uvicorn.run(app=APP_REFERENCE, log_config=None, **settings.uvicorn_kwargs)

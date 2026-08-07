@@ -16,16 +16,16 @@ from learninghouse.models.brain import (
     BrainPredictionResult,
     BrainTrainingRequest,
 )
-from learninghouse.services.auth import authservice
+from learninghouse.services.auth import protect_admin, protect_trainer, protect_user
 from learninghouse.services.brain import BrainConfigurationService, BrainService
 
 router = APIRouter(prefix="/brain", tags=["brain"])
 
-router_usage = APIRouter(dependencies=[Depends(authservice.protect_user)])
+router_usage = APIRouter(dependencies=[Depends(protect_user)])
 
-router_training = APIRouter(dependencies=[Depends(authservice.protect_trainer)])
+router_training = APIRouter(dependencies=[Depends(protect_trainer)])
 
-router_admin = APIRouter(dependencies=[Depends(authservice.protect_admin)])
+router_admin = APIRouter(dependencies=[Depends(protect_admin)])
 
 
 @router_usage.get(

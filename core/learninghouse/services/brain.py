@@ -8,14 +8,6 @@ import pandas as pd
 from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import accuracy_score
 
-from learninghouse.api.errors.brain import (
-    BrainBadRequest,
-    BrainExists,
-    BrainNoConfiguration,
-    BrainNotActual,
-    BrainNotEnoughData,
-    BrainNotTrained,
-)
 from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.models.brain import (
@@ -32,10 +24,16 @@ from learninghouse.services.preprocessing import DatasetPreprocessing
 
 
 class BrainService:
-    brains: Dict[str, Tuple[float, Brain]] = {}
+    # Keyed by (brains_directory, name), not name alone - two different
+    # brains directories in the same process (Phase 2 de-globalization) can
+    # each have a brain of the same name, and a name-only key would serve the
+    # wrong one.
+    brains: Dict[Tuple[str, str], Tuple[float, Brain]] = {}
 
     @classmethod
     def list_all(cls) -> BrainInfos:
+        from learninghouse.api.errors.brain import BrainNoConfiguration
+
         brains: Dict[str, BrainInfo] = {}
         for directory in listdir(service_settings().brains_directory):
             try:
@@ -47,6 +45,8 @@ class BrainService:
 
     @staticmethod
     def get_info(name: str) -> BrainInfo:
+        from learninghouse.api.errors.brain import BrainNoConfiguration, BrainNotTrained
+
         info: Optional[BrainInfo] = None
         if Brain.is_trained(name):
             try:
@@ -75,6 +75,8 @@ class BrainService:
         dependent_value: Optional[Any] = None,
         sensors_data: Optional[Dict[str, Any]] = None,
     ) -> BrainInfo:
+        from learninghouse.api.errors.brain import BrainBadRequest, BrainNotEnoughData
+
         filename = Brain.sanitize_filename(name, BrainFileType.TRAINING_DATA_FILE)
 
         trainings_data: Optional[Dict[str, Any]] = sensors_data
@@ -108,6 +110,11 @@ class BrainService:
 
     @staticmethod
     def train(name: str, data: pd.DataFrame) -> BrainInfo:
+        from learninghouse.api.errors.brain import (
+            BrainNoConfiguration,
+            BrainNotEnoughData,
+        )
+
         try:
             brain = Brain(name)
 
@@ -155,6 +162,8 @@ class BrainService:
 
     @classmethod
     def prediction(cls, name: str, request_data: Dict[str, Any]):
+        from learninghouse.api.errors.brain import BrainNotActual, BrainNotTrained
+
         try:
             brain = cls.load_brain(name)
             if not brain.actual_versions:
@@ -191,10 +200,11 @@ class BrainService:
         filename = Brain.sanitize_filename(name, BrainFileType.TRAINED_FILE)
         stamp = stat(filename).st_mtime
 
-        cached = cls.brains.get(name)
+        cache_key = (str(service_settings().brains_directory), name)
+        cached = cls.brains.get(cache_key)
         if cached is None or cached[0] != stamp:
             cached = (stamp, Brain.load_trained(name))
-            cls.brains[name] = cached
+            cls.brains[cache_key] = cached
 
         return cached[1]
 
@@ -202,6 +212,8 @@ class BrainService:
 class BrainConfigurationService:
     @staticmethod
     def get(name: str) -> BrainConfiguration:
+        from learninghouse.api.errors.brain import BrainNoConfiguration
+
         try:
             return BrainConfiguration.from_json_file(name)
         except FileNotFoundError as exc:
@@ -209,6 +221,8 @@ class BrainConfigurationService:
 
     @staticmethod
     def create(configuration: BrainConfiguration) -> BrainConfiguration:
+        from learninghouse.api.errors.brain import BrainExists
+
         if BrainConfiguration.json_config_file_exists(configuration.name):
             raise BrainExists(configuration.name)
 
@@ -218,6 +232,8 @@ class BrainConfigurationService:
 
     @staticmethod
     def update(name: str, configuration: BrainConfiguration) -> BrainConfiguration:
+        from learninghouse.api.errors.brain import BrainNoConfiguration
+
         if not BrainConfiguration.json_config_file_exists(name):
             raise BrainNoConfiguration(name)
 
@@ -227,6 +243,8 @@ class BrainConfigurationService:
 
     @staticmethod
     def delete(name: str) -> BrainDeleteResult:
+        from learninghouse.api.errors.brain import BrainNoConfiguration
+
         brainpath = Brain.sanitize_directory(name)
 
         if not path.exists(brainpath):

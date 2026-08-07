@@ -1,13 +1,13 @@
 from typing import Any, Dict, Union
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from learninghouse import versions
 from learninghouse.api import auth, brain, sensor
 from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
 from learninghouse.models import LearningHouseVersions
-from learninghouse.services.auth import authservice
+from learninghouse.services.auth import AuthServiceInternal, auth_service_cached
 
 SECURITY_RESPONSE: Dict[Union[int, str], Dict[str, Any]] = {
     LearningHouseSecurityException.STATUS_CODE: (
@@ -24,9 +24,9 @@ api.include_router(auth.router)
 
 
 @api.get("/mode", response_model=str, tags=["service"])
-def get_mode():
+def get_mode(auth_service: AuthServiceInternal = Depends(auth_service_cached)):
     mode = service_settings().environment
-    if authservice.is_initial_admin_password:
+    if auth_service.is_initial_admin_password:
         mode = "initial"
 
     return mode

@@ -1,4 +1,3 @@
-from learninghouse.api.errors.sensor import NoSensor, SensorExists
 from learninghouse.models.sensor import (
     Sensor,
     SensorDeleteResult,
@@ -14,6 +13,8 @@ class SensorConfigurationService:
 
     @staticmethod
     def get(name: str) -> Sensor:
+        from learninghouse.api.errors.sensor import NoSensor
+
         sensors = Sensors.load_config()
 
         for sensor in sensors.root:
@@ -24,6 +25,8 @@ class SensorConfigurationService:
 
     @staticmethod
     def create(name: str, typed: SensorType) -> Sensor:
+        from learninghouse.api.errors.sensor import SensorExists
+
         sensors = Sensors.load_config()
 
         for sensor in sensors.root:
@@ -40,6 +43,8 @@ class SensorConfigurationService:
     def update(
         name: str, typed: SensorType, cycles: int, calc_sun_position: bool
     ) -> Sensor:
+        from learninghouse.api.errors.sensor import NoSensor
+
         sensors = Sensors.load_config()
         for sensor in sensors.root:
             if sensor.name == name:
@@ -53,6 +58,8 @@ class SensorConfigurationService:
 
     @staticmethod
     def delete(name: str) -> SensorDeleteResult:
+        from learninghouse.api.errors.sensor import NoSensor
+
         sensors = Sensors.load_config()
 
         for sensor in sensors.root:

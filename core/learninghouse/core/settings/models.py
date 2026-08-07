@@ -7,10 +7,6 @@ from typing import Any, Dict, Optional, Union
 from pydantic import BaseModel, DirectoryPath
 
 from learninghouse import versions
-from learninghouse.api.errors import (
-    LearningHouseException,
-    LearningHouseValidationError,
-)
 from learninghouse.core.logger.models import LoggingLevelEnum
 
 DOCKER_SECRETS_DIR = "/run/secrets"
@@ -63,6 +59,18 @@ class ServiceSettings(BaseModel):
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
+        # Imported here, not at module level: core.settings.models is on the
+        # import path of nearly everything (service_settings() is called from
+        # models/auth.py, models/brain.py, services/auth.py, ...), while
+        # api.errors sits inside the learninghouse.api package, whose
+        # __init__ pulls in api.auth -> models.auth -> core.settings. A
+        # module-level import here made that a circular import that only
+        # failed depending on which module happened to be imported first.
+        from learninghouse.api.errors import (
+            LearningHouseException,
+            LearningHouseValidationError,
+        )
+
         validation_error = LearningHouseValidationError
         exception = LearningHouseException
         return {
@@ -131,10 +139,20 @@ class ServiceSettings(BaseModel):
         sources: list[Callable[[], Generator[tuple[str, str], None, None]]],
         data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        # Keys passed explicitly to the constructor take precedence over every
+        # source below - otherwise an explicit ServiceSettings(config_directory=...)
+        # is silently overwritten whenever the matching environment variable is
+        # set, which is exactly the case in a test process that also carries
+        # LEARNINGHOUSE_CONFIG_DIRECTORY for the default settings instance.
+        explicit_keys = set(data.keys())
+
         for source in sources:
             for key, value in source():
                 key = key.lower().strip()[len("learninghouse_") :]  # remove prefix
                 subkeys = key.split("__")  # get nested structure
+                if subkeys[0] in explicit_keys:
+                    continue
+
                 context = data
                 for subkey in subkeys[:-1]:
                     if subkey not in context:

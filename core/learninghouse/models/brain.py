@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from os import makedirs, path
+from pathlib import Path
 from typing import Dict, List, Optional, Type
 
 import joblib
@@ -10,14 +11,10 @@ from pydantic import Field, StrictBool, StrictFloat, StrictInt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from learninghouse import versions
-from learninghouse.api.errors import LearningHouseSecurityException
-from learninghouse.api.errors.brain import BrainNotTrained
 from learninghouse.core.settings import service_settings
 from learninghouse.models import LearningHouseVersions
 from learninghouse.models.base import DictModel, EnumModel, LHBaseModel
 from learninghouse.models.preprocessing import DatasetConfiguration
-
-settings = service_settings()
 
 
 class BrainEstimatorType(EnumModel):
@@ -201,6 +198,7 @@ class BrainFileType(EnumModel):
 class Brain:
     def __init__(self, name: str):
         self.name: str = name
+        self.brains_directory: Path = service_settings().brains_directory
         self.configuration: BrainConfiguration = BrainConfiguration.from_json_file(name)
 
         self.dataset: DatasetConfiguration = DatasetConfiguration(self.configuration)
@@ -244,6 +242,8 @@ class Brain:
 
     @classmethod
     def load_trained(cls, name: str) -> Brain:
+        from learninghouse.api.errors.brain import BrainNotTrained
+
         try:
             if not cls.is_trained(name):
                 raise BrainNotTrained(name)
@@ -269,21 +269,30 @@ class Brain:
         self.score = score
         self.trained_at = datetime.now()
 
-        filename = Brain.sanitize_filename(self.name, BrainFileType.TRAINED_FILE)
+        filename = Brain.sanitize_filename(
+            self.name, BrainFileType.TRAINED_FILE, self.brains_directory
+        )
 
         joblib.dump(self, filename)
 
-        filename = Brain.sanitize_filename(self.name, BrainFileType.INFO_FILE)
+        filename = Brain.sanitize_filename(
+            self.name, BrainFileType.INFO_FILE, self.brains_directory
+        )
 
         self.info.write_to_file(filename, 4)
 
     @staticmethod
-    def sanitize_directory(name: str) -> str:
-        brainpath = str(settings.brains_directory / name)
+    def sanitize_directory(name: str, brains_directory: Optional[Path] = None) -> str:
+        from learninghouse.api.errors import LearningHouseSecurityException
+
+        if brains_directory is None:
+            brains_directory = service_settings().brains_directory
+
+        brainpath = str(brains_directory / name)
 
         fullpath = path.normpath(brainpath)
 
-        if not fullpath.startswith(str(settings.brains_directory)):
+        if not fullpath.startswith(str(brains_directory)):
             raise LearningHouseSecurityException(
                 "Configuration file name breaks configuration directory"
             )
@@ -291,8 +300,13 @@ class Brain:
         return fullpath
 
     @classmethod
-    def sanitize_filename(cls, name: str, filetype: BrainFileType) -> str:
-        brainpath = cls.sanitize_directory(name)
+    def sanitize_filename(
+        cls,
+        name: str,
+        filetype: BrainFileType,
+        brains_directory: Optional[Path] = None,
+    ) -> str:
+        brainpath = cls.sanitize_directory(name, brains_directory)
 
         return path.normpath(path.join(brainpath, filetype.filename))
 

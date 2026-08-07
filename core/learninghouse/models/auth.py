@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from os import path
+from pathlib import Path
 from random import randint
 from secrets import token_hex
 from typing import Dict, List, Union
@@ -9,11 +10,8 @@ from typing import Dict, List, Union
 from passlib.hash import sha512_crypt  # pyright: ignore[reportAttributeAccessIssue]
 from pydantic import Field
 
-from learninghouse.api.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.core.settings import service_settings
 from learninghouse.models.base import EnumModel, LHBaseModel
-
-settings = service_settings()
 
 
 class LoginRequest(LHBaseModel):
@@ -43,7 +41,7 @@ class TokenPayload(LHBaseModel):
     def create(
         cls, subject: str, expire: datetime, issue_time: datetime
     ) -> TokenPayload:
-        payload_args = settings.jwt_payload_claims
+        payload_args = service_settings().jwt_payload_claims
 
         return cls(
             sub=subject,
@@ -112,7 +110,8 @@ class APIKey(APIKeyRequest):
         )
 
 
-SECURITY_FILENAME = settings.brains_directory / "security.json"
+def _security_filename() -> Path:
+    return service_settings().brains_directory / "security.json"
 
 
 class SecurityDatabase(LHBaseModel):
@@ -124,9 +123,11 @@ class SecurityDatabase(LHBaseModel):
 
     @classmethod
     def load_or_write_default(cls) -> SecurityDatabase:
+        filename = _security_filename()
+
         database = None
-        if path.exists(SECURITY_FILENAME):
-            database = cls.parse_file(SECURITY_FILENAME, encoding="utf-8")
+        if path.exists(filename):
+            database = cls.parse_file(filename, encoding="utf-8")
         else:
             database = cls(admin_password=sha512_crypt.hash("learninghouse"))
             database.write()
@@ -134,7 +135,7 @@ class SecurityDatabase(LHBaseModel):
         return database
 
     def write(self):
-        self.write_to_file(SECURITY_FILENAME, 4)
+        self.write_to_file(_security_filename(), 4)
 
     def authenticate_password(self, password: str) -> bool:
         return sha512_crypt.verify(password, self.admin_password)
@@ -144,6 +145,8 @@ class SecurityDatabase(LHBaseModel):
         self.initial_password = False
 
     def create_apikey(self, create: APIKeyRequest) -> APIKey:
+        from learninghouse.api.errors.auth import APIKeyExists
+
         if self.find_apikey_by_description(create.description):
             raise APIKeyExists(create.description)
 
@@ -155,6 +158,8 @@ class SecurityDatabase(LHBaseModel):
         return APIKey.from_api_key_request(create, key)
 
     def delete_apikey(self, description: str) -> str:
+        from learninghouse.api.errors.auth import NoAPIKey
+
         api_key = self.find_apikey_by_description(description, True)
         if not isinstance(api_key, APIKey):
             raise NoAPIKey(description)

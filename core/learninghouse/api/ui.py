@@ -4,10 +4,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse, PlainTextResponse, RedirectResponse
 
-from learninghouse.api.errors import LearningHouseSecurityException
-from learninghouse.core.settings import service_settings
-
-settings = service_settings()
+from learninghouse.errors import LearningHouseSecurityException
 
 router = APIRouter(include_in_schema=False)
 

@@ -58,6 +58,7 @@ following phases is riskier than it needs to be.
 |---|---|---|
 | 1 | Development environment, toolchain, CI gates | your list #1, extended |
 | 2 | Test foundation and de-globalization | added in review |
+| 2b | UI test foundation | added in review |
 | 3 | Dependency updates | your list #2 |
 | 4 | Security hardening | added in review |
 | 5 | Persistence on SQLite | your list #3 |
@@ -66,8 +67,8 @@ following phases is riskier than it needs to be.
 | 8 | Brain on a scikit-learn pipeline | your list #6 |
 | 9 | Home Assistant add-on | from the add-on assessment |
 
-Phases 2 and 4 did not come from the original list; they were added during review and confirmed.
-The reasoning for each is in its own section.
+Phases 2, 2b and 4 did not come from the original list; they were added during review and
+confirmed. The reasoning for each is in its own section.
 
 **One pull request per phase**, matching the convention adopted in `pvlearn`. Commits within a
 branch stay individually meaningful; the pull request description carries the reasoning that
@@ -147,13 +148,67 @@ upward per phase. `pvlearn` gates at 90%; adopting that number on day one here w
 the phase or invite meaningless tests.
 
 **Acceptance**
-- [ ] Every `/api` route has at least one test covering the success path and one covering its
+- [x] Every `/api` route has at least one test covering the success path and one covering its
       documented error.
-- [ ] Training and prediction on the fixture dataset are pinned by a test that would fail if the
+- [x] Training and prediction on the fixture dataset are pinned by a test that would fail if the
       predicted values changed.
-- [ ] Two tests in the same session can use two different brains directories.
-- [ ] `pytest` runs offline, with no writes outside `tmp_path`.
-- [ ] A coverage floor is configured in CI and is met.
+- [x] Two tests in the same session can use two different brains directories.
+- [x] `pytest` runs offline, with no writes outside `tmp_path`.
+- [x] A coverage floor is configured in CI and is met.
+
+---
+
+### Phase 2b — UI test foundation
+
+**Goal:** The Angular side gets the same starting discipline Phase 2 gives the Python side, before
+Phase 3 touches Angular, TypeScript and Tailwind versions underneath it.
+
+Measured against the current UI: 12 of 48 testable source files have a `.spec.ts` next to them —
+roughly a quarter. More importantly, **none of the security-relevant path is covered**:
+`shared/guards/auth.guard.ts`, `shared/interceptors/auth.interceptor.ts` and
+`modules/auth/auth.service.ts` gate every route and every outgoing request the same way
+`EnforceInitialPasswordChange` gates the API in Phase 2, and nothing pins what they do today.
+Every service that talks to the backend — `shared/services/api.service.ts`,
+`modules/brains/brains.service.ts`,
+`modules/configuration/services/sensor-configuration.service.ts` — is equally untested, so Phase 3's
+Angular major-version bump and Phase 5's persistence rewrite could each silently change what the UI
+sends or how it handles a response, and nothing here would notice.
+
+**A second gap sits in CI, not in the test files.** `build_project.yml` runs `npm install` and
+`npm run build:core` for the UI job; it never runs `npm test`. The 12 specs that already exist are
+not enforced anywhere but a developer's own machine — Phase 3's acceptance criterion "the UI builds
+and its Karma suite passes" is currently verified by hand. Wiring the existing suite into CI is
+lower-risk than writing new tests and belongs at the start of this phase, not the end.
+
+- Add a `test` job to `build_project.yml` running Karma headless (`ChromeHeadless` launcher,
+  `singleRun: true`), gating the same way the Python `test` job does — before the UI build step, not
+  after.
+- **Priority order for new specs, most load-bearing first:**
+  1. `auth.guard.ts`, `auth.interceptor.ts`, `auth.service.ts` — what redirects, what gets attached
+     to a request, what happens on a 401.
+  2. `api.service.ts`, `brains.service.ts`, `sensor-configuration.service.ts` — the request/response
+     shapes the UI depends on, characterized the same way the API characterization tests pin the
+     server side of the same contract.
+  3. The remaining untested pages and dialogs — `login`, `change-password`, `apikeys`,
+     `sensors.component`, `brains.component`, `edit-dialog`, `table.component`, `form-response`,
+     `delete-dialog`, `yes-no`, `password`, `select`, `input` — following the pattern of the 12
+     specs that already exist rather than introducing a new style.
+- `karma-coverage` is already a devDependency and already writes an HTML report
+  (`karma.conf.js:coverageReporter`), but nothing reads it — there is no `check` threshold. Add one,
+  set at whatever this phase's suite reaches, mirroring the Python coverage-floor decision in
+  Phase 2 and the open question in chapter 5, point 4.
+- Stay on Karma/Jasmine for this phase. A runner migration is a separate, larger decision the plan
+  does not make here — introducing new specs on a runner about to be replaced would mean writing
+  them twice.
+
+**Acceptance**
+- [ ] `npm test` runs headless and exits non-zero on a failing spec; wired into
+      `build_project.yml` and gating the UI build.
+- [ ] `auth.guard.ts`, `auth.interceptor.ts` and `auth.service.ts` each have a spec covering their
+      documented behaviour, success and failure.
+- [ ] `api.service.ts`, `brains.service.ts` and `sensor-configuration.service.ts` each have a spec
+      pinning the requests they issue and how they handle a response.
+- [ ] A coverage threshold is configured in `karma.conf.js` and is met.
 
 ---
 
@@ -449,8 +504,14 @@ invalidate trained models and each need an explicit changelog entry saying so.
    dependency for little gain — but hand-written migrations need discipline. Decide in Phase 5.
 3. **Fate of `estimators` and `max_depth`** in `BrainEstimatorConfiguration` once the estimator
    changes. Decide in Phase 8.
-4. **Coverage target.** `pvlearn` gates at 90%. Where this project starts and how fast it ratchets
-   needs a number per phase, not a wish.
+4. **Coverage target.** `pvlearn` gates at 90%. ~~Where this project starts and how fast it
+   ratchets needs a number per phase, not a wish.~~ Resolved in Phase 2: `fail_under = 85` in
+   `core/pyproject.toml`'s `[tool.coverage.report]`, the characterization suite's actual combined
+   line+branch coverage (85.75% measured, rounded down for margin). CI's existing
+   `pytest --cov=learninghouse --cov-report=xml:coverage.xml` step in `build_project.yml` enforces
+   it automatically - pytest-cov reads `fail_under` from the coverage config, no separate CI change
+   needed. Next ratchet point is Phase 3: each dependency-update pull request that adds coverage
+   should raise the floor to match, rather than leaving it at the Phase 2 number indefinitely.
 5. **Home Assistant base image versus standalone Dockerfile** for the add-on. Decide in Phase 9.
 6. **Shuffled `train_test_split`** in `prepare_training`. For genuinely independent observations it
    is correct; for timestamped, autocorrelated rows it is not. The same question is open in pvlearn.
@@ -478,6 +539,8 @@ invalidate trained models and each need an explicit changelog entry saying so.
 P1  Toolchain + CI gates            ← commands must exist before they are documented
  │
 P2  Tests + de-globalization        ← without this nothing below is verifiable
+ │
+P2b Angular test foundation         ← same reasoning as P2, applied before P3 touches the UI stack
  │
 P3  Dependency updates              ← aligns shared pins with pvlearn
  │

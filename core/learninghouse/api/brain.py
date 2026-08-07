@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, status
 
 from learninghouse.api.errors.brain import (
+    BrainExists,
     BrainNoConfiguration,
     BrainNotActual,
     BrainNotEnoughData,
     BrainNotTrained,
-    BrainExists
 )
 from learninghouse.models.brain import (
     BrainConfiguration,
@@ -17,15 +17,13 @@ from learninghouse.models.brain import (
     BrainTrainingRequest,
 )
 from learninghouse.services.auth import authservice
-from learninghouse.services.brain import BrainService, BrainConfigurationService
-
+from learninghouse.services.brain import BrainConfigurationService, BrainService
 
 router = APIRouter(prefix="/brain", tags=["brain"])
 
 router_usage = APIRouter(dependencies=[Depends(authservice.protect_user)])
 
-router_training = APIRouter(
-    dependencies=[Depends(authservice.protect_trainer)])
+router_training = APIRouter(dependencies=[Depends(authservice.protect_trainer)])
 
 router_admin = APIRouter(dependencies=[Depends(authservice.protect_admin)])
 
@@ -149,8 +147,7 @@ async def configuration_put(name: str, configuration: BrainConfiguration):
     "/{name}/configuration",
     response_model=BrainDeleteResult,
     summary="Delete whole brain",
-    responses={status.HTTP_200_OK: {
-        "description": "Returns the name of the brain"}},
+    responses={status.HTTP_200_OK: {"description": "Returns the name of the brain"}},
 )
 async def configuration_delete(name: str):
     return BrainConfigurationService.delete(name)

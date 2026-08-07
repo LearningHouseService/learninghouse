@@ -14,7 +14,6 @@ from learninghouse.models.auth import (
 )
 from learninghouse.services.auth import authservice
 
-
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -37,7 +36,7 @@ async def put_token(refresh_token_jti: str = Depends(authservice.protect_refresh
 
 @router.delete("/token", response_model=bool)
 async def delete_token(
-    refresh_token_jti: Union[str, None] = Depends(authservice.get_refresh)
+    refresh_token_jti: Union[str, None] = Depends(authservice.get_refresh),
 ):
     return authservice.revoke_refresh_token(refresh_token_jti)
 
@@ -72,9 +71,9 @@ if not authservice.is_initial_admin_password:
         description: str = Path(
             min_length=3,
             max_length=15,
-            regex=r"^[A-Za-z]\w{1,13}[A-Za-z0-9]$",
-            example="app_as_user",
-        )
+            pattern=r"^[A-Za-z]\w{1,13}[A-Za-z0-9]$",
+            examples=["app_as_user"],
+        ),
     ):
         return authservice.delete_apikey(description)
 

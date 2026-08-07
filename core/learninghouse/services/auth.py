@@ -2,10 +2,10 @@ from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from typing import Dict, List, Tuple, Union
 
+import jwt
 from fastapi import Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.security.api_key import APIKeyHeader, APIKeyQuery
-import jwt
 
 from learninghouse.api.errors import (
     LearningHouseSecurityException,
@@ -105,14 +105,14 @@ class AuthServiceInternal:
         access_expire = issuetime + timedelta(minutes=1)
         access_payload = TokenPayload.create("admin", access_expire, issuetime)
         access_token = jwt.encode(
-            access_payload.model_dump(), settings.jwt_secret, algorithm="HS256")
+            access_payload.model_dump(), settings.jwt_secret, algorithm="HS256"
+        )
 
-        refresh_expire = issuetime + \
-            timedelta(minutes=settings.jwt_expire_minutes)
-        refresh_payload = TokenPayload.create(
-            "refresh", refresh_expire, issuetime)
+        refresh_expire = issuetime + timedelta(minutes=settings.jwt_expire_minutes)
+        refresh_payload = TokenPayload.create("refresh", refresh_expire, issuetime)
         refresh_token = jwt.encode(
-            refresh_payload.model_dump(), settings.jwt_secret, algorithm="HS256")
+            refresh_payload.model_dump(), settings.jwt_secret, algorithm="HS256"
+        )
 
         self.refresh_tokens[refresh_payload.jti] = refresh_expire
 
@@ -160,13 +160,15 @@ class AuthServiceInternal:
     ) -> str:
         _, jti = self.validate_credentials(credentials, True, "refresh")
 
+        if jti is None:  # pragma: no cover - validate_credentials raises before
+            raise LearningHouseUnauthorizedException()
+
         return jti
 
     async def get_refresh(
         self, credentials: HTTPAuthorizationCredentials = Security(jwt_bearer)
     ) -> Union[str, None]:
-        is_valid, jti = self.validate_credentials(
-            credentials, False, "refresh")
+        is_valid, jti = self.validate_credentials(credentials, False, "refresh")
 
         return jti if is_valid else None
 
@@ -195,8 +197,8 @@ class AuthServiceInternal:
 
     def is_admin_user_or_trainer(
         self, credentials: HTTPAuthorizationCredentials, query: str, header: str
-    ) -> Union[UserRole, None]:
-        role = None
+    ) -> UserRole:
+        role: UserRole
 
         is_valid, _ = self.validate_credentials(credentials, False, "admin")
 
@@ -239,8 +241,7 @@ class AuthServiceInternal:
 
         else:
             is_valid = False
-            self.raise_error_conditionally(
-                "Invalid authorization code.", auto_error)
+            self.raise_error_conditionally("Invalid authorization code.", auto_error)
 
         return is_valid, jti
 
@@ -264,7 +265,7 @@ class AuthServiceInternal:
                     settings.jwt_secret,
                     algorithms=["HS256"],
                     audience=payload_args["audience"],
-                    issuer=payload_args["issuer"]
+                    issuer=payload_args["issuer"],
                 )
             )
 
@@ -272,10 +273,9 @@ class AuthServiceInternal:
                 raise jwt.InvalidTokenError("Invalid subject")
 
             if subject == "refresh":
-                verified = (
-                    payload.jti in self.refresh_tokens
-                    and self.refresh_tokens[payload.jti] > datetime.now(timezone.utc)
-                )
+                verified = payload.jti in self.refresh_tokens and self.refresh_tokens[
+                    payload.jti
+                ] > datetime.now(timezone.utc)
 
                 if not verified:
                     logger.error("No valid refresh token")

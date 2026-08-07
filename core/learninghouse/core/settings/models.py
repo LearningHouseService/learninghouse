@@ -1,7 +1,8 @@
+from collections.abc import Callable, Generator
 from os import environ, listdir, path
 from pathlib import Path
 from secrets import token_hex
-from typing import Any, Dict, Generator, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseModel, DirectoryPath
 
@@ -33,21 +34,21 @@ class ServiceSettings(BaseModel):
 
     environment: str = "production"
 
-    config_directory: DirectoryPath = "./brains"
+    config_directory: DirectoryPath = Path("./brains")
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
     jwt_secret: str = token_hex(16)
     jwt_expire_minutes: int = 10
 
-    def __init__(self, **data: dict[str, any]):
+    def __init__(self, **data: Any):
         sources = [self._read_environment, self._read_dotenv, self._read_secrets]
         data = self._parse_key_and_values(sources, data)
         data = self.set_development_defaults(data)
 
         super().__init__(**data)
 
-    def set_development_defaults(self, data: dict[str, any]) -> dict[str, any]:
+    def set_development_defaults(self, data: Dict[str, Any]) -> Dict[str, Any]:
         if "environment" in data and data["environment"] == "development":
             data = {
                 **{
@@ -63,6 +64,7 @@ class ServiceSettings(BaseModel):
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
         validation_error = LearningHouseValidationError
+        exception = LearningHouseException
         return {
             "debug": self.debug,
             "title": self.title,
@@ -72,7 +74,7 @@ class ServiceSettings(BaseModel):
             "version": versions.service,
             "responses": {
                 validation_error.STATUS_CODE: validation_error.api_description(),
-                LearningHouseException.STATUS_CODE: LearningHouseException.api_description(),
+                exception.STATUS_CODE: exception.api_description(),
             },
             "license_info": {"name": "MIT License", "url": LICENSE_URL},
         }
@@ -125,8 +127,10 @@ class ServiceSettings(BaseModel):
         return {"audience": "LearningHouseAPI", "issuer": "LearningHouse Service"}
 
     def _parse_key_and_values(
-        self, sources: list[callable], data: dict[str, any]
-    ) -> dict[str, any]:
+        self,
+        sources: list[Callable[[], Generator[tuple[str, str], None, None]]],
+        data: Dict[str, Any],
+    ) -> Dict[str, Any]:
         for source in sources:
             for key, value in source():
                 key = key.lower().strip()[len("learninghouse_") :]  # remove prefix
@@ -144,13 +148,13 @@ class ServiceSettings(BaseModel):
         return data
 
     @classmethod
-    def _read_environment(cls) -> Generator[tuple[str, str], any, any]:
+    def _read_environment(cls) -> Generator[tuple[str, str], None, None]:
         for key, value in environ.items():
             if cls._has_prefix(key):
                 yield key, value
 
     @classmethod
-    def _read_secrets(cls) -> Generator[tuple[str, str], any, any]:
+    def _read_secrets(cls) -> Generator[tuple[str, str], None, None]:
         if path.exists(DOCKER_SECRETS_DIR) and path.isdir(DOCKER_SECRETS_DIR):
             for filename in listdir(DOCKER_SECRETS_DIR):
                 if cls._has_prefix(filename):
@@ -160,7 +164,7 @@ class ServiceSettings(BaseModel):
                         yield filename, f.read()
 
     @classmethod
-    def _read_dotenv(cls) -> Generator[tuple[str, str], any, any]:
+    def _read_dotenv(cls) -> Generator[tuple[str, str], None, None]:
         if path.exists(".env"):
             with open(".env", "r", encoding="utf-8") as f:
                 for line in f.readlines():

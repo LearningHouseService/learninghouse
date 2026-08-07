@@ -1,0 +1,14 @@
+{
+  "venvPath": "..",
+  "venv": ".venv",
+  "include": [
+    "learninghouse",
+    "tests"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "learninghouse/ui",
+    "learninghouse.egg-info",
+    "htmlcov"
+  ]
+}

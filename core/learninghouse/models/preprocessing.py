@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 
 import numpy as np
 from sklearn.impute import SimpleImputer
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class DatasetConfiguration:
     dependent_encoder: Optional[LabelEncoder] = None
     imputer: SimpleImputer
-    data_size: Optional[int] = 0
+    data_size: int = 0
     features: Optional[List[str]] = None
     columns: Optional[List[str]] = None
 

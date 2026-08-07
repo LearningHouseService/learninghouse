@@ -31,10 +31,10 @@ class SensorType(EnumModel):
 
 
 class SensorConfiguration(LHBaseModel):
-    name: str = Field(None, example="azimuth")
-    typed: SensorType = Field(None, example=SensorType.NUMERICAL)
-    cycles: int = Field(0, examples=360)
-    calc_sun_position: bool = Field(False, examples=False)
+    name: str = Field(..., examples=["azimuth"])
+    typed: SensorType = Field(..., examples=[SensorType.NUMERICAL])
+    cycles: int = Field(default=0, examples=[360])
+    calc_sun_position: bool = Field(default=False, examples=[False])
 
 
 class Sensor(SensorConfiguration):
@@ -43,16 +43,18 @@ class Sensor(SensorConfiguration):
 
 class Sensors(ListModel):
     root: List[Sensor] = Field(
-        None,
-        example=[
-            {"name": "azimuth", "typed": "numerical"},
-            {"name": "elevation", "typed": "numerical"},
-            {"name": "rain_gauge", "typed": "numerical"},
-            {"name": "pressure", "typed": "numerical"},
-            {"name": "pressure_trend_1h", "typed": "categorical"},
-            {"name": "temperature_outside", "typed": "numerical"},
-            {"name": "temperature_trend_1h", "typed": "categorical"},
-            {"name": "light_state", "typed": "categorical"},
+        ...,
+        examples=[
+            [
+                {"name": "azimuth", "typed": "numerical"},
+                {"name": "elevation", "typed": "numerical"},
+                {"name": "rain_gauge", "typed": "numerical"},
+                {"name": "pressure", "typed": "numerical"},
+                {"name": "pressure_trend_1h", "typed": "categorical"},
+                {"name": "temperature_outside", "typed": "numerical"},
+                {"name": "temperature_trend_1h", "typed": "categorical"},
+                {"name": "light_state", "typed": "categorical"},
+            ]
         ],
     )
 
@@ -93,4 +95,4 @@ class Sensors(ListModel):
 
 
 class SensorDeleteResult(LHBaseModel):
-    name: str = Field(None, example="azimuth")
+    name: str = Field(..., examples=["azimuth"])

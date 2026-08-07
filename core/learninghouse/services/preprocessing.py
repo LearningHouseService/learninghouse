@@ -1,7 +1,18 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 import numpy as np
 import pandas as pd
@@ -77,7 +88,7 @@ class DatasetPreprocessing:
             else:
                 x_selected = data[used_columns]
 
-        x_selected = cls.sort_columns(x_selected)
+        x_selected = cls.sort_columns(cast(pd.DataFrame, x_selected))
 
         return x_selected, numericals
 
@@ -91,11 +102,18 @@ class DatasetPreprocessing:
 
         y_vector = data[brain.configuration.name]
 
-        if brain.configuration.dependent_encode:
-            y_vector = brain.dataset.dependent_encoder.fit_transform(y_vector)
+        dependent_encoder = brain.dataset.dependent_encoder
+        if brain.configuration.dependent_encode and dependent_encoder is not None:
+            y_vector = dependent_encoder.fit_transform(y_vector)
 
-        x_train, x_test, y_train, y_test = train_test_split(
-            x_vector, y_vector, test_size=brain.configuration.test_size, random_state=0
+        x_train, x_test, y_train, y_test = cast(
+            Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
+            train_test_split(
+                x_vector,
+                y_vector,
+                test_size=brain.configuration.test_size,
+                random_state=0,
+            ),
         )
 
         if only_features:
@@ -142,7 +160,7 @@ class DatasetPreprocessing:
     @staticmethod
     def transform_columns(
         func: Callable, data: pd.DataFrame, columns: List[str]
-    ) -> pd.DataFrame():
+    ) -> pd.DataFrame:
         data_temp = data.copy()
         data_temp[columns] = func(data[columns])
         return data_temp
@@ -155,19 +173,21 @@ class DatasetPreprocessing:
     @classmethod
     def columns_intersection(
         cls,
-        list_or_dataframe1: Union[pd.DataFrame, List[str]],
-        list_or_dataframe2: Union[pd.DataFrame, List[str]],
+        list_or_dataframe1: Optional[Union[pd.DataFrame, List[str]]],
+        list_or_dataframe2: Optional[Union[pd.DataFrame, List[str]]],
     ) -> List[str]:
         set1 = cls.set_of_columns(list_or_dataframe1)
         set2 = cls.set_of_columns(list_or_dataframe2)
         return sorted(list(set.intersection(set1, set2)))
 
     @staticmethod
-    def set_of_columns(list_or_dataframe: Union[pd.DataFrame, List[str]]) -> Set[str]:
-        set_of_columns = None
+    def set_of_columns(
+        list_or_dataframe: Optional[Union[pd.DataFrame, List[str]]],
+    ) -> Set[str]:
         if isinstance(list_or_dataframe, pd.DataFrame):
-            set_of_columns = set(list_or_dataframe.columns.values.tolist())
-        elif isinstance(list_or_dataframe, list):
-            set_of_columns = set(list_or_dataframe)
+            return set(list_or_dataframe.columns.values.tolist())
 
-        return set_of_columns
+        if isinstance(list_or_dataframe, list):
+            return set(list_or_dataframe)
+
+        raise TypeError(f"Cannot read column names from {type(list_or_dataframe)}")

@@ -8,16 +8,16 @@ from learninghouse.models.base import LHBaseModel
 
 
 class LearningHouseVersions(LHBaseModel):
-    service: str = Field(None, example="1.0.0")
-    fastapi: str = Field(None, example="1.0.0")
-    pydantic: str = Field(None, example="1.0.0")
-    uvicorn: str = Field(None, example="1.0.0")
-    sklearn: str = Field(None, example="1.0.0")
-    numpy: str = Field(None, example="1.0.0")
-    pandas: str = Field(None, example="1.0.0")
-    jwt: str = Field(None, example="1.0.0")
-    passlib: str = Field(None, example="1.0.0")
-    loguru: str = Field(None, example="1.0.0")
+    service: str = Field(..., examples=["1.0.0"])
+    fastapi: str = Field(..., examples=["1.0.0"])
+    pydantic: str = Field(..., examples=["1.0.0"])
+    uvicorn: str = Field(..., examples=["1.0.0"])
+    sklearn: str = Field(..., examples=["1.0.0"])
+    numpy: str = Field(..., examples=["1.0.0"])
+    pandas: str = Field(..., examples=["1.0.0"])
+    jwt: str = Field(..., examples=["1.0.0"])
+    passlib: str = Field(..., examples=["1.0.0"])
+    loguru: str = Field(..., examples=["1.0.0"])
 
     @property
     def libraries_versions(self) -> str:

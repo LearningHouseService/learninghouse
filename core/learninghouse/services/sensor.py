@@ -16,7 +16,7 @@ class SensorConfigurationService:
     def get(name: str) -> Sensor:
         sensors = Sensors.load_config()
 
-        for sensor in sensors:  # type: Sensor
+        for sensor in sensors.root:
             if sensor.name == name:
                 return sensor
 
@@ -26,7 +26,7 @@ class SensorConfigurationService:
     def create(name: str, typed: SensorType) -> Sensor:
         sensors = Sensors.load_config()
 
-        for sensor in sensors:  # type: Sensor
+        for sensor in sensors.root:
             if sensor.name == name:
                 raise SensorExists(name)
 
@@ -37,9 +37,11 @@ class SensorConfigurationService:
         return new_sensor
 
     @staticmethod
-    def update(name: str, typed: SensorType, cycles: int, calc_sun_position: bool) -> Sensor:
+    def update(
+        name: str, typed: SensorType, cycles: int, calc_sun_position: bool
+    ) -> Sensor:
         sensors = Sensors.load_config()
-        for sensor in sensors:  # type: Sensor
+        for sensor in sensors.root:
             if sensor.name == name:
                 sensor.typed = typed
                 sensor.cycles = cycles
@@ -50,10 +52,10 @@ class SensorConfigurationService:
         raise NoSensor(name)
 
     @staticmethod
-    def delete(name: str) -> None:
+    def delete(name: str) -> SensorDeleteResult:
         sensors = Sensors.load_config()
 
-        for sensor in sensors:  # type: Sensor
+        for sensor in sensors.root:
             if sensor.name == name:
                 sensors.remove(sensor)
                 sensors.write_config()

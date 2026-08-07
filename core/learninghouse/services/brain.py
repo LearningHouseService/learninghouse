@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from os import listdir, path, stat
 from shutil import rmtree
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple
 
 import pandas as pd
 from sklearn.feature_selection import SelectFromModel
@@ -30,12 +30,9 @@ from learninghouse.models.brain import (
 )
 from learninghouse.services.preprocessing import DatasetPreprocessing
 
-if TYPE_CHECKING:
-    from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
 
 class BrainService:
-    brains: Dict[str, Dict[str, Union[int, Brain]]] = {}
+    brains: Dict[str, Tuple[float, Brain]] = {}
 
     @classmethod
     def list_all(cls) -> BrainInfos:
@@ -46,7 +43,7 @@ class BrainService:
             except BrainNoConfiguration:
                 pass
 
-        return BrainInfos(**brains)
+        return BrainInfos(root=brains)
 
     @staticmethod
     def get_info(name: str) -> BrainInfo:
@@ -76,19 +73,19 @@ class BrainService:
         cls,
         name: str,
         dependent_value: Optional[Any] = None,
-        sensors_data: Optional[Dict[str, Any]] = None
+        sensors_data: Optional[Dict[str, Any]] = None,
     ) -> BrainInfo:
-        filename = Brain.sanitize_filename(
-            name, BrainFileType.TRAINING_DATA_FILE)
+        filename = Brain.sanitize_filename(name, BrainFileType.TRAINING_DATA_FILE)
 
         trainings_data: Optional[Dict[str, Any]] = sensors_data
 
         if sensors_data is not None:
-            if dependent_value is not None:
-                trainings_data[name] = dependent_value
-            else:
-                # Todo this is never thrown because of if 86
+            if dependent_value is None:
+                # Todo this is never thrown, the API layer already rejects a
+                # training request without a dependent value.
                 raise BrainBadRequest("Missing dependent variable!")
+
+            sensors_data[name] = dependent_value
 
         if trainings_data is None:
             if path.exists(filename):
@@ -97,8 +94,7 @@ class BrainService:
                 raise BrainNotEnoughData()
         else:
             logger.debug(trainings_data)
-            trainings_data = DatasetPreprocessing.add_time_information(
-                trainings_data)
+            trainings_data = DatasetPreprocessing.add_time_information(trainings_data)
             if path.exists(filename):
                 data_temp = pd.read_csv(filename)
                 df_new_row = pd.DataFrame([trainings_data])
@@ -151,8 +147,7 @@ class BrainService:
             else:
                 score = estimator.score(x_test, y_test)
 
-            brain.store_trained(x_train.columns.tolist(),
-                                len(data.index), score)
+            brain.store_trained(x_train.columns.tolist(), len(data.index), score)
 
             return brain.info
         except FileNotFoundError as exc:
@@ -165,22 +160,20 @@ class BrainService:
             if not brain.actual_versions:
                 raise BrainNotActual(name, brain.versions)
 
-            request_data = DatasetPreprocessing.add_time_information(
-                request_data)
+            request_data = DatasetPreprocessing.add_time_information(request_data)
 
             data = pd.DataFrame([request_data])
-            prepared_data = DatasetPreprocessing.prepare_prediction(
-                brain, data)
+            prepared_data = DatasetPreprocessing.prepare_prediction(brain, data)
 
             prediction = brain.estimator().predict(prepared_data)
 
+            dependent_encoder = brain.dataset.dependent_encoder
             if (
                 brain.configuration.dependent_encode
                 and brain.configuration.estimator.typed == BrainEstimatorType.CLASSIFIER
+                and dependent_encoder is not None
             ):
-                prediction = brain.dataset.dependent_encoder.inverse_transform(
-                    prediction
-                )
+                prediction = dependent_encoder.inverse_transform(prediction)
                 prediction = list(map(bool, prediction))
             else:
                 prediction = list(map(float, prediction))
@@ -198,11 +191,12 @@ class BrainService:
         filename = Brain.sanitize_filename(name, BrainFileType.TRAINED_FILE)
         stamp = stat(filename).st_mtime
 
-        if not (name in cls.brains and cls.brains[name]["stamp"] == stamp):
-            cls.brains[name] = {"stamp": stamp,
-                                "brain": Brain.load_trained(name)}
+        cached = cls.brains.get(name)
+        if cached is None or cached[0] != stamp:
+            cached = (stamp, Brain.load_trained(name))
+            cls.brains[name] = cached
 
-        return cls.brains[name]["brain"]
+        return cached[1]
 
 
 class BrainConfigurationService:

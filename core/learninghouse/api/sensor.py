@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, Depends, status
 
-from learninghouse.api.errors.sensor import NoSensor, SensorExists
+from learninghouse.errors.sensor import NoSensor, SensorExists
 from learninghouse.models.sensor import Sensor, SensorDeleteResult, Sensors
 from learninghouse.services.auth import protect_admin, protect_user
 from learninghouse.services.sensor import SensorConfigurationService

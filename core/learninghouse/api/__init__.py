@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends
 
 from learninghouse import versions
 from learninghouse.api import auth, brain, sensor
-from learninghouse.api.errors import LearningHouseSecurityException
 from learninghouse.core.settings import service_settings
+from learninghouse.errors import LearningHouseSecurityException
 from learninghouse.models import LearningHouseVersions
 from learninghouse.services.auth import AuthServiceInternal, auth_service_cached
 

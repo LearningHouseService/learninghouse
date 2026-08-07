@@ -9,11 +9,6 @@ from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from learninghouse import versions
 from learninghouse.api import api, docs, ui
-from learninghouse.api.errors import (
-    LearningHouseException,
-    learninghouse_exception_handler,
-    validation_error_handler,
-)
 from learninghouse.api.middleware import (
     CatchAllException,
     CustomHeader,
@@ -22,6 +17,11 @@ from learninghouse.api.middleware import (
 from learninghouse.core.logger import initialize_logging, logger
 from learninghouse.core.settings import service_settings
 from learninghouse.core.settings.models import ServiceSettings
+from learninghouse.errors import (
+    LearningHouseException,
+    learninghouse_exception_handler,
+    validation_error_handler,
+)
 from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, auth_service_cached
 
 APP_REFERENCE = "learninghouse.service:app"

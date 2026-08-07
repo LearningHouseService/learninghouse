@@ -12,6 +12,8 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from learninghouse import versions
 from learninghouse.core.settings import service_settings
+from learninghouse.errors import LearningHouseSecurityException
+from learninghouse.errors.brain import BrainNotTrained
 from learninghouse.models import LearningHouseVersions
 from learninghouse.models.base import DictModel, EnumModel, LHBaseModel
 from learninghouse.models.preprocessing import DatasetConfiguration
@@ -242,8 +244,6 @@ class Brain:
 
     @classmethod
     def load_trained(cls, name: str) -> Brain:
-        from learninghouse.api.errors.brain import BrainNotTrained
-
         try:
             if not cls.is_trained(name):
                 raise BrainNotTrained(name)
@@ -283,8 +283,6 @@ class Brain:
 
     @staticmethod
     def sanitize_directory(name: str, brains_directory: Optional[Path] = None) -> str:
-        from learninghouse.api.errors import LearningHouseSecurityException
-
         if brains_directory is None:
             brains_directory = service_settings().brains_directory
 

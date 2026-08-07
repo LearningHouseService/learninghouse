@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 
-from learninghouse.api.errors.brain import (
+from learninghouse.errors.brain import (
     BrainExists,
     BrainNoConfiguration,
     BrainNotActual,

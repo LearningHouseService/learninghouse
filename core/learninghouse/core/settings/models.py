@@ -8,6 +8,7 @@ from pydantic import BaseModel, DirectoryPath
 
 from learninghouse import versions
 from learninghouse.core.logger.models import LoggingLevelEnum
+from learninghouse.errors import LearningHouseException, LearningHouseValidationError
 
 DOCKER_SECRETS_DIR = "/run/secrets"
 
@@ -59,18 +60,6 @@ class ServiceSettings(BaseModel):
 
     @property
     def fastapi_kwargs(self) -> Dict[str, Any]:
-        # Imported here, not at module level: core.settings.models is on the
-        # import path of nearly everything (service_settings() is called from
-        # models/auth.py, models/brain.py, services/auth.py, ...), while
-        # api.errors sits inside the learninghouse.api package, whose
-        # __init__ pulls in api.auth -> models.auth -> core.settings. A
-        # module-level import here made that a circular import that only
-        # failed depending on which module happened to be imported first.
-        from learninghouse.api.errors import (
-            LearningHouseException,
-            LearningHouseValidationError,
-        )
-
         validation_error = LearningHouseValidationError
         exception = LearningHouseException
         return {

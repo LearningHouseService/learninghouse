@@ -11,6 +11,7 @@ from passlib.hash import sha512_crypt  # pyright: ignore[reportAttributeAccessIs
 from pydantic import Field
 
 from learninghouse.core.settings import service_settings
+from learninghouse.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.models.base import EnumModel, LHBaseModel
 
 
@@ -145,8 +146,6 @@ class SecurityDatabase(LHBaseModel):
         self.initial_password = False
 
     def create_apikey(self, create: APIKeyRequest) -> APIKey:
-        from learninghouse.api.errors.auth import APIKeyExists
-
         if self.find_apikey_by_description(create.description):
             raise APIKeyExists(create.description)
 
@@ -158,8 +157,6 @@ class SecurityDatabase(LHBaseModel):
         return APIKey.from_api_key_request(create, key)
 
     def delete_apikey(self, description: str) -> str:
-        from learninghouse.api.errors.auth import NoAPIKey
-
         api_key = self.find_apikey_by_description(description, True)
         if not isinstance(api_key, APIKey):
             raise NoAPIKey(description)

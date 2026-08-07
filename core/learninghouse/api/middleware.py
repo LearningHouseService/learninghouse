@@ -2,12 +2,12 @@ import time
 
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from learninghouse.api.errors import (
+from learninghouse.core.logger import logger
+from learninghouse.core.settings.models import ServiceSettings
+from learninghouse.errors import (
     LearningHouseException,
     LearningHouseUnauthorizedException,
 )
-from learninghouse.core.logger import logger
-from learninghouse.core.settings.models import ServiceSettings
 from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, AuthServiceInternal
 
 UNKNOWN_EXCEPTION_MESSAGE = """

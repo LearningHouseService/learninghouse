@@ -9,6 +9,11 @@ from fastapi.security.api_key import APIKeyHeader, APIKeyQuery
 
 from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
+from learninghouse.errors import (
+    LearningHouseSecurityException,
+    LearningHouseUnauthorizedException,
+)
+from learninghouse.errors.auth import InvalidPassword
 from learninghouse.models.auth import (
     APIKey,
     APIKeyInfo,
@@ -44,8 +49,6 @@ class AuthServiceInternal:
         return self.database.initial_password
 
     def create_token(self, password: str) -> Token:
-        from learninghouse.api.errors.auth import InvalidPassword
-
         if not self.database.authenticate_password(password):
             raise InvalidPassword()
 
@@ -116,8 +119,6 @@ class AuthServiceInternal:
         return Token(access_token=access_token, refresh_token=refresh_token)
 
     def update_password(self, old_password: str, new_password: str) -> bool:
-        from learninghouse.api.errors.auth import InvalidPassword
-
         if not self.database.authenticate_password(old_password):
             raise InvalidPassword()
 
@@ -151,11 +152,6 @@ class AuthServiceInternal:
     def is_admin_user_or_trainer(
         self, credentials: HTTPAuthorizationCredentials, query: str, header: str
     ) -> UserRole:
-        from learninghouse.api.errors import (
-            LearningHouseSecurityException,
-            LearningHouseUnauthorizedException,
-        )
-
         role: UserRole
 
         is_valid, _ = self.validate_credentials(credentials, False, "admin")
@@ -180,8 +176,6 @@ class AuthServiceInternal:
         auto_error: bool,
         subject: str,
     ) -> Tuple[bool, Union[str, None]]:
-        from learninghouse.api.errors import LearningHouseUnauthorizedException
-
         is_valid = True
         jti = None
 
@@ -207,8 +201,6 @@ class AuthServiceInternal:
 
     @staticmethod
     def raise_error_conditionally(description: str, auto_error: bool):
-        from learninghouse.api.errors import LearningHouseSecurityException
-
         if auto_error:
             raise LearningHouseSecurityException(description)
 
@@ -278,8 +270,6 @@ async def protect_refresh(
     credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
     auth_service: AuthServiceInternal = Depends(auth_service_cached),
 ) -> str:
-    from learninghouse.api.errors import LearningHouseUnauthorizedException
-
     _, jti = auth_service.validate_credentials(credentials, True, "refresh")
 
     if jti is None:  # pragma: no cover - validate_credentials raises before
@@ -312,8 +302,6 @@ async def protect_trainer(
     header: str = Security(api_key_header),
     auth_service: AuthServiceInternal = Depends(auth_service_cached),
 ) -> UserRole:
-    from learninghouse.api.errors import LearningHouseUnauthorizedException
-
     role = auth_service.is_admin_user_or_trainer(credentials, query, header)
 
     if role.role not in ["admin", APIKeyRole.TRAINER.role]:

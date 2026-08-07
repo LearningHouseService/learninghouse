@@ -2,7 +2,7 @@ from typing import List, Union
 
 from fastapi import APIRouter, Depends, Path
 
-from learninghouse.api.errors.auth import InvalidPassword
+from learninghouse.errors.auth import InvalidPassword
 from learninghouse.models.auth import (
     APIKey,
     APIKeyInfo,

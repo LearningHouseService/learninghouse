@@ -36,7 +36,7 @@ dependencies = [
     "pydantic==2.13.4",
     "PyJWT==2.13.0",
     "scikit-learn==1.8.0",
-    "uvicorn[standard]==0.51.0",
+    "uvicorn[standard]==0.52.1",
 ]
 
 [project.urls]

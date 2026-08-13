@@ -2,15 +2,13 @@ import time
 
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from learninghouse.api.errors import (
+from learninghouse.core.logger import logger
+from learninghouse.core.settings.models import ServiceSettings
+from learninghouse.errors import (
     LearningHouseException,
     LearningHouseUnauthorizedException,
 )
-from learninghouse.core.logger import logger
-from learninghouse.core.settings import service_settings
-from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, authservice
-
-settings = service_settings()
+from learninghouse.services.auth import INITIAL_PASSWORD_WARNING, AuthServiceInternal
 
 UNKNOWN_EXCEPTION_MESSAGE = """
 An unknown error occured which is not handled by the service yet:
@@ -30,16 +28,23 @@ class EnforceInitialPasswordChange(BaseHTTPMiddleware):
         "/api/versions",
     ]
 
-    def __init__(self, app, **kwargs):
+    def __init__(
+        self,
+        app,
+        settings: ServiceSettings,
+        auth_service: AuthServiceInternal,
+        **kwargs,
+    ):
         super().__init__(app, **kwargs)
-        self.endpoints = self.ALLOWED_ENDPOINTS
+        self.auth_service = auth_service
+        self.endpoints = list(self.ALLOWED_ENDPOINTS)
         self.endpoints.append(settings.openapi_file)
         if settings.docs_url:
             self.endpoints.append(settings.docs_url)
 
     async def dispatch(self, request, call_next):
         endpoint = request.url.path
-        if authservice.is_initial_admin_password and not (
+        if self.auth_service.is_initial_admin_password and not (
             endpoint in self.endpoints
             or endpoint.startswith("/static/")
             or endpoint.startswith("/ui")

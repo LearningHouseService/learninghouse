@@ -26,8 +26,9 @@ and the API changes they need get their own plan.
 ```
 core/                       # the Python service — everything installable lives here
 ├── learninghouse/
-│   ├── api/                # FastAPI routers, middleware, error types and their OpenAPI shape
+│   ├── api/                # FastAPI routers and middleware
 │   ├── core/               # settings and logging infrastructure
+│   ├── errors/             # LearningHouseException subclasses and their OpenAPI shape
 │   ├── models/             # pydantic models and the brain/dataset domain objects
 │   ├── services/           # brain training and prediction, sensors, auth
 │   ├── static/             # swagger assets served by the service
@@ -117,8 +118,12 @@ carries the reasoning that survives into `main`'s history.
 - **Model persistence:** joblib pickles with version metadata. A model whose service or
   scikit-learn version does not match the running one is rejected and retrained, never loaded
   best-effort.
-- **Errors:** raise a `LearningHouseException` subclass from `api/errors/`; each one carries its
-  status code and its OpenAPI description, so a new error type documents itself.
+- **Errors:** raise a `LearningHouseException` subclass from `errors/`; each one carries its
+  status code and its OpenAPI description, so a new error type documents itself. `errors/` is a
+  standalone top-level module with no dependency on `api`, `models` or `services` — it existed as
+  `api/errors/` until Phase 2 of the modernization plan, where models and services importing from
+  inside the `api` package created a circular import depending on which module happened to be
+  imported first.
 
 ### Testing
 

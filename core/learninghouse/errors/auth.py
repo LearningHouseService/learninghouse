@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from fastapi import status
 
-from learninghouse.api.errors import (
+from learninghouse.errors import (
     LearningHouseException,
     LearningHouseSecurityException,
 )

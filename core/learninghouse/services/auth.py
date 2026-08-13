@@ -3,17 +3,17 @@ from functools import lru_cache
 from typing import Dict, List, Tuple, Union
 
 import jwt
-from fastapi import Security
+from fastapi import Depends, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.security.api_key import APIKeyHeader, APIKeyQuery
 
-from learninghouse.api.errors import (
+from learninghouse.core.logger import logger
+from learninghouse.core.settings import service_settings
+from learninghouse.errors import (
     LearningHouseSecurityException,
     LearningHouseUnauthorizedException,
 )
-from learninghouse.api.errors.auth import InvalidPassword
-from learninghouse.core.logger import logger
-from learninghouse.core.settings import service_settings
+from learninghouse.errors.auth import InvalidPassword
 from learninghouse.models.auth import (
     APIKey,
     APIKeyInfo,
@@ -24,8 +24,6 @@ from learninghouse.models.auth import (
     TokenPayload,
     UserRole,
 )
-
-settings = service_settings()
 
 API_KEY_NAME = "X-LEARNINGHOUSE-API-KEY"
 
@@ -101,6 +99,8 @@ class AuthServiceInternal:
             del self.refresh_tokens[jti]
 
     def create_new_token(self) -> Token:
+        settings = service_settings()
+
         issuetime = datetime.now(timezone.utc)
         access_expire = issuetime + timedelta(minutes=1)
         access_payload = TokenPayload.create("admin", access_expire, issuetime)
@@ -148,52 +148,6 @@ class AuthServiceInternal:
         logger.info(f"Removed API key for {description}.")
 
         return confirm
-
-    async def protect_admin(
-        self, credentials: HTTPAuthorizationCredentials = Security(jwt_bearer)
-    ) -> UserRole:
-        self.validate_credentials(credentials, True, "admin")
-        return UserRole.ADMIN
-
-    async def protect_refresh(
-        self, credentials: HTTPAuthorizationCredentials = Security(jwt_bearer)
-    ) -> str:
-        _, jti = self.validate_credentials(credentials, True, "refresh")
-
-        if jti is None:  # pragma: no cover - validate_credentials raises before
-            raise LearningHouseUnauthorizedException()
-
-        return jti
-
-    async def get_refresh(
-        self, credentials: HTTPAuthorizationCredentials = Security(jwt_bearer)
-    ) -> Union[str, None]:
-        is_valid, jti = self.validate_credentials(credentials, False, "refresh")
-
-        return jti if is_valid else None
-
-    async def protect_user(
-        self,
-        credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
-        query: str = Security(api_key_query),
-        header: str = Security(api_key_header),
-    ) -> UserRole:
-        role = self.is_admin_user_or_trainer(credentials, query, header)
-
-        return role
-
-    async def protect_trainer(
-        self,
-        credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
-        query: str = Security(api_key_query),
-        header: str = Security(api_key_header),
-    ) -> UserRole:
-        role = self.is_admin_user_or_trainer(credentials, query, header)
-
-        if role.role not in ["admin", APIKeyRole.TRAINER.role]:
-            raise LearningHouseUnauthorizedException()
-
-        return role
 
     def is_admin_user_or_trainer(
         self, credentials: HTTPAuthorizationCredentials, query: str, header: str
@@ -256,6 +210,7 @@ class AuthServiceInternal:
         verified = False
         jti = None
 
+        settings = service_settings()
         payload_args = settings.jwt_payload_claims
 
         try:
@@ -295,4 +250,61 @@ def auth_service_cached() -> AuthServiceInternal:
     return service
 
 
-authservice = auth_service_cached()
+# The FastAPI dependency callables below used to be bound methods of the
+# `authservice` singleton, attached to routers at import time. That meant
+# every router permanently referenced whichever AuthServiceInternal instance
+# happened to exist when the module was first imported. As free functions
+# resolving the service through `Depends(auth_service_cached)`, the service
+# is looked up per request instead of being baked into the router.
+
+
+async def protect_admin(
+    credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
+    auth_service: AuthServiceInternal = Depends(auth_service_cached),
+) -> UserRole:
+    auth_service.validate_credentials(credentials, True, "admin")
+    return UserRole.ADMIN
+
+
+async def protect_refresh(
+    credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
+    auth_service: AuthServiceInternal = Depends(auth_service_cached),
+) -> str:
+    _, jti = auth_service.validate_credentials(credentials, True, "refresh")
+
+    if jti is None:  # pragma: no cover - validate_credentials raises before
+        raise LearningHouseUnauthorizedException()
+
+    return jti
+
+
+async def get_refresh(
+    credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
+    auth_service: AuthServiceInternal = Depends(auth_service_cached),
+) -> Union[str, None]:
+    is_valid, jti = auth_service.validate_credentials(credentials, False, "refresh")
+
+    return jti if is_valid else None
+
+
+async def protect_user(
+    credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
+    query: str = Security(api_key_query),
+    header: str = Security(api_key_header),
+    auth_service: AuthServiceInternal = Depends(auth_service_cached),
+) -> UserRole:
+    return auth_service.is_admin_user_or_trainer(credentials, query, header)
+
+
+async def protect_trainer(
+    credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
+    query: str = Security(api_key_query),
+    header: str = Security(api_key_header),
+    auth_service: AuthServiceInternal = Depends(auth_service_cached),
+) -> UserRole:
+    role = auth_service.is_admin_user_or_trainer(credentials, query, header)
+
+    if role.role not in ["admin", APIKeyRole.TRAINER.role]:
+        raise LearningHouseUnauthorizedException()
+
+    return role

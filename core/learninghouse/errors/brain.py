@@ -3,7 +3,7 @@ from typing import Any, Dict
 from fastapi import status
 
 from learninghouse import versions
-from learninghouse.api.errors import LearningHouseException
+from learninghouse.errors import LearningHouseException
 from learninghouse.models import (
     LearningHouseErrorMessage,
     LearningHouseVersions,

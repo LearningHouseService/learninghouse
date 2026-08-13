@@ -8,7 +8,9 @@ import pandas as pd
 from sklearn.feature_selection import SelectFromModel
 from sklearn.metrics import accuracy_score
 
-from learninghouse.api.errors.brain import (
+from learninghouse.core.logger import logger
+from learninghouse.core.settings import service_settings
+from learninghouse.errors.brain import (
     BrainBadRequest,
     BrainExists,
     BrainNoConfiguration,
@@ -16,8 +18,6 @@ from learninghouse.api.errors.brain import (
     BrainNotEnoughData,
     BrainNotTrained,
 )
-from learninghouse.core.logger import logger
-from learninghouse.core.settings import service_settings
 from learninghouse.models.brain import (
     Brain,
     BrainConfiguration,
@@ -32,7 +32,11 @@ from learninghouse.services.preprocessing import DatasetPreprocessing
 
 
 class BrainService:
-    brains: Dict[str, Tuple[float, Brain]] = {}
+    # Keyed by (brains_directory, name), not name alone - two different
+    # brains directories in the same process (Phase 2 de-globalization) can
+    # each have a brain of the same name, and a name-only key would serve the
+    # wrong one.
+    brains: Dict[Tuple[str, str], Tuple[float, Brain]] = {}
 
     @classmethod
     def list_all(cls) -> BrainInfos:
@@ -191,10 +195,11 @@ class BrainService:
         filename = Brain.sanitize_filename(name, BrainFileType.TRAINED_FILE)
         stamp = stat(filename).st_mtime
 
-        cached = cls.brains.get(name)
+        cache_key = (str(service_settings().brains_directory), name)
+        cached = cls.brains.get(cache_key)
         if cached is None or cached[0] != stamp:
             cached = (stamp, Brain.load_trained(name))
-            cls.brains[name] = cached
+            cls.brains[cache_key] = cached
 
         return cached[1]
 

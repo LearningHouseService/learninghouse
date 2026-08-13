@@ -202,13 +202,28 @@ lower-risk than writing new tests and belongs at the start of this phase, not th
   them twice.
 
 **Acceptance**
-- [ ] `npm test` runs headless and exits non-zero on a failing spec; wired into
-      `build_project.yml` and gating the UI build.
-- [ ] `auth.guard.ts`, `auth.interceptor.ts` and `auth.service.ts` each have a spec covering their
+- [x] `npm test` runs headless and exits non-zero on a failing spec; wired into
+      `build_project.yml` and gating the UI build. `check-ui` job runs
+      `npm test -- --watch=false --browsers=ChromeHeadlessCI --code-coverage`; `build-ui` now
+      depends on it. Verified locally: `ChromeHeadlessCI` (no-sandbox) launcher runs headless,
+      and dropping the coverage floor's threshold to an unreachable number reproduces a non-zero
+      exit.
+- [x] `auth.guard.ts`, `auth.interceptor.ts` and `auth.service.ts` each have a spec covering their
       documented behaviour, success and failure.
-- [ ] `api.service.ts`, `brains.service.ts` and `sensor-configuration.service.ts` each have a spec
+- [x] `api.service.ts`, `brains.service.ts` and `sensor-configuration.service.ts` each have a spec
       pinning the requests they issue and how they handle a response.
-- [ ] A coverage threshold is configured in `karma.conf.js` and is met.
+- [x] A coverage threshold is configured in `karma.conf.js` and is met: 68/53/56/67%
+      (statements/branches/functions/lines), the suite's actual measured coverage rounded down
+      for margin, mirroring the Phase 2 coverage-floor decision. Next ratchet point is Phase 3,
+      same as the Python floor.
+
+The priority-3 list (`login`, `change-password`, `apikeys`, `sensors.component`,
+`brains.component`, `edit-dialog`, `table.component`, `form-response`, `delete-dialog`, `yes-no`,
+`password`, `select`, `input`) is also covered now, following the existing 12 specs' shallow
+"should create" convention rather than the deeper behavioural style used for the priority-1/2
+files above. Adding these pulled more source under coverage instrumentation than the specs
+exercise, which is why the floor above is lower than the number Phase 2b started with
+(73/64/61/72%) — the suite covers more surface, not less.
 
 ---
 

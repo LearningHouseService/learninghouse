@@ -6,6 +6,7 @@
     "prebuild": "node git-version.js",
     "prebuild:core": "node git-version.js",
     "prestart": "node git-version.js",
+    "pretest": "node git-version.js",
     "start": "ng serve",
     "build": "ng build --delete-output-path",
     "build:core": "ng build --delete-output-path --base-href=/ui/",

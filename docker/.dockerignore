@@ -1,4 +1,7 @@
-# The image is built from the wheel produced by the build-core job, nothing
-# else. Everything that is not that wheel stays out of the build context.
+# The image is built from the wheel produced by the build-core job plus the
+# lockfile that pins its dependencies. Everything else stays out of the
+# build context.
 *
 !dist/*.whl
+!pyproject.toml
+!uv.lock

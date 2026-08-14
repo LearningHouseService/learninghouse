@@ -16,6 +16,11 @@ jobs:
   variables:
     outputs:
       ref_name: ${{ steps.var.outputs.ref_name}}
+      cache_ref_name: ${{ steps.var.outputs.cache_ref_name }}
+      image_name: ${{ steps.var.outputs.image_name }}
+      ghcr_image: ${{ steps.var.outputs.ghcr_image }}
+      version: ${{ steps.var.outputs.version }}
+      should_publish: ${{ steps.var.outputs.should_publish }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
@@ -24,6 +29,43 @@ jobs:
         with:
           script: |
             core.setOutput('ref_name', '${{ github.ref_name }}'.toLowerCase().replaceAll(/[/.]/g, '-').trim('-'));
+
+            // Docker layer cache scope. On a pull request this points at the
+            // base branch instead of the PR's own ref: a PR-scoped cache can
+            // only ever be read back by re-runs of that same PR, so scoping
+            // to the PR means every PR build starts cold and then writes a
+            // few hundred MB that nothing will ever read again. Reading the
+            // base branch's scope instead makes PR builds warm; build-docker
+            // correspondingly only writes the cache on push/release.
+            const baseRef = '${{ github.base_ref }}';
+            const cacheRefSource = baseRef || '${{ github.ref_name }}';
+            core.setOutput('cache_ref_name', cacheRefSource.toLowerCase().replaceAll(/[/.]/g, '-').trim('-'));
+
+            // Lowercased once here rather than at every use site: ghcr and
+            // Docker Hub both reject mixed-case repository paths, and
+            // github.repository carries this repo's actual casing
+            // (LearningHouseService/learninghouse). docker/metadata-action
+            // lowercases its own `images:` input automatically, but the
+            // merge-manifest job below builds tags by hand in shell, where
+            // nothing does that for it.
+            core.setOutput('image_name', '${{ github.repository }}'.toLowerCase());
+            core.setOutput('ghcr_image', '${{ env.REGISTRY_GITHUB }}/${{ github.repository }}'.toLowerCase());
+
+            const refForVersion = '${{ github.ref_name }}' || '${{ github.event.release.tag_name }}';
+            core.setOutput('version', refForVersion.replace(/^v/, ''));
+
+            // Precomputed here, not re-evaluated at every use site: a job-
+            // level `if:` (merge-manifest below) cannot see the `env`
+            // context at all - only `github`, `needs`, `vars` and `inputs`
+            // are available there - so `env.PACKAGE_BRANCHES` only ever
+            // worked in step-level `if:`s. Computing it once as a `needs`
+            // output works in both places.
+            const packageBranches = JSON.parse('${{ env.PACKAGE_BRANCHES }}');
+            const eventName = '${{ github.event_name }}';
+            const shouldPublish =
+              eventName === 'release' ||
+              (eventName === 'push' && packageBranches.includes('${{ github.ref_name }}'));
+            core.setOutput('should_publish', shouldPublish);
 
   # Lint, type check and tests. Runs before anything is built, and independently
   # of the UI, so a lint error fails within a minute instead of after a full
@@ -43,44 +85,35 @@ jobs:
         # setuptools-scm derives the version from tags on the repository root.
         fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v7
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.0.1
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Cache Python packages
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.cache/pip
-          !~/.cache/pip/log
-        key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
-          ${{ runner.os }}-python-${{ matrix.python-version }}-
-          ${{ runner.os }}-python-
-          ${{ runner.os }}-pip-
+        enable-cache: true
+        cache-dependency-glob: "core/uv.lock"
+        # A cache written from a pull request is only ever read back by a
+        # re-run of that same PR, so saving one on every PR push is pure
+        # cache-quota spend for no reuse.
+        save-cache: ${{ github.event_name != 'pull_request' }}
 
     - name: Install package with dev dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+      run: uv sync --extra dev --locked
       working-directory: core
 
     - name: Lint with ruff
-      run: ruff check .
+      run: uv run --no-sync ruff check .
       working-directory: core
 
     - name: Check formatting with ruff
-      run: ruff format --check .
+      run: uv run --no-sync ruff format --check .
       working-directory: core
 
     - name: Type check with pyright
-      run: pyright
+      run: uv run --no-sync pyright
       working-directory: core
 
     - name: Run tests with coverage
-      run: python -m pytest --cov=learninghouse --cov-report=xml:coverage.xml
+      run: uv run --no-sync pytest --cov=learninghouse --cov-report=xml:coverage.xml
       working-directory: core
 
   # Karma/Jasmine suite. Runs before the UI is built, same reasoning as check-core:
@@ -157,24 +190,16 @@ jobs:
         # setuptools-scm derives the version from tags on the repository root.
         fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v7
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10.0.1
       with:
         python-version: ${{ matrix.python-version }}
-
-
-    - name: Cache Python packages
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.cache/pip
-          !~/.cache/pip/log
-        key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
-          ${{ runner.os }}-python-${{ matrix.python-version }}-
-          ${{ runner.os }}-python-
-          ${{ runner.os }}-pip-
+        enable-cache: true
+        cache-dependency-glob: "core/uv.lock"
+        # A cache written from a pull request is only ever read back by a
+        # re-run of that same PR, so saving one on every PR push is pure
+        # cache-quota spend for no reuse.
+        save-cache: ${{ github.event_name != 'pull_request' }}
 
     - name: Download UI
       uses: actions/download-artifact@v8
@@ -182,13 +207,8 @@ jobs:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: core/learninghouse/ui
 
-    - name: Install build package
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
-
     - name: Build package
-      run: python -m build
+      run: uv build
       working-directory: core
 
     - name: Save python artifacts
@@ -215,13 +235,24 @@ jobs:
         file_glob: true
 
   build-docker:
-    permissions:
-      packages: write
-      contents: read
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     needs: [variables, build-core]
     env:
       REF_NAME: ${{ needs.variables.outputs.ref_name }}
+      CACHE_REF_NAME: ${{ needs.variables.outputs.cache_ref_name }}
+      IMAGE_NAME: ${{ needs.variables.outputs.image_name }}
+      GHCR_IMAGE: ${{ needs.variables.outputs.ghcr_image }}
+      VERSION: ${{ needs.variables.outputs.version }}
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
     steps:
     - name: Checkout
       uses: actions/checkout@v7
@@ -234,17 +265,19 @@ jobs:
         name: python-artifacts-3.13-${{ env.REF_NAME }}
         path: docker/dist
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@master
-      with:
-        platforms: all
+    # The buildimage stage syncs dependencies from the lockfile before the
+    # wheel is installed on top, so it needs its own copy inside the build
+    # context (context: docker below, not the repository root).
+    - name: Copy uv lockfile into the Docker build context
+      run: cp core/pyproject.toml core/uv.lock docker/
+      shell: bash
 
     - name: Set up Docker Buildx
       id: buildx
       uses: docker/setup-buildx-action@master
 
     - name: Log in to the Docker github container registry
-      if: ${{github.event_name == 'release' || (github.event_name == 'push' && github.ref_name == 'main')}}
+      if: ${{ needs.variables.outputs.should_publish == 'true' }}
       uses: docker/login-action@v4.5.2
       with:
         registry: ${{ env.REGISTRY_GITHUB }}
@@ -258,28 +291,140 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Extract metadata (tags, labels) for Docker (No Release)
-      id: meta
-      if: ${{github.event_name != 'release'}}
-      uses: docker/metadata-action@v6
-      with:
-        images: |
-          ${{ env.REGISTRY_GITHUB }}/${{ env.IMAGE_NAME }}
+    - name: Map platform to tag suffix
+      run: echo "ARCH_TAG=${{ matrix.arch }}" >> "$GITHUB_ENV"
+      shell: bash
 
-    - name: Extract metadata (tags, labels) for Docker (Release)
-      id: meta_release
-      if: ${{github.event_name == 'release'}}
+    - name: Extract Docker metadata
+      id: meta
       uses: docker/metadata-action@v6
       with:
         images: |
-          ${{ env.IMAGE_NAME }}
-          ${{ env.REGISTRY_GITHUB }}/${{ env.IMAGE_NAME }}
+          ${{ env.GHCR_IMAGE }}
+          ${{ github.event_name == 'release' && env.IMAGE_NAME || '' }}
+        tags: |
+          type=raw,value=latest-${{ env.ARCH_TAG }},enable=${{ github.event_name == 'release' }}
+          type=raw,value=${{ env.VERSION }}-${{ env.ARCH_TAG }},enable=${{ github.event_name == 'release' }}
+          type=raw,value=${{ env.REF_NAME }}-${{ env.ARCH_TAG }},enable=${{ github.event_name != 'release' }}
 
     - name: Build and push Docker image
+      id: build
       uses: docker/build-push-action@v7
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: docker
-        push: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
-        tags: ${{github.event_name == 'release' && steps.meta_release.outputs.tags || steps.meta.outputs.tags }}
+        platforms: linux/${{ matrix.arch }}
+        push: ${{ needs.variables.outputs.should_publish == 'true' }}
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        # CACHE_REF_NAME is the base branch on a pull request (see the
+        # variables job), so PR builds read the base branch's warm cache
+        # instead of starting cold in a PR-private scope.
+        cache-from: type=gha,scope=${{ github.repository }}-${{ env.CACHE_REF_NAME }}-${{ matrix.arch }}
+        # Written only on push/release, same reasoning as save-cache above: a
+        # cache written by a PR build is readable only by re-runs of that
+        # same PR.
+        cache-to: ${{ (github.event_name == 'push' || github.event_name == 'release') && format('type=gha,mode=max,scope={0}-{1}-{2}', github.repository, env.CACHE_REF_NAME, matrix.arch) || '' }}
+
+    # merge-manifest combines these per-arch builds by digest, not by the
+    # mutable per-arch tags above: two overlapping workflow runs racing to
+    # push the same tag (e.g. arm64's longer build time letting an older
+    # commit's push land after a newer one's) must never let the older image
+    # win the final multi-arch manifest silently. A digest is immutable and
+    # always names the exact image this job just built.
+    - name: Export digest
+      if: ${{ needs.variables.outputs.should_publish == 'true' }}
+      run: |
+        mkdir -p /tmp/digests
+        digest="${{ steps.build.outputs.digest }}"
+        touch "/tmp/digests/${digest#sha256:}"
+      shell: bash
+
+    - name: Upload digest
+      if: ${{ needs.variables.outputs.should_publish == 'true' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: digests-${{ matrix.arch }}
+        path: /tmp/digests/*
+        if-no-files-found: error
+        retention-days: 1
+
+  merge-manifest:
+    runs-on: ubuntu-latest
+    needs: [variables, build-docker]
+    env:
+      REF_NAME: ${{ needs.variables.outputs.ref_name }}
+      IMAGE_NAME: ${{ needs.variables.outputs.image_name }}
+      GHCR_IMAGE: ${{ needs.variables.outputs.ghcr_image }}
+      VERSION: ${{ needs.variables.outputs.version }}
+    if: ${{ needs.variables.outputs.should_publish == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@master
+
+      - name: Log in to the Docker github container registry
+        uses: docker/login-action@v4.5.2
+        with:
+          registry: ${{ env.REGISTRY_GITHUB }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to the Docker container registry
+        if: ${{github.event_name == 'release'}}
+        uses: docker/login-action@v4.5.2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Downloads one file per build-docker leg, named after that leg's image
+      # digest (see "Export digest" above). Combining by digest rather than
+      # by the mutable per-arch tags means this job always assembles exactly
+      # the images this workflow run built, immune to a slower/older run's
+      # push landing after this one's.
+      - name: Download digests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: digests-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Create and push multi-arch manifest
+        run: |
+          set -eux
+
+          cd /tmp/digests
+          ghcr_refs=()
+          for digest in *; do
+            ghcr_refs+=("${{ env.GHCR_IMAGE }}@sha256:$digest")
+          done
+
+          if [ "${{ github.event_name }}" == "release" ]; then
+            dockerhub_refs=()
+            for digest in *; do
+              dockerhub_refs+=("${{ env.IMAGE_NAME }}@sha256:$digest")
+            done
+
+            docker buildx imagetools create \
+              -t ${{ env.GHCR_IMAGE }}:latest \
+              "${ghcr_refs[@]}"
+
+            docker buildx imagetools create \
+              -t ${{ env.IMAGE_NAME }}:latest \
+              "${dockerhub_refs[@]}"
+
+            docker buildx imagetools create \
+              -t ${{ env.GHCR_IMAGE }}:${{ env.VERSION }} \
+              "${ghcr_refs[@]}"
+
+            docker buildx imagetools create \
+              -t ${{ env.IMAGE_NAME }}:${{ env.VERSION }} \
+              "${dockerhub_refs[@]}"
+          else
+            docker buildx imagetools create \
+              -t ${{ env.GHCR_IMAGE }}:${{ env.REF_NAME }} \
+              "${ghcr_refs[@]}"
+          fi
+        shell: bash

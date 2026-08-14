@@ -59,7 +59,9 @@ following phases is riskier than it needs to be.
 | 1 | Development environment, toolchain, CI gates | your list #1, extended |
 | 2 | Test foundation and de-globalization | added in review |
 | 2b | UI test foundation | added in review |
+| 2c | uv for the Python build and Docker image | added in review, patterned after `solaredge2mqtt` |
 | 3 | Dependency updates | your list #2 |
+| 3b | Configuration via `configuration.yaml` / `secrets.yaml` | added in review, patterned after `solaredge2mqtt` |
 | 4 | Security hardening | added in review |
 | 5 | Persistence on SQLite | your list #3 |
 | 6 | pvlearn as a library dependency | your list #4 |
@@ -67,7 +69,7 @@ following phases is riskier than it needs to be.
 | 8 | Brain on a scikit-learn pipeline | your list #6 |
 | 9 | Home Assistant add-on | from the add-on assessment |
 
-Phases 2, 2b and 4 did not come from the original list; they were added during review and
+Phases 2, 2b, 2c, 3b and 4 did not come from the original list; they were added during review and
 confirmed. The reasoning for each is in its own section.
 
 **One pull request per phase**, matching the convention adopted in `pvlearn`. Commits within a
@@ -227,13 +229,118 @@ exercise, which is why the floor above is lower than the number Phase 2b started
 
 ---
 
+### Phase 2c — uv for the Python build and Docker image
+
+**Goal:** Faster, reproducible Python installs, with CI cache hits that key off a lockfile instead
+of pip's per-run wheel cache — the same setup `solaredge2mqtt` already runs.
+
+Placed before Phase 3 rather than after: Phase 3 re-pins every shared dependency against `pvlearn`.
+Doing that pinning once, directly in a `uv.lock`, is cheaper than pinning with pip first and moving
+the result to uv afterwards.
+
+- `core/pyproject.toml` stays the single source of truth for dependencies; add a committed
+  `uv.lock` and drop `setup.py`-era assumptions that no longer apply (there are none left after
+  Phase 1, this is here as a sanity check, not new work).
+- CI (`check-core`, `build-core` in `build_project.yml`): replace `actions/setup-python` +
+  `pip install -e ".[dev]"` + the manual `actions/cache` block over `~/.cache/pip` with
+  `astral-sh/setup-uv` and `enable-cache: true`, `uv sync --locked` / `uv run`. The lockfile hash
+  becomes the cache key instead of `pyproject.toml`'s hash, which is coarser than what pip currently
+  keys on. `save-cache: ${{ github.event_name != 'pull_request' }}`, matching `solaredge2mqtt`: a
+  cache written from a PR run is only ever read back by a re-run of that same PR, so writing one on
+  every PR push is pure cache-quota spend for no reuse. `build-core` drops the separate "install
+  build package" step entirely — `uv build` replaces `pip install build && python -m build`.
+- `docker/Dockerfile`, matching `solaredge2mqtt`'s pattern directly rather than just replacing `pip`
+  with `uv pip` one-for-one: the `buildimage` stage now syncs dependencies from `core/uv.lock` first
+  (`uv sync --frozen --no-install-project`, under a BuildKit `--mount=type=cache` so the download
+  cache survives across builds), then installs the wheel on top with `uv pip install --no-deps`, so
+  a dependency-only change and a version-only rebuild invalidate different, independently cached
+  layers. `python:3.13-slim` replaces `python:3.13` for the build stage too (`solaredge2mqtt` runs
+  the build stage on `-slim` throughout); `UV_LINK_MODE=copy` (safe across the layer boundary this
+  stage's output crosses into `stage-1`), `UV_PYTHON_DOWNLOADS=never` (use the image's own
+  interpreter, don't let `uv` fetch one) and `UV_PROJECT_ENVIRONMENT=/venv` (point the sync straight
+  at the venv path the final stage copies out, no separate `uv venv` step). `uv` itself copied in via
+  the `ghcr.io/astral-sh/uv` distroless copy trick. The Docker build-push step gets the matching
+  `cache-from: type=gha` / `cache-to: type=gha,mode=max`, the latter gated the same way as
+  `save-cache` above — only push/release builds write it.
+  **Drop the `piwheels` index entirely, matching `solaredge2mqtt`.** It exists only to serve
+  prebuilt `armv6l`/`armv7l` wheels for `numpy`/`scipy`/`scikit-learn` — confirmed by `uv`'s own
+  resolver error when the index was kept: it lists `numpy` for `linux_armv6l`/`linux_armv7l` only,
+  not for the platform actually being built. Phase 9 already excludes `armv7` as a decision taken
+  up front (see its multi-architecture section), and Phase 9's `aarch64` target gets manylinux
+  wheels straight from PyPI, so nothing here still needs it. Without `armv7` as a target, keeping
+  `piwheels` would have meant carrying a `uv`-specific `--index-strategy unsafe-best-match`
+  workaround for an index the image no longer needs at all — removed instead of worked around.
+- `docker/.dockerignore` widens from `!dist/*.whl` only to also allow `pyproject.toml` and `uv.lock`
+  into the build context, and `build_project.yml`'s `build-docker` job copies both from `core/` into
+  `docker/` before the build step — the lockfile-sync layer above needs its own copy since the
+  Docker build context stays scoped to `docker/`, not the repository root.
+- `AGENTS.md` developer commands (`pip install -e ".[dev]"`, etc.) updated to their `uv` equivalents.
+- **Multi-architecture build, pulled forward from Phase 9.** Originally scoped there, moved up once
+  dropping `piwheels` (above) raised the question of whether `arm64` still needed to wait: it
+  doesn't. Checked directly against PyPI — `numpy`, `pandas`, `scikit-learn` and `scipy` all publish
+  `manylinux_aarch64` wheels for `cp313` at the versions this project pins, so an `arm64` build never
+  needs to compile anything, the same as `amd64`. `build_project.yml`'s `variables` job gains
+  `image_name`/`ghcr_image`/`version`/`cache_ref_name` outputs (lowercased once, since `ghcr`/Docker
+  Hub reject the mixed case `github.repository` actually carries — `LearningHouseService` — and the
+  `merge-manifest` job below builds tags by hand in shell, where `docker/metadata-action`'s automatic
+  lowercasing doesn't apply). `build-docker` becomes a `linux/amd64` / `linux/arm64` matrix on native
+  runners (`ubuntu-latest` / `ubuntu-24.04-arm` — this repo is public, so both are free GitHub-hosted
+  runners), each leg pushing an arch-suffixed tag and exporting its image digest; QEMU is dropped
+  entirely since neither leg emulates. A new `merge-manifest` job downloads both digests and combines
+  them into the final multi-arch tags with `docker buildx imagetools create`, keyed by digest rather
+  than by the mutable per-arch tags so two overlapping workflow runs can't let an older push win.
+  Matches `solaredge2mqtt`'s pattern directly (same author, already proven there); the one thing
+  *not* adopted from it is its source-copy-instead-of-wheel Dockerfile, for the reason already given
+  above — learninghouse bundles the Angular UI into the wheel, `solaredge2mqtt` has no frontend to
+  bundle, so the two Dockerfiles' final stage keeps installing a wheel either way.
+- Not in scope: changing the runtime dependency *versions* — that is Phase 3. This phase only
+  changes the tool that resolves and installs them.
+
+**Acceptance**
+- [x] `uv sync` from a clean clone reproduces the same environment `pip install -e ".[dev]"` produced
+      before this phase (`ruff check .`, `pyright`, `pytest` all still pass). Verified locally:
+      `uv sync --extra dev` then `ruff check .`, `ruff format --check .`, `pyright` and
+      `pytest --cov=learninghouse --cov-report=xml:coverage.xml` all pass (70 passed, 85.61%
+      coverage, above the Phase 2 floor).
+- [x] CI's `check-core` and `build-core` jobs use `astral-sh/setup-uv` with caching enabled.
+      Confirmed working on PR #566's CI run (`astral-sh/setup-uv@v10.0.1` — the action publishes no
+      floating `v10` tag, only exact releases, `actionlint` caught the wrong pin before a second CI
+      run was needed; `cache-dependency-glob: "core/uv.lock"`). The speed-comparison half of this
+      criterion needs a *second* run against an *unchanged* lockfile on a cache-writing event —
+      `save-cache` is deliberately `false` on `pull_request` events (cache-quota reasoning above), so
+      a PR's own re-runs never produce that comparison. Check once this merges and a subsequent push
+      to `main` reads back what this PR's merge commit writes.
+- [x] The Docker image builds via `uv` and starts identically to the pip-built image (same
+      `/api/versions` output, same entry point). Verified locally against the final two-layer
+      buildimage (lockfile sync, then wheel installed with `--no-deps`, `piwheels` dropped): built,
+      ran it, `curl /api/versions` returned the same payload the pip-built image returned, same
+      `python3 -m learninghouse` entry point, same startup log lines.
+- [x] `uv.lock` is committed and CI fails if it is out of sync with `pyproject.toml`. `check-core`
+      runs `uv sync --extra dev --locked`; verified locally that `--locked` accepts a matching
+      lockfile and rejects one made stale by editing a pin in `pyproject.toml` without updating it.
+- [x] The `arm64` leg of the Docker build resolves and installs every dependency from
+      `manylinux_aarch64` wheels, nothing compiles from source. Verified locally first
+      (QEMU-emulated `docker buildx build --platform linux/arm64`, since this machine is `amd64`),
+      then confirmed for real on PR #566's CI run: both `build-docker` matrix legs passed on native
+      runners (`amd64` on `ubuntu-latest`, `arm64` on `ubuntu-24.04-arm`), 29s each, no QEMU
+      anywhere. `merge-manifest` itself correctly skipped on that run (`should_publish` is false for
+      a `pull_request` event) — the actual multi-arch manifest push to `ghcr`/Docker Hub still needs
+      a push-to-`main` or release event to confirm, which is what `should_publish` is gating it on.
+
+---
+
 ### Phase 3 — Dependency updates
 
 **Goal:** Current, coherent dependency set on both sides, with the shared packages already aligned
 to what `pvlearn` pins.
 
-- Merge or close the open Dependabot branches (currently nine, spanning GitHub Actions, npm and
-  pip).
+- Merge or close the open Dependabot branches (14 as of 2026-08-14, spanning GitHub Actions, npm and
+  pip — up from nine when this plan was first written; the backlog grows if left unmerged, so this
+  bullet is not a one-time cleanup, it is the reason this phase exists now rather than later).
+  `#514` (`scikit-learn` 1.8.0 → 1.9.0) already does this phase's load-bearing bump — verify
+  `BrainNotActual` per the risk below before merging it rather than redoing the bump from scratch.
+  `#511` (`typescript` 5.9.3 → 6.0.3) is a major version; confirm it compiles against the pinned
+  Angular 21 toolchain before merging, don't wave it through with the patch-level bumps.
 - Angular and the npm toolchain to current.
 - Python dependencies to current — **with one constraint that shapes this phase**: `pvlearn` pins
   its dependencies *exactly*, not as ranges. Once Phase 6 adds `pvlearn` to `install_requires`, pip
@@ -270,6 +377,77 @@ to what `pvlearn` pins.
 
 ---
 
+### Phase 3b — Configuration via `configuration.yaml` / `secrets.yaml`
+
+**Goal:** Replace the environment-variable-driven settings with a `configuration.yaml` plus a
+separate `secrets.yaml` for sensitive values — the model `solaredge2mqtt` already uses, and the one
+Phase 9's Home Assistant add-on will want to read from its mapped `/data` directory anyway.
+
+`ServiceSettings.__init__` (`core/learninghouse/core/settings/models.py`) currently merges three
+sources in order: `_read_environment`, `_read_dotenv`, `_read_secrets` (Docker secrets under
+`/run/secrets`). All three are ways of avoiding one readable file; a `configuration.yaml` is that
+file, and separating `secrets.yaml` keeps the split Docker secrets already made (config vs.
+sensitive values) without needing the Docker-specific mechanism.
+
+- `ServiceSettings` reads `configuration.yaml` for everything currently settable via `LEARNINGHOUSE_*`
+  (`host`, `port`, `workers`, `logging_level`, CORS origins from Phase 4, …), and `secrets.yaml` for
+  `jwt_secret` and anything else that should never be readable from the general config file or from
+  logs.
+- One bootstrap value has to stay resolvable before either YAML file can be located:
+  `config_directory` (or an explicit path to `configuration.yaml`) remains settable via a single
+  environment variable, matching how `solaredge2mqtt` bootstraps its own config path. Everything
+  downstream of that path moves to YAML.
+- **`jwt_secret` gets its persistent home here, not in Phase 5.** Today it defaults to a fresh
+  `token_hex(16)` per process start (`core/settings/models.py:39`); Phase 4 originally proposed
+  persisting it via the Phase 5 SQLite database. Writing it into `secrets.yaml` on first start
+  achieves the same thing without waiting on Phase 5, and is simpler — the value never becomes a
+  table for one row. Phase 4's acceptance criterion ("sessions survive a restart") is satisfiable
+  starting in this phase.
+- `docker/Dockerfile` currently hardcodes `LEARNINGHOUSE_HOST=0.0.0.0` and `LEARNINGHOUSE_PORT=5000`
+  as image `ENV` values. Replace with a documented default `configuration.yaml` baked into the image
+  (or written on first start if the mounted volume doesn't have one), overridable by mounting a file
+  over it.
+- **Migration for existing installations: a one-shot script, not a runtime fallback.** Reading
+  `LEARNINGHOUSE_*` as a permanent deprecated fallback keeps two settings paths alive indefinitely
+  and defeats the point of this phase. Instead, ship a migration script (`core/scripts/` or a
+  console entry point, e.g. `learninghouse-migrate-config`) that reads every `LEARNINGHOUSE_*`
+  variable currently set in the process environment (and `.env` if present) and writes them into a
+  `configuration.yaml` / `secrets.yaml` pair at the target `config_directory`. Run once, by hand, on
+  upgrade — not on every start.
+  - Must be idempotent-safe to re-run: refuses to overwrite an existing `configuration.yaml` /
+    `secrets.yaml` unless passed an explicit `--force`, so re-running it after a manual edit doesn't
+    silently clobber it.
+  - Splits sensitive values (`jwt_secret`, anything else Phase 3b routes to `secrets.yaml`) from the
+    rest correctly — same split the settings loader itself uses, driven by one shared field list so
+    the two can't drift apart.
+  - Console form: run directly against a `config_directory` on disk, e.g.
+    `learninghouse-migrate-config --config-directory ./brains`.
+  - Docker form: run once inside the container against the mounted volume before switching the image
+    to the version that requires YAML config, e.g.
+    `docker run --rm --env-file .env -v <volume>:/learninghouse/brains <image> learninghouse-migrate-config`,
+    reusing the same `.env`/`LEARNINGHOUSE_*` variables the old container was started with.
+- **README.** Document both invocation forms above, plus what the script does and does not migrate
+  (env vars only — it does not touch brain data, sensors or the security database), as part of this
+  phase, not deferred to Phase 9. Section 4's versioning discipline already expects a changelog entry
+  for a breaking change; this is one.
+
+**Acceptance**
+- [ ] Every setting currently readable from a `LEARNINGHOUSE_*` environment variable is readable from
+      `configuration.yaml`.
+- [ ] `jwt_secret` (and any other sensitive value) is read only from `secrets.yaml`, never from
+      `configuration.yaml`, the environment, or logged output.
+- [ ] `jwt_secret` persists across a service restart without depending on Phase 5.
+- [ ] The Docker image starts correctly with only a mounted `configuration.yaml`, no `LEARNINGHOUSE_*`
+      environment variables set.
+- [ ] The migration script converts a representative set of `LEARNINGHOUSE_*` variables (including at
+      least one that must land in `secrets.yaml`) into a correct `configuration.yaml` /
+      `secrets.yaml` pair, verified against a fixture of the old environment-variable layout.
+- [ ] The migration script refuses to overwrite existing YAML files without `--force`.
+- [ ] README documents console and Docker invocation of the migration script, and the changelog
+      records the breaking change.
+
+---
+
 ### Phase 4 — Security hardening
 
 **Goal:** Close the findings that would otherwise ship into people's homes in Phase 9.
@@ -281,14 +459,15 @@ because by then someone is depending on the current behaviour.
   Starlette resolves that combination by reflecting the request's `Origin` header back instead of
   sending a wildcard, which means any web page a user visits can make authenticated requests to
   their learninghouse instance. Replace with a configurable origin list, defaulting to the UI's own
-  origin.
+  origin — the list lives in `configuration.yaml` since Phase 3b.
 - **API keys in the query string.** `services/auth.py:32` accepts the key via `APIKeyQuery` as well
   as the header. Query strings end up in access logs, proxy logs and browser history. Deprecate the
   query variant, keep the header.
 - **JWT secret.** `core/settings/models.py:39` defaults `jwt_secret` to a fresh `token_hex(16)` per
   process start. Consequences: every restart invalidates all sessions, and with `workers > 1` each
-  worker generates its own secret, so tokens issued by one worker are rejected by another. Persist
-  the secret (Phase 5 gives it a natural home) and log a warning when it had to be generated.
+  worker generates its own secret, so tokens issued by one worker are rejected by another. Phase 3b
+  already persists it in `secrets.yaml`; this phase only needs the warning log for when it had to be
+  generated for the first time.
 - **Refresh tokens in memory.** `AuthServiceInternal.refresh_tokens` is a per-process dict, which is
   the second half of the same multi-worker problem. Either persist it or document that `workers`
   must stay at 1.
@@ -312,8 +491,9 @@ Today: brain configuration in `config.json`, sensors in `brains/sensors.json`, t
 model as a pickle. Reading a single training row means loading the entire CSV; appending one means
 rewriting it.
 
-- Single SQLite database in the configuration directory. Tables for brains, sensors, training data,
-  security/API keys, and the JWT secret from Phase 4.
+- Single SQLite database in the configuration directory. Tables for brains, sensors, training data
+  and security/API keys. The JWT secret does *not* move here — it stays in `secrets.yaml` since
+  Phase 3b, deliberately outside the database that gets backed up/inspected alongside brain data.
 - **Design the training-data table for time series now.** A timestamp column, a uniqueness
   constraint on it, and idempotent upsert. This costs nothing today and is exactly what the later
   pvlearn integration needs: weather snapshots written ahead of time, the measured target value
@@ -440,11 +620,16 @@ survives restarts and updates with its data intact.
 Decisions already taken for this phase: Ingress rather than a plain port; Ingress requests are
 trusted because Home Assistant has already authenticated the user; `amd64` and `aarch64` only.
 
-**Multi-architecture build.** `build_project.yml:164` sets `platforms: all` on the QEMU setup step,
-but `docker/build-push-action` receives no `platforms` input — so QEMU and Buildx are configured and
-then not used, and the published image is `amd64` only. Add `platforms: linux/amd64,linux/arm64`.
-`armv7` stays unsupported, consistent with the pvlearn plan, which excludes it because of the
-numpy/scipy/scikit-learn wheel situation. That limitation belongs prominently in the documentation.
+**Multi-architecture build — done early, in Phase 2c, not here.** Pulled forward once the piwheels
+drop and the wheel-availability check in that phase confirmed there was no longer a reason to wait:
+every dependency (`numpy`, `pandas`, `scikit-learn`, `scipy`) has `manylinux_aarch64` wheels for
+cp313 on PyPI, so nothing needs to compile on `arm64` either — the QEMU-emulation slowness that
+made this feel like a Phase 9 concern was never actually about wheel availability, just about
+`armv7`, which Phase 2c already dropped. `build-docker` is now a `linux/amd64` /
+`linux/arm64` matrix on native runners (`ubuntu-latest` / `ubuntu-24.04-arm`, no QEMU), with a
+`merge-manifest` job combining both by digest. `armv7` stays unsupported, consistent with the
+pvlearn plan, which excludes it for the same wheel-availability reason. That limitation belongs
+prominently in the documentation — still this phase's job, see below.
 
 **Ingress path handling.** Home Assistant serves add-ons under `/api/hassio_ingress/<token>/` and
 sets an `X-Ingress-Path` header. Three places break:
@@ -470,7 +655,10 @@ header alone.
 - Add-on repository under `LearningHouseService/hassio-addons`, or the add-on added to an existing
   one.
 - `config.yaml` with options for log level, port and CORS origins; `ingress: true`; `map: [data:rw]`
-  with `LEARNINGHOUSE_CONFIG_DIRECTORY` pointed at `/data`.
+  with the bootstrap config path from Phase 3b pointed at `/data`. The add-on's options translate
+  into the `configuration.yaml` written to that mount rather than into environment variables — the
+  natural use case Phase 3b was built for. `secrets.yaml` on the same mount also gives Home
+  Assistant's own `!secret` convention a familiar counterpart on this side.
 - A watchdog URL. `/api/mode` exists and would serve, though a dedicated `/health` that does not
   touch auth state is cleaner.
 - Decide between the current standalone Dockerfile and the Home Assistant Python base images with
@@ -478,7 +666,12 @@ header alone.
   integration for free.
 
 **Acceptance**
-- [ ] The image is published for `linux/amd64` and `linux/arm64` and starts on both.
+- [x] The image is published for `linux/amd64` and `linux/arm64` and starts on both. Done in
+      Phase 2c: `build-docker` matrix on native `ubuntu-latest`/`ubuntu-24.04-arm` runners,
+      `merge-manifest` job combining both by digest. Both matrix legs confirmed passing on real
+      native runners on PR #566's CI run (29s each, no QEMU). The "published" half — the manifest
+      actually pushed to `ghcr`/Docker Hub — still needs a push-to-`main` or release event, since
+      `merge-manifest` only runs when `should_publish` is true and a pull request never sets it.
 - [ ] The add-on installs on HAOS from the repository, appears in the sidebar, and the UI is fully
       usable through Ingress — including deep links and page reloads.
 - [ ] A request that sets the ingress header but does not come from the Supervisor is rejected.
@@ -532,6 +725,10 @@ invalidate trained models and each need an explicit changelog entry saying so.
    is correct; for timestamped, autocorrelated rows it is not. The same question is open in pvlearn.
    Whether learninghouse switches to a chronological split — and whether that is per brain or
    global — is a real modelling decision, not a bug fix.
+7. ~~**`LEARNINGHOUSE_*` environment variables: deprecated fallback or breaking change** once
+   `configuration.yaml` / `secrets.yaml` land.~~ Resolved in Phase 3b: breaking change, mitigated by
+   a one-shot migration script (`learninghouse-migrate-config`) documented in the README for both
+   console and Docker use — no permanent env-var fallback.
 
 ---
 
@@ -544,6 +741,7 @@ invalidate trained models and each need an explicit changelog entry saying so.
 | scikit-learn 1.9.0 bump invalidates existing brains without the version check catching it | Models keep loading and silently mispredict | Verify `BrainNotActual` covers the library version before Phase 3 merges |
 | Exact pins in pvlearn collide with learninghouse's own | Installation fails outright | Align shared pins in Phase 3, before pvlearn is added in Phase 6 |
 | Ingress header trusted without checking the peer | Complete authentication bypass over the exposed port | Verify the Supervisor's address; covered by an explicit acceptance criterion in Phase 9 |
+| Existing deployments break silently when `LEARNINGHOUSE_*` env vars stop being read | Users lose their configuration on upgrade | Phase 3b ships a one-shot migration script plus README/changelog documentation, required by its acceptance criteria |
 | The plan grows to absorb the pvlearn integration | Nothing ships | Scheduler, event bus, weather providers and API changes are explicitly out of scope and get their own plan |
 
 ---
@@ -557,7 +755,11 @@ P2  Tests + de-globalization        ← without this nothing below is verifiable
  │
 P2b Angular test foundation         ← same reasoning as P2, applied before P3 touches the UI stack
  │
+P2c uv build + Docker + CI caching  ← pins land in a lockfile once, not pip then uv
+ │
 P3  Dependency updates              ← aligns shared pins with pvlearn
+ │
+P3b Config via YAML + secrets       ← gives Phase 4's jwt_secret a home before Phase 4 needs it
  │
 P4  Security hardening              ← cheaper now than after the add-on ships
  │

@@ -30,13 +30,31 @@ module.exports = function (config) {
       reporters: [
         { type: 'html' },
         { type: 'text-summary' }
-      ]
+      ],
+      // Phase 2b of the modernization plan: floor at what the UI test foundation
+      // suite reaches (68.17/53.73/56.03/67.24% measured, rounded down for margin),
+      // mirroring the Python coverage-floor decision from Phase 2. Ratchet upward
+      // as later phases add specs.
+      check: {
+        global: {
+          statements: 68,
+          branches: 53,
+          functions: 56,
+          lines: 67
+        }
+      }
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
+    customLaunchers: {
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu']
+      }
+    },
     browsers: ['Chrome'],
     singleRun: false,
     restartOnFileChange: true

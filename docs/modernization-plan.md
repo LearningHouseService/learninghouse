@@ -302,11 +302,14 @@ the result to uv afterwards.
       `uv sync --extra dev` then `ruff check .`, `ruff format --check .`, `pyright` and
       `pytest --cov=learninghouse --cov-report=xml:coverage.xml` all pass (70 passed, 85.61%
       coverage, above the Phase 2 floor).
-- [ ] CI's `check-core` and `build-core` jobs use `astral-sh/setup-uv` with caching enabled, and a
-      second run against an unchanged lockfile is measurably faster than the pip-cache baseline.
-      Jobs are wired up (`astral-sh/setup-uv@v10`, `enable-cache: true`,
-      `cache-dependency-glob: "core/uv.lock"`); the speed comparison itself needs an actual run on
-      GitHub Actions and could not be verified locally — check after this branch's first CI run.
+- [x] CI's `check-core` and `build-core` jobs use `astral-sh/setup-uv` with caching enabled.
+      Confirmed working on PR #566's CI run (`astral-sh/setup-uv@v10.0.1` — the action publishes no
+      floating `v10` tag, only exact releases, `actionlint` caught the wrong pin before a second CI
+      run was needed; `cache-dependency-glob: "core/uv.lock"`). The speed-comparison half of this
+      criterion needs a *second* run against an *unchanged* lockfile on a cache-writing event —
+      `save-cache` is deliberately `false` on `pull_request` events (cache-quota reasoning above), so
+      a PR's own re-runs never produce that comparison. Check once this merges and a subsequent push
+      to `main` reads back what this PR's merge commit writes.
 - [x] The Docker image builds via `uv` and starts identically to the pip-built image (same
       `/api/versions` output, same entry point). Verified locally against the final two-layer
       buildimage (lockfile sync, then wheel installed with `--no-deps`, `piwheels` dropped): built,
@@ -316,12 +319,13 @@ the result to uv afterwards.
       runs `uv sync --extra dev --locked`; verified locally that `--locked` accepts a matching
       lockfile and rejects one made stale by editing a pin in `pyproject.toml` without updating it.
 - [x] The `arm64` leg of the Docker build resolves and installs every dependency from
-      `manylinux_aarch64` wheels, nothing compiles from source. Verified locally: `docker buildx
-      build --platform linux/arm64` against the same `Dockerfile` (QEMU-emulated, since this
-      machine is `amd64`) completed the dependency-sync and wheel-install layers successfully; the
-      real native-runner (`ubuntu-24.04-arm`) build and the multi-arch manifest push itself still
-      need this branch's first CI run to confirm, same open item as the CI-cache-speed criterion
-      above.
+      `manylinux_aarch64` wheels, nothing compiles from source. Verified locally first
+      (QEMU-emulated `docker buildx build --platform linux/arm64`, since this machine is `amd64`),
+      then confirmed for real on PR #566's CI run: both `build-docker` matrix legs passed on native
+      runners (`amd64` on `ubuntu-latest`, `arm64` on `ubuntu-24.04-arm`), 29s each, no QEMU
+      anywhere. `merge-manifest` itself correctly skipped on that run (`should_publish` is false for
+      a `pull_request` event) — the actual multi-arch manifest push to `ghcr`/Docker Hub still needs
+      a push-to-`main` or release event to confirm, which is what `should_publish` is gating it on.
 
 ---
 
@@ -664,11 +668,10 @@ header alone.
 **Acceptance**
 - [x] The image is published for `linux/amd64` and `linux/arm64` and starts on both. Done in
       Phase 2c: `build-docker` matrix on native `ubuntu-latest`/`ubuntu-24.04-arm` runners,
-      `merge-manifest` job pushing the combined manifest. Verified locally for `arm64` via
-      QEMU-emulated `docker buildx build --platform linux/arm64` — dependency resolution and image
-      build succeed (`manylinux_aarch64` wheels throughout, nothing compiles); real native-runner
-      confirmation happens on this branch's first CI run, same as the CI-cache-speed criterion in
-      Phase 2c.
+      `merge-manifest` job combining both by digest. Both matrix legs confirmed passing on real
+      native runners on PR #566's CI run (29s each, no QEMU). The "published" half — the manifest
+      actually pushed to `ghcr`/Docker Hub — still needs a push-to-`main` or release event, since
+      `merge-manifest` only runs when `should_publish` is true and a pull request never sets it.
 - [ ] The add-on installs on HAOS from the repository, appears in the sidebar, and the UI is fully
       usable through Ingress — including deep links and page reloads.
 - [ ] A request that sets the ingress header but does not come from the Supervisor is rejected.

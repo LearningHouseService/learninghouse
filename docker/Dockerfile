@@ -12,19 +12,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # by setuptools-scm, so the image needs neither a source tree nor git history.
 COPY dist/*.whl /build/
 
-# --index-strategy unsafe-best-match: piwheels only carries wheels for arm
-# platforms, not this amd64 build stage. uv's default index strategy stops at
-# the first index that lists a package name at all, regardless of whether it
-# has a matching wheel, and piwheels does list numpy here — just not for this
-# platform. pip's own extra-index-url behaviour falls through to PyPI in that
-# case; this flag restores it. Safe here because every dependency is an exact
-# pin from the wheel's own metadata, not a loose range.
 RUN uv venv /venv && \
     uv pip install \
     --python /venv/bin/python \
     --no-cache \
-    --extra-index-url https://www.piwheels.org/simple \
-    --index-strategy unsafe-best-match \
     /build/*.whl
 
 FROM python:3.13-slim

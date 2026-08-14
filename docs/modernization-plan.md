@@ -246,12 +246,18 @@ the result to uv afterwards.
   `astral-sh/setup-uv` and `enable-cache: true`, `uv sync` / `uv run`. The lockfile hash becomes the
   cache key instead of `pyproject.toml`'s hash, which is coarser than what pip currently keys on.
 - `docker/Dockerfile`: the `buildimage` stage currently creates a venv by hand and `pip install`s
-  the wheel with `--extra-index-url piwheels`. Replace with `uv sync --frozen` (or `uv pip install`
-  against the built wheel, whichever keeps the two-stage layout — wheel stays the artifact the image
-  installs, this phase only changes the tool that installs it) from an image with `uv` available
-  (either the `ghcr.io/astral-sh/uv` distroless copy trick, or `pip install uv` in the existing
-  `python:3.13` build stage — decide based on final image size). piwheels only matters if arm builds
-  stay on pip-built wheels; confirm uv resolves the same wheels there before dropping the fallback.
+  the wheel with `--extra-index-url piwheels`. Replace with `uv pip install` against the built
+  wheel (wheel stays the artifact the image installs, this phase only changes the tool that
+  installs it), `uv` itself copied in via the `ghcr.io/astral-sh/uv` distroless copy trick.
+  **Drop the `piwheels` index entirely, matching `solaredge2mqtt`.** It exists only to serve
+  prebuilt `armv6l`/`armv7l` wheels for `numpy`/`scipy`/`scikit-learn` — confirmed by `uv`'s own
+  resolver error when the index was kept: it lists `numpy` for `linux_armv6l`/`linux_armv7l` only,
+  not for the platform actually being built. Phase 9 already excludes `armv7` as a decision taken
+  up front (see its multi-architecture section), and Phase 9's `aarch64` target gets manylinux
+  wheels straight from PyPI, so nothing here still needs it. Without
+  `armv7` as a target, keeping `piwheels` would have meant carrying a `uv`-specific
+  `--index-strategy unsafe-best-match` workaround for an index the image no longer needs at all —
+  removed instead of worked around.
 - `AGENTS.md` developer commands (`pip install -e ".[dev]"`, etc.) updated to their `uv` equivalents.
 - Not in scope: changing the runtime dependency *versions* — that is Phase 3. This phase only
   changes the tool that resolves and installs them.

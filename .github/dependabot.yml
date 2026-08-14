@@ -10,9 +10,13 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-  # Maintain dependencies for pip
-  - package-ecosystem: "pip" 
-    directory: "/core" 
+  # Maintain dependencies for uv. Was "pip" until Phase 3 of
+  # docs/modernization-plan.md; that ecosystem type only understands
+  # pyproject.toml's version strings, not uv.lock, so it kept bumping pins
+  # without updating the lockfile - which check-core's `uv sync --locked`
+  # (Phase 2c) then correctly rejected on every such PR.
+  - package-ecosystem: "uv"
+    directory: "/core"
     schedule:
       interval: "daily"
   # Maintain dependencies for npm

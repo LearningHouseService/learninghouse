@@ -275,13 +275,24 @@ the result to uv afterwards.
   `docker/` before the build step — the lockfile-sync layer above needs its own copy since the
   Docker build context stays scoped to `docker/`, not the repository root.
 - `AGENTS.md` developer commands (`pip install -e ".[dev]"`, etc.) updated to their `uv` equivalents.
-- **Not adopted from `solaredge2mqtt` here:** its per-arch build matrix with digest-based manifest
-  merging is Phase 9 territory (multi-architecture build), not this phase — worth using as the
-  reference implementation when that phase starts. Its Dockerfile also ships source directly
-  (`COPY solaredge2mqtt/ ./solaredge2mqtt/`) instead of installing a wheel, which works for it
-  because it doesn't bundle a separately-built frontend into the package the way learninghouse
-  bundles the Angular UI into the wheel; switching learninghouse to that model would mean changing
-  what the Docker build context receives from CI, a bigger call than this phase makes.
+- **Multi-architecture build, pulled forward from Phase 9.** Originally scoped there, moved up once
+  dropping `piwheels` (above) raised the question of whether `arm64` still needed to wait: it
+  doesn't. Checked directly against PyPI — `numpy`, `pandas`, `scikit-learn` and `scipy` all publish
+  `manylinux_aarch64` wheels for `cp313` at the versions this project pins, so an `arm64` build never
+  needs to compile anything, the same as `amd64`. `build_project.yml`'s `variables` job gains
+  `image_name`/`ghcr_image`/`version`/`cache_ref_name` outputs (lowercased once, since `ghcr`/Docker
+  Hub reject the mixed case `github.repository` actually carries — `LearningHouseService` — and the
+  `merge-manifest` job below builds tags by hand in shell, where `docker/metadata-action`'s automatic
+  lowercasing doesn't apply). `build-docker` becomes a `linux/amd64` / `linux/arm64` matrix on native
+  runners (`ubuntu-latest` / `ubuntu-24.04-arm` — this repo is public, so both are free GitHub-hosted
+  runners), each leg pushing an arch-suffixed tag and exporting its image digest; QEMU is dropped
+  entirely since neither leg emulates. A new `merge-manifest` job downloads both digests and combines
+  them into the final multi-arch tags with `docker buildx imagetools create`, keyed by digest rather
+  than by the mutable per-arch tags so two overlapping workflow runs can't let an older push win.
+  Matches `solaredge2mqtt`'s pattern directly (same author, already proven there); the one thing
+  *not* adopted from it is its source-copy-instead-of-wheel Dockerfile, for the reason already given
+  above — learninghouse bundles the Angular UI into the wheel, `solaredge2mqtt` has no frontend to
+  bundle, so the two Dockerfiles' final stage keeps installing a wheel either way.
 - Not in scope: changing the runtime dependency *versions* — that is Phase 3. This phase only
   changes the tool that resolves and installs them.
 
@@ -304,6 +315,13 @@ the result to uv afterwards.
 - [x] `uv.lock` is committed and CI fails if it is out of sync with `pyproject.toml`. `check-core`
       runs `uv sync --extra dev --locked`; verified locally that `--locked` accepts a matching
       lockfile and rejects one made stale by editing a pin in `pyproject.toml` without updating it.
+- [x] The `arm64` leg of the Docker build resolves and installs every dependency from
+      `manylinux_aarch64` wheels, nothing compiles from source. Verified locally: `docker buildx
+      build --platform linux/arm64` against the same `Dockerfile` (QEMU-emulated, since this
+      machine is `amd64`) completed the dependency-sync and wheel-install layers successfully; the
+      real native-runner (`ubuntu-24.04-arm`) build and the multi-arch manifest push itself still
+      need this branch's first CI run to confirm, same open item as the CI-cache-speed criterion
+      above.
 
 ---
 
@@ -598,11 +616,16 @@ survives restarts and updates with its data intact.
 Decisions already taken for this phase: Ingress rather than a plain port; Ingress requests are
 trusted because Home Assistant has already authenticated the user; `amd64` and `aarch64` only.
 
-**Multi-architecture build.** `build_project.yml:164` sets `platforms: all` on the QEMU setup step,
-but `docker/build-push-action` receives no `platforms` input — so QEMU and Buildx are configured and
-then not used, and the published image is `amd64` only. Add `platforms: linux/amd64,linux/arm64`.
-`armv7` stays unsupported, consistent with the pvlearn plan, which excludes it because of the
-numpy/scipy/scikit-learn wheel situation. That limitation belongs prominently in the documentation.
+**Multi-architecture build — done early, in Phase 2c, not here.** Pulled forward once the piwheels
+drop and the wheel-availability check in that phase confirmed there was no longer a reason to wait:
+every dependency (`numpy`, `pandas`, `scikit-learn`, `scipy`) has `manylinux_aarch64` wheels for
+cp313 on PyPI, so nothing needs to compile on `arm64` either — the QEMU-emulation slowness that
+made this feel like a Phase 9 concern was never actually about wheel availability, just about
+`armv7`, which Phase 2c already dropped. `build-docker` is now a `linux/amd64` /
+`linux/arm64` matrix on native runners (`ubuntu-latest` / `ubuntu-24.04-arm`, no QEMU), with a
+`merge-manifest` job combining both by digest. `armv7` stays unsupported, consistent with the
+pvlearn plan, which excludes it for the same wheel-availability reason. That limitation belongs
+prominently in the documentation — still this phase's job, see below.
 
 **Ingress path handling.** Home Assistant serves add-ons under `/api/hassio_ingress/<token>/` and
 sets an `X-Ingress-Path` header. Three places break:
@@ -639,7 +662,13 @@ header alone.
   integration for free.
 
 **Acceptance**
-- [ ] The image is published for `linux/amd64` and `linux/arm64` and starts on both.
+- [x] The image is published for `linux/amd64` and `linux/arm64` and starts on both. Done in
+      Phase 2c: `build-docker` matrix on native `ubuntu-latest`/`ubuntu-24.04-arm` runners,
+      `merge-manifest` job pushing the combined manifest. Verified locally for `arm64` via
+      QEMU-emulated `docker buildx build --platform linux/arm64` — dependency resolution and image
+      build succeed (`manylinux_aarch64` wheels throughout, nothing compiles); real native-runner
+      confirmation happens on this branch's first CI run, same as the CI-cache-speed criterion in
+      Phase 2c.
 - [ ] The add-on installs on HAOS from the repository, appears in the sidebar, and the UI is fully
       usable through Ingress — including deep links and page reloads.
 - [ ] A request that sets the ingress header but does not come from the Supervisor is rejected.

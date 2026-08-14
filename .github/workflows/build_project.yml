@@ -20,6 +20,7 @@ jobs:
       image_name: ${{ steps.var.outputs.image_name }}
       ghcr_image: ${{ steps.var.outputs.ghcr_image }}
       version: ${{ steps.var.outputs.version }}
+      should_publish: ${{ steps.var.outputs.should_publish }}
     runs-on: "ubuntu-latest"
     steps:
       - name: Setting global variables
@@ -52,6 +53,19 @@ jobs:
 
             const refForVersion = '${{ github.ref_name }}' || '${{ github.event.release.tag_name }}';
             core.setOutput('version', refForVersion.replace(/^v/, ''));
+
+            // Precomputed here, not re-evaluated at every use site: a job-
+            // level `if:` (merge-manifest below) cannot see the `env`
+            // context at all - only `github`, `needs`, `vars` and `inputs`
+            // are available there - so `env.PACKAGE_BRANCHES` only ever
+            // worked in step-level `if:`s. Computing it once as a `needs`
+            // output works in both places.
+            const packageBranches = JSON.parse('${{ env.PACKAGE_BRANCHES }}');
+            const eventName = '${{ github.event_name }}';
+            const shouldPublish =
+              eventName === 'release' ||
+              (eventName === 'push' && packageBranches.includes('${{ github.ref_name }}'));
+            core.setOutput('should_publish', shouldPublish);
 
   # Lint, type check and tests. Runs before anything is built, and independently
   # of the UI, so a lint error fails within a minute instead of after a full
@@ -263,7 +277,7 @@ jobs:
       uses: docker/setup-buildx-action@master
 
     - name: Log in to the Docker github container registry
-      if: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
+      if: ${{ needs.variables.outputs.should_publish == 'true' }}
       uses: docker/login-action@v4.5.2
       with:
         registry: ${{ env.REGISTRY_GITHUB }}
@@ -300,7 +314,7 @@ jobs:
         builder: ${{ steps.buildx.outputs.name }}
         context: docker
         platforms: linux/${{ matrix.arch }}
-        push: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
+        push: ${{ needs.variables.outputs.should_publish == 'true' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         # CACHE_REF_NAME is the base branch on a pull request (see the
@@ -319,7 +333,7 @@ jobs:
     # win the final multi-arch manifest silently. A digest is immutable and
     # always names the exact image this job just built.
     - name: Export digest
-      if: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
+      if: ${{ needs.variables.outputs.should_publish == 'true' }}
       run: |
         mkdir -p /tmp/digests
         digest="${{ steps.build.outputs.digest }}"
@@ -327,7 +341,7 @@ jobs:
       shell: bash
 
     - name: Upload digest
-      if: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
+      if: ${{ needs.variables.outputs.should_publish == 'true' }}
       uses: actions/upload-artifact@v7
       with:
         name: digests-${{ matrix.arch }}
@@ -343,7 +357,7 @@ jobs:
       IMAGE_NAME: ${{ needs.variables.outputs.image_name }}
       GHCR_IMAGE: ${{ needs.variables.outputs.ghcr_image }}
       VERSION: ${{ needs.variables.outputs.version }}
-    if: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
+    if: ${{ needs.variables.outputs.should_publish == 'true' }}
     permissions:
       contents: read
       packages: write

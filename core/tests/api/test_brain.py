@@ -206,6 +206,38 @@ class TestPredictionPost:
         assert response.status_code == 404
         assert response.json()["error"] == "NOT_TRAINED"
 
+    def test_brain_trained_under_different_library_versions_is_rejected(
+        self, isolated_client, unlocked_admin_headers, monkeypatch
+    ):
+        """Guards Brain.actual_versions (models/brain.py), the check Phase 3's
+        scikit-learn bump relies on: a brain trained under one library set
+        must be rejected, not silently loaded, once the running versions
+        differ - see docs/modernization-plan.md Phase 3.
+
+        Training happens first with the real `versions`, so the pickled
+        Brain.versions snapshot captures it; the running versions.sklearn is
+        then changed post-training to simulate an upgrade that happened after
+        training, without needing to actually install a different
+        scikit-learn build to prove the check works.
+        """
+        _set_up_trained_brain(isolated_client, unlocked_admin_headers)
+
+        import learninghouse.models.brain as brain_module
+
+        upgraded_versions = brain_module.versions.model_copy(
+            update={"sklearn": "0.0.0-test-upgrade"}
+        )
+        monkeypatch.setattr(brain_module, "versions", upgraded_versions)
+
+        response = isolated_client.post(
+            f"/api/brain/{BRAIN_NAME}/prediction",
+            json={"azimuth": 150, "elevation": -10, "pressure_trend_1h": "falling"},
+            headers=unlocked_admin_headers,
+        )
+
+        assert response.status_code == 428
+        assert response.json()["error"] == "NOT_ACTUAL"
+
 
 class TestConfigurationGet:
     def test_existing_brain_configuration_is_returned(

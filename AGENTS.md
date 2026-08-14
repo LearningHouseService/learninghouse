@@ -16,7 +16,7 @@ and the API changes they need get their own plan.
   data and predicts values from it — darkness detection, heating setpoints, and anything else a
   user configures.
 - **Languages:** Python (>=3.13, <4) for the service, TypeScript/Angular for the UI.
-- **Package managers:** pip with `pyproject.toml` (`core/`), npm (`ui/`).
+- **Package managers:** [uv](https://docs.astral.sh/uv/) with `pyproject.toml` / `uv.lock` (`core/`), npm (`ui/`).
 - **Related project:** [`pvlearn`](https://github.com/LearningHouseService/pvlearn) — the PV
   forecast library learninghouse will depend on from Phase 6 onwards. Shared dependency pins are
   aligned with it; see chapter 3 of the modernization plan.
@@ -42,7 +42,7 @@ docs/                       # documentation and the modernization plan
 ```
 
 `core/README.md`, `core/LICENSE` and `core/THIRD-PARTY-NOTICES` are symlinks to the files at the
-repository root, so that `pip install -e .` works from a plain checkout without a copy step.
+repository root, so that `uv sync` works from a plain checkout without a copy step.
 
 ### Versioning
 
@@ -57,23 +57,21 @@ clone without tags produces a fallback version, which is why CI checks out with 
 All Python commands run in `core/`:
 
 ```bash
-# Install with all development dependencies
-pip install -e ".[dev]"
+# Install with all development dependencies (creates core/.venv, writes/reads uv.lock)
+uv sync --extra dev
 
 # Lint and format (must pass before commit)
-ruff check .
-ruff check . --fix    # auto-fix
-ruff format .
+uv run ruff check .
+uv run ruff check . --fix    # auto-fix
+uv run ruff format .
 
-# Type check — resolves against .venv at the repository root if there is one,
-# otherwise against the interpreter on PATH, which has to be the one the
-# package is installed into
-pyright
+# Type check — resolves against core/.venv, which uv sync created
+uv run pyright
 
 # Tests (parallel via pytest-xdist, -v --tb=short set in pyproject.toml)
-pytest
-pytest --cov=learninghouse --cov-report=xml:coverage.xml
-pytest tests/path/to/test_file.py
+uv run pytest
+uv run pytest --cov=learninghouse --cov-report=xml:coverage.xml
+uv run pytest tests/path/to/test_file.py
 ```
 
 UI commands run in `ui/`: `npm install`, `npm run build:core`, `npm test`.

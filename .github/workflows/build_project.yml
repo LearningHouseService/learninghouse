@@ -43,44 +43,31 @@ jobs:
         # setuptools-scm derives the version from tags on the repository root.
         fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v7
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Cache Python packages
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.cache/pip
-          !~/.cache/pip/log
-        key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
-          ${{ runner.os }}-python-${{ matrix.python-version }}-
-          ${{ runner.os }}-python-
-          ${{ runner.os }}-pip-
+        enable-cache: true
+        cache-dependency-glob: "core/uv.lock"
 
     - name: Install package with dev dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e ".[dev]"
+      run: uv sync --extra dev
       working-directory: core
 
     - name: Lint with ruff
-      run: ruff check .
+      run: uv run --no-sync ruff check .
       working-directory: core
 
     - name: Check formatting with ruff
-      run: ruff format --check .
+      run: uv run --no-sync ruff format --check .
       working-directory: core
 
     - name: Type check with pyright
-      run: pyright
+      run: uv run --no-sync pyright
       working-directory: core
 
     - name: Run tests with coverage
-      run: python -m pytest --cov=learninghouse --cov-report=xml:coverage.xml
+      run: uv run --no-sync pytest --cov=learninghouse --cov-report=xml:coverage.xml
       working-directory: core
 
   # Karma/Jasmine suite. Runs before the UI is built, same reasoning as check-core:
@@ -157,24 +144,12 @@ jobs:
         # setuptools-scm derives the version from tags on the repository root.
         fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v7
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v10
       with:
         python-version: ${{ matrix.python-version }}
-
-
-    - name: Cache Python packages
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.cache/pip
-          !~/.cache/pip/log
-        key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
-          ${{ runner.os }}-python-${{ matrix.python-version }}-
-          ${{ runner.os }}-python-
-          ${{ runner.os }}-pip-
+        enable-cache: true
+        cache-dependency-glob: "core/uv.lock"
 
     - name: Download UI
       uses: actions/download-artifact@v8
@@ -182,13 +157,8 @@ jobs:
         name: ui-artifacts-${{ env.REF_NAME }}
         path: core/learninghouse/ui
 
-    - name: Install build package
-      run: |
-        python -m pip install --upgrade pip
-        pip install build
-
     - name: Build package
-      run: python -m build
+      run: uv build
       working-directory: core
 
     - name: Save python artifacts

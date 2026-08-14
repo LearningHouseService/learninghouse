@@ -49,6 +49,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
         enable-cache: true
         cache-dependency-glob: "core/uv.lock"
+        # A cache written from a pull request is only ever read back by a
+        # re-run of that same PR, so saving one on every PR push is pure
+        # cache-quota spend for no reuse.
+        save-cache: ${{ github.event_name != 'pull_request' }}
 
     - name: Install package with dev dependencies
       run: uv sync --extra dev --locked
@@ -150,6 +154,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
         enable-cache: true
         cache-dependency-glob: "core/uv.lock"
+        # A cache written from a pull request is only ever read back by a
+        # re-run of that same PR, so saving one on every PR push is pure
+        # cache-quota spend for no reuse.
+        save-cache: ${{ github.event_name != 'pull_request' }}
 
     - name: Download UI
       uses: actions/download-artifact@v8
@@ -204,6 +212,13 @@ jobs:
         name: python-artifacts-3.13-${{ env.REF_NAME }}
         path: docker/dist
 
+    # The buildimage stage syncs dependencies from the lockfile before the
+    # wheel is installed on top, so it needs its own copy inside the build
+    # context (context: docker below, not the repository root).
+    - name: Copy uv lockfile into the Docker build context
+      run: cp core/pyproject.toml core/uv.lock docker/
+      shell: bash
+
     - name: Set up QEMU
       uses: docker/setup-qemu-action@master
       with:
@@ -253,3 +268,8 @@ jobs:
         push: ${{github.event_name == 'release' || (github.event_name == 'push' && contains(fromJSON(env.PACKAGE_BRANCHES), github.ref_name))}}
         tags: ${{github.event_name == 'release' && steps.meta_release.outputs.tags || steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        # Same reasoning as save-cache above: only push/release builds get to
+        # write the cache, so a PR build reads a warm cache without spending
+        # quota on one that only that PR's own re-runs could ever read back.
+        cache-to: ${{ (github.event_name == 'push' || github.event_name == 'release') && 'type=gha,mode=max' || '' }}

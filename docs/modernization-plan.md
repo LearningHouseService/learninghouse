@@ -243,22 +243,45 @@ the result to uv afterwards.
   Phase 1, this is here as a sanity check, not new work).
 - CI (`check-core`, `build-core` in `build_project.yml`): replace `actions/setup-python` +
   `pip install -e ".[dev]"` + the manual `actions/cache` block over `~/.cache/pip` with
-  `astral-sh/setup-uv` and `enable-cache: true`, `uv sync` / `uv run`. The lockfile hash becomes the
-  cache key instead of `pyproject.toml`'s hash, which is coarser than what pip currently keys on.
-- `docker/Dockerfile`: the `buildimage` stage currently creates a venv by hand and `pip install`s
-  the wheel with `--extra-index-url piwheels`. Replace with `uv pip install` against the built
-  wheel (wheel stays the artifact the image installs, this phase only changes the tool that
-  installs it), `uv` itself copied in via the `ghcr.io/astral-sh/uv` distroless copy trick.
+  `astral-sh/setup-uv` and `enable-cache: true`, `uv sync --locked` / `uv run`. The lockfile hash
+  becomes the cache key instead of `pyproject.toml`'s hash, which is coarser than what pip currently
+  keys on. `save-cache: ${{ github.event_name != 'pull_request' }}`, matching `solaredge2mqtt`: a
+  cache written from a PR run is only ever read back by a re-run of that same PR, so writing one on
+  every PR push is pure cache-quota spend for no reuse. `build-core` drops the separate "install
+  build package" step entirely — `uv build` replaces `pip install build && python -m build`.
+- `docker/Dockerfile`, matching `solaredge2mqtt`'s pattern directly rather than just replacing `pip`
+  with `uv pip` one-for-one: the `buildimage` stage now syncs dependencies from `core/uv.lock` first
+  (`uv sync --frozen --no-install-project`, under a BuildKit `--mount=type=cache` so the download
+  cache survives across builds), then installs the wheel on top with `uv pip install --no-deps`, so
+  a dependency-only change and a version-only rebuild invalidate different, independently cached
+  layers. `python:3.13-slim` replaces `python:3.13` for the build stage too (`solaredge2mqtt` runs
+  the build stage on `-slim` throughout); `UV_LINK_MODE=copy` (safe across the layer boundary this
+  stage's output crosses into `stage-1`), `UV_PYTHON_DOWNLOADS=never` (use the image's own
+  interpreter, don't let `uv` fetch one) and `UV_PROJECT_ENVIRONMENT=/venv` (point the sync straight
+  at the venv path the final stage copies out, no separate `uv venv` step). `uv` itself copied in via
+  the `ghcr.io/astral-sh/uv` distroless copy trick. The Docker build-push step gets the matching
+  `cache-from: type=gha` / `cache-to: type=gha,mode=max`, the latter gated the same way as
+  `save-cache` above — only push/release builds write it.
   **Drop the `piwheels` index entirely, matching `solaredge2mqtt`.** It exists only to serve
   prebuilt `armv6l`/`armv7l` wheels for `numpy`/`scipy`/`scikit-learn` — confirmed by `uv`'s own
   resolver error when the index was kept: it lists `numpy` for `linux_armv6l`/`linux_armv7l` only,
   not for the platform actually being built. Phase 9 already excludes `armv7` as a decision taken
   up front (see its multi-architecture section), and Phase 9's `aarch64` target gets manylinux
-  wheels straight from PyPI, so nothing here still needs it. Without
-  `armv7` as a target, keeping `piwheels` would have meant carrying a `uv`-specific
-  `--index-strategy unsafe-best-match` workaround for an index the image no longer needs at all —
-  removed instead of worked around.
+  wheels straight from PyPI, so nothing here still needs it. Without `armv7` as a target, keeping
+  `piwheels` would have meant carrying a `uv`-specific `--index-strategy unsafe-best-match`
+  workaround for an index the image no longer needs at all — removed instead of worked around.
+- `docker/.dockerignore` widens from `!dist/*.whl` only to also allow `pyproject.toml` and `uv.lock`
+  into the build context, and `build_project.yml`'s `build-docker` job copies both from `core/` into
+  `docker/` before the build step — the lockfile-sync layer above needs its own copy since the
+  Docker build context stays scoped to `docker/`, not the repository root.
 - `AGENTS.md` developer commands (`pip install -e ".[dev]"`, etc.) updated to their `uv` equivalents.
+- **Not adopted from `solaredge2mqtt` here:** its per-arch build matrix with digest-based manifest
+  merging is Phase 9 territory (multi-architecture build), not this phase — worth using as the
+  reference implementation when that phase starts. Its Dockerfile also ships source directly
+  (`COPY solaredge2mqtt/ ./solaredge2mqtt/`) instead of installing a wheel, which works for it
+  because it doesn't bundle a separately-built frontend into the package the way learninghouse
+  bundles the Angular UI into the wheel; switching learninghouse to that model would mean changing
+  what the Docker build context receives from CI, a bigger call than this phase makes.
 - Not in scope: changing the runtime dependency *versions* — that is Phase 3. This phase only
   changes the tool that resolves and installs them.
 
@@ -274,9 +297,10 @@ the result to uv afterwards.
       `cache-dependency-glob: "core/uv.lock"`); the speed comparison itself needs an actual run on
       GitHub Actions and could not be verified locally — check after this branch's first CI run.
 - [x] The Docker image builds via `uv` and starts identically to the pip-built image (same
-      `/api/versions` output, same entry point). Verified locally: built the image from a wheel
-      produced by `uv build`, ran it, `curl /api/versions` returned the same payload the pip-built
-      image returned, same `python3 -m learninghouse` entry point, same startup log lines.
+      `/api/versions` output, same entry point). Verified locally against the final two-layer
+      buildimage (lockfile sync, then wheel installed with `--no-deps`, `piwheels` dropped): built,
+      ran it, `curl /api/versions` returned the same payload the pip-built image returned, same
+      `python3 -m learninghouse` entry point, same startup log lines.
 - [x] `uv.lock` is committed and CI fails if it is out of sync with `pyproject.toml`. `check-core`
       runs `uv sync --extra dev --locked`; verified locally that `--locked` accepts a matching
       lockfile and rejects one made stale by editing a pin in `pyproject.toml` without updating it.

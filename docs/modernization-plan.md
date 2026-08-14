@@ -59,7 +59,9 @@ following phases is riskier than it needs to be.
 | 1 | Development environment, toolchain, CI gates | your list #1, extended |
 | 2 | Test foundation and de-globalization | added in review |
 | 2b | UI test foundation | added in review |
+| 2c | uv for the Python build and Docker image | added in review, patterned after `solaredge2mqtt` |
 | 3 | Dependency updates | your list #2 |
+| 3b | Configuration via `configuration.yaml` / `secrets.yaml` | added in review, patterned after `solaredge2mqtt` |
 | 4 | Security hardening | added in review |
 | 5 | Persistence on SQLite | your list #3 |
 | 6 | pvlearn as a library dependency | your list #4 |
@@ -67,7 +69,7 @@ following phases is riskier than it needs to be.
 | 8 | Brain on a scikit-learn pipeline | your list #6 |
 | 9 | Home Assistant add-on | from the add-on assessment |
 
-Phases 2, 2b and 4 did not come from the original list; they were added during review and
+Phases 2, 2b, 2c, 3b and 4 did not come from the original list; they were added during review and
 confirmed. The reasoning for each is in its own section.
 
 **One pull request per phase**, matching the convention adopted in `pvlearn`. Commits within a
@@ -227,13 +229,56 @@ exercise, which is why the floor above is lower than the number Phase 2b started
 
 ---
 
+### Phase 2c — uv for the Python build and Docker image
+
+**Goal:** Faster, reproducible Python installs, with CI cache hits that key off a lockfile instead
+of pip's per-run wheel cache — the same setup `solaredge2mqtt` already runs.
+
+Placed before Phase 3 rather than after: Phase 3 re-pins every shared dependency against `pvlearn`.
+Doing that pinning once, directly in a `uv.lock`, is cheaper than pinning with pip first and moving
+the result to uv afterwards.
+
+- `core/pyproject.toml` stays the single source of truth for dependencies; add a committed
+  `uv.lock` and drop `setup.py`-era assumptions that no longer apply (there are none left after
+  Phase 1, this is here as a sanity check, not new work).
+- CI (`check-core`, `build-core` in `build_project.yml`): replace `actions/setup-python` +
+  `pip install -e ".[dev]"` + the manual `actions/cache` block over `~/.cache/pip` with
+  `astral-sh/setup-uv` and `enable-cache: true`, `uv sync` / `uv run`. The lockfile hash becomes the
+  cache key instead of `pyproject.toml`'s hash, which is coarser than what pip currently keys on.
+- `docker/Dockerfile`: the `buildimage` stage currently creates a venv by hand and `pip install`s
+  the wheel with `--extra-index-url piwheels`. Replace with `uv sync --frozen` (or `uv pip install`
+  against the built wheel, whichever keeps the two-stage layout — wheel stays the artifact the image
+  installs, this phase only changes the tool that installs it) from an image with `uv` available
+  (either the `ghcr.io/astral-sh/uv` distroless copy trick, or `pip install uv` in the existing
+  `python:3.13` build stage — decide based on final image size). piwheels only matters if arm builds
+  stay on pip-built wheels; confirm uv resolves the same wheels there before dropping the fallback.
+- `AGENTS.md` developer commands (`pip install -e ".[dev]"`, etc.) updated to their `uv` equivalents.
+- Not in scope: changing the runtime dependency *versions* — that is Phase 3. This phase only
+  changes the tool that resolves and installs them.
+
+**Acceptance**
+- [ ] `uv sync` from a clean clone reproduces the same environment `pip install -e ".[dev]"` produced
+      before this phase (`ruff check .`, `pyright`, `pytest` all still pass).
+- [ ] CI's `check-core` and `build-core` jobs use `astral-sh/setup-uv` with caching enabled, and a
+      second run against an unchanged lockfile is measurably faster than the pip-cache baseline.
+- [ ] The Docker image builds via `uv` and starts identically to the pip-built image (same
+      `/api/versions` output, same entry point).
+- [ ] `uv.lock` is committed and CI fails if it is out of sync with `pyproject.toml`.
+
+---
+
 ### Phase 3 — Dependency updates
 
 **Goal:** Current, coherent dependency set on both sides, with the shared packages already aligned
 to what `pvlearn` pins.
 
-- Merge or close the open Dependabot branches (currently nine, spanning GitHub Actions, npm and
-  pip).
+- Merge or close the open Dependabot branches (14 as of 2026-08-14, spanning GitHub Actions, npm and
+  pip — up from nine when this plan was first written; the backlog grows if left unmerged, so this
+  bullet is not a one-time cleanup, it is the reason this phase exists now rather than later).
+  `#514` (`scikit-learn` 1.8.0 → 1.9.0) already does this phase's load-bearing bump — verify
+  `BrainNotActual` per the risk below before merging it rather than redoing the bump from scratch.
+  `#511` (`typescript` 5.9.3 → 6.0.3) is a major version; confirm it compiles against the pinned
+  Angular 21 toolchain before merging, don't wave it through with the patch-level bumps.
 - Angular and the npm toolchain to current.
 - Python dependencies to current — **with one constraint that shapes this phase**: `pvlearn` pins
   its dependencies *exactly*, not as ranges. Once Phase 6 adds `pvlearn` to `install_requires`, pip
@@ -270,6 +315,77 @@ to what `pvlearn` pins.
 
 ---
 
+### Phase 3b — Configuration via `configuration.yaml` / `secrets.yaml`
+
+**Goal:** Replace the environment-variable-driven settings with a `configuration.yaml` plus a
+separate `secrets.yaml` for sensitive values — the model `solaredge2mqtt` already uses, and the one
+Phase 9's Home Assistant add-on will want to read from its mapped `/data` directory anyway.
+
+`ServiceSettings.__init__` (`core/learninghouse/core/settings/models.py`) currently merges three
+sources in order: `_read_environment`, `_read_dotenv`, `_read_secrets` (Docker secrets under
+`/run/secrets`). All three are ways of avoiding one readable file; a `configuration.yaml` is that
+file, and separating `secrets.yaml` keeps the split Docker secrets already made (config vs.
+sensitive values) without needing the Docker-specific mechanism.
+
+- `ServiceSettings` reads `configuration.yaml` for everything currently settable via `LEARNINGHOUSE_*`
+  (`host`, `port`, `workers`, `logging_level`, CORS origins from Phase 4, …), and `secrets.yaml` for
+  `jwt_secret` and anything else that should never be readable from the general config file or from
+  logs.
+- One bootstrap value has to stay resolvable before either YAML file can be located:
+  `config_directory` (or an explicit path to `configuration.yaml`) remains settable via a single
+  environment variable, matching how `solaredge2mqtt` bootstraps its own config path. Everything
+  downstream of that path moves to YAML.
+- **`jwt_secret` gets its persistent home here, not in Phase 5.** Today it defaults to a fresh
+  `token_hex(16)` per process start (`core/settings/models.py:39`); Phase 4 originally proposed
+  persisting it via the Phase 5 SQLite database. Writing it into `secrets.yaml` on first start
+  achieves the same thing without waiting on Phase 5, and is simpler — the value never becomes a
+  table for one row. Phase 4's acceptance criterion ("sessions survive a restart") is satisfiable
+  starting in this phase.
+- `docker/Dockerfile` currently hardcodes `LEARNINGHOUSE_HOST=0.0.0.0` and `LEARNINGHOUSE_PORT=5000`
+  as image `ENV` values. Replace with a documented default `configuration.yaml` baked into the image
+  (or written on first start if the mounted volume doesn't have one), overridable by mounting a file
+  over it.
+- **Migration for existing installations: a one-shot script, not a runtime fallback.** Reading
+  `LEARNINGHOUSE_*` as a permanent deprecated fallback keeps two settings paths alive indefinitely
+  and defeats the point of this phase. Instead, ship a migration script (`core/scripts/` or a
+  console entry point, e.g. `learninghouse-migrate-config`) that reads every `LEARNINGHOUSE_*`
+  variable currently set in the process environment (and `.env` if present) and writes them into a
+  `configuration.yaml` / `secrets.yaml` pair at the target `config_directory`. Run once, by hand, on
+  upgrade — not on every start.
+  - Must be idempotent-safe to re-run: refuses to overwrite an existing `configuration.yaml` /
+    `secrets.yaml` unless passed an explicit `--force`, so re-running it after a manual edit doesn't
+    silently clobber it.
+  - Splits sensitive values (`jwt_secret`, anything else Phase 3b routes to `secrets.yaml`) from the
+    rest correctly — same split the settings loader itself uses, driven by one shared field list so
+    the two can't drift apart.
+  - Console form: run directly against a `config_directory` on disk, e.g.
+    `learninghouse-migrate-config --config-directory ./brains`.
+  - Docker form: run once inside the container against the mounted volume before switching the image
+    to the version that requires YAML config, e.g.
+    `docker run --rm --env-file .env -v <volume>:/learninghouse/brains <image> learninghouse-migrate-config`,
+    reusing the same `.env`/`LEARNINGHOUSE_*` variables the old container was started with.
+- **README.** Document both invocation forms above, plus what the script does and does not migrate
+  (env vars only — it does not touch brain data, sensors or the security database), as part of this
+  phase, not deferred to Phase 9. Section 4's versioning discipline already expects a changelog entry
+  for a breaking change; this is one.
+
+**Acceptance**
+- [ ] Every setting currently readable from a `LEARNINGHOUSE_*` environment variable is readable from
+      `configuration.yaml`.
+- [ ] `jwt_secret` (and any other sensitive value) is read only from `secrets.yaml`, never from
+      `configuration.yaml`, the environment, or logged output.
+- [ ] `jwt_secret` persists across a service restart without depending on Phase 5.
+- [ ] The Docker image starts correctly with only a mounted `configuration.yaml`, no `LEARNINGHOUSE_*`
+      environment variables set.
+- [ ] The migration script converts a representative set of `LEARNINGHOUSE_*` variables (including at
+      least one that must land in `secrets.yaml`) into a correct `configuration.yaml` /
+      `secrets.yaml` pair, verified against a fixture of the old environment-variable layout.
+- [ ] The migration script refuses to overwrite existing YAML files without `--force`.
+- [ ] README documents console and Docker invocation of the migration script, and the changelog
+      records the breaking change.
+
+---
+
 ### Phase 4 — Security hardening
 
 **Goal:** Close the findings that would otherwise ship into people's homes in Phase 9.
@@ -281,14 +397,15 @@ because by then someone is depending on the current behaviour.
   Starlette resolves that combination by reflecting the request's `Origin` header back instead of
   sending a wildcard, which means any web page a user visits can make authenticated requests to
   their learninghouse instance. Replace with a configurable origin list, defaulting to the UI's own
-  origin.
+  origin — the list lives in `configuration.yaml` since Phase 3b.
 - **API keys in the query string.** `services/auth.py:32` accepts the key via `APIKeyQuery` as well
   as the header. Query strings end up in access logs, proxy logs and browser history. Deprecate the
   query variant, keep the header.
 - **JWT secret.** `core/settings/models.py:39` defaults `jwt_secret` to a fresh `token_hex(16)` per
   process start. Consequences: every restart invalidates all sessions, and with `workers > 1` each
-  worker generates its own secret, so tokens issued by one worker are rejected by another. Persist
-  the secret (Phase 5 gives it a natural home) and log a warning when it had to be generated.
+  worker generates its own secret, so tokens issued by one worker are rejected by another. Phase 3b
+  already persists it in `secrets.yaml`; this phase only needs the warning log for when it had to be
+  generated for the first time.
 - **Refresh tokens in memory.** `AuthServiceInternal.refresh_tokens` is a per-process dict, which is
   the second half of the same multi-worker problem. Either persist it or document that `workers`
   must stay at 1.
@@ -312,8 +429,9 @@ Today: brain configuration in `config.json`, sensors in `brains/sensors.json`, t
 model as a pickle. Reading a single training row means loading the entire CSV; appending one means
 rewriting it.
 
-- Single SQLite database in the configuration directory. Tables for brains, sensors, training data,
-  security/API keys, and the JWT secret from Phase 4.
+- Single SQLite database in the configuration directory. Tables for brains, sensors, training data
+  and security/API keys. The JWT secret does *not* move here — it stays in `secrets.yaml` since
+  Phase 3b, deliberately outside the database that gets backed up/inspected alongside brain data.
 - **Design the training-data table for time series now.** A timestamp column, a uniqueness
   constraint on it, and idempotent upsert. This costs nothing today and is exactly what the later
   pvlearn integration needs: weather snapshots written ahead of time, the measured target value
@@ -470,7 +588,10 @@ header alone.
 - Add-on repository under `LearningHouseService/hassio-addons`, or the add-on added to an existing
   one.
 - `config.yaml` with options for log level, port and CORS origins; `ingress: true`; `map: [data:rw]`
-  with `LEARNINGHOUSE_CONFIG_DIRECTORY` pointed at `/data`.
+  with the bootstrap config path from Phase 3b pointed at `/data`. The add-on's options translate
+  into the `configuration.yaml` written to that mount rather than into environment variables — the
+  natural use case Phase 3b was built for. `secrets.yaml` on the same mount also gives Home
+  Assistant's own `!secret` convention a familiar counterpart on this side.
 - A watchdog URL. `/api/mode` exists and would serve, though a dedicated `/health` that does not
   touch auth state is cleaner.
 - Decide between the current standalone Dockerfile and the Home Assistant Python base images with
@@ -532,6 +653,10 @@ invalidate trained models and each need an explicit changelog entry saying so.
    is correct; for timestamped, autocorrelated rows it is not. The same question is open in pvlearn.
    Whether learninghouse switches to a chronological split — and whether that is per brain or
    global — is a real modelling decision, not a bug fix.
+7. ~~**`LEARNINGHOUSE_*` environment variables: deprecated fallback or breaking change** once
+   `configuration.yaml` / `secrets.yaml` land.~~ Resolved in Phase 3b: breaking change, mitigated by
+   a one-shot migration script (`learninghouse-migrate-config`) documented in the README for both
+   console and Docker use — no permanent env-var fallback.
 
 ---
 
@@ -544,6 +669,7 @@ invalidate trained models and each need an explicit changelog entry saying so.
 | scikit-learn 1.9.0 bump invalidates existing brains without the version check catching it | Models keep loading and silently mispredict | Verify `BrainNotActual` covers the library version before Phase 3 merges |
 | Exact pins in pvlearn collide with learninghouse's own | Installation fails outright | Align shared pins in Phase 3, before pvlearn is added in Phase 6 |
 | Ingress header trusted without checking the peer | Complete authentication bypass over the exposed port | Verify the Supervisor's address; covered by an explicit acceptance criterion in Phase 9 |
+| Existing deployments break silently when `LEARNINGHOUSE_*` env vars stop being read | Users lose their configuration on upgrade | Phase 3b ships a one-shot migration script plus README/changelog documentation, required by its acceptance criteria |
 | The plan grows to absorb the pvlearn integration | Nothing ships | Scheduler, event bus, weather providers and API changes are explicitly out of scope and get their own plan |
 
 ---
@@ -557,7 +683,11 @@ P2  Tests + de-globalization        ← without this nothing below is verifiable
  │
 P2b Angular test foundation         ← same reasoning as P2, applied before P3 touches the UI stack
  │
+P2c uv build + Docker + CI caching  ← pins land in a lockfile once, not pip then uv
+ │
 P3  Dependency updates              ← aligns shared pins with pvlearn
+ │
+P3b Config via YAML + secrets       ← gives Phase 4's jwt_secret a home before Phase 4 needs it
  │
 P4  Security hardening              ← cheaper now than after the add-on ships
  │

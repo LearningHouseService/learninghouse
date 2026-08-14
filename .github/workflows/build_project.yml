@@ -51,7 +51,7 @@ jobs:
         cache-dependency-glob: "core/uv.lock"
 
     - name: Install package with dev dependencies
-      run: uv sync --extra dev
+      run: uv sync --extra dev --locked
       working-directory: core
 
     - name: Lint with ruff

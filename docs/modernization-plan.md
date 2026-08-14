@@ -257,13 +257,23 @@ the result to uv afterwards.
   changes the tool that resolves and installs them.
 
 **Acceptance**
-- [ ] `uv sync` from a clean clone reproduces the same environment `pip install -e ".[dev]"` produced
-      before this phase (`ruff check .`, `pyright`, `pytest` all still pass).
+- [x] `uv sync` from a clean clone reproduces the same environment `pip install -e ".[dev]"` produced
+      before this phase (`ruff check .`, `pyright`, `pytest` all still pass). Verified locally:
+      `uv sync --extra dev` then `ruff check .`, `ruff format --check .`, `pyright` and
+      `pytest --cov=learninghouse --cov-report=xml:coverage.xml` all pass (70 passed, 85.61%
+      coverage, above the Phase 2 floor).
 - [ ] CI's `check-core` and `build-core` jobs use `astral-sh/setup-uv` with caching enabled, and a
       second run against an unchanged lockfile is measurably faster than the pip-cache baseline.
-- [ ] The Docker image builds via `uv` and starts identically to the pip-built image (same
-      `/api/versions` output, same entry point).
-- [ ] `uv.lock` is committed and CI fails if it is out of sync with `pyproject.toml`.
+      Jobs are wired up (`astral-sh/setup-uv@v10`, `enable-cache: true`,
+      `cache-dependency-glob: "core/uv.lock"`); the speed comparison itself needs an actual run on
+      GitHub Actions and could not be verified locally — check after this branch's first CI run.
+- [x] The Docker image builds via `uv` and starts identically to the pip-built image (same
+      `/api/versions` output, same entry point). Verified locally: built the image from a wheel
+      produced by `uv build`, ran it, `curl /api/versions` returned the same payload the pip-built
+      image returned, same `python3 -m learninghouse` entry point, same startup log lines.
+- [x] `uv.lock` is committed and CI fails if it is out of sync with `pyproject.toml`. `check-core`
+      runs `uv sync --extra dev --locked`; verified locally that `--locked` accepts a matching
+      lockfile and rejects one made stale by editing a pin in `pyproject.toml` without updating it.
 
 ---
 

@@ -1,7 +1,19 @@
 name: build-project
 
+# Without a branch filter, `push:` fires on every branch - including one that
+# already has an open pull request, which then also fires `pull_request:` for
+# the same commit. Restricting push to `main` leaves pull_request as the only
+# trigger while a PR is open; concurrency then cancels a run superseded by a
+# newer push to the same PR/ref instead of letting both finish. Matches
+# solaredge2mqtt's build_project.yml (same author, same fix already proven
+# there).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
+    branches: [main]
   pull_request:
     branches: main
   release:

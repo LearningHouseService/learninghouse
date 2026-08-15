@@ -23,19 +23,26 @@ classifiers = [
 # resolve changes. The build-system requirements below stay on lower bounds:
 # they shape how the wheel is built, not how the installed package behaves.
 #
-# The shared pins with pvlearn (numpy, pandas, scikit-learn, pydantic) are
-# deliberately still on learninghouse's own versions here — aligning them with
-# pvlearn's is Phase 3 of docs/modernization-plan.md, and doing it in this
-# phase would mean changing predictions before any test pins them down.
+# The shared pins (numpy, pandas, scikit-learn, scipy, pydantic, joblib) now
+# match pvlearn exactly, aligned in Phase 3 of docs/modernization-plan.md —
+# verified by installing both into one environment (see that phase's
+# acceptance criteria). scipy and joblib are pinned explicitly even though
+# scikit-learn already pulls both in transitively: joblib is imported
+# directly (models/brain.py, joblib.dump/load), and pinning scipy here rather
+# than leaving it to whatever scikit-learn's own range resolves to is what
+# "matches pvlearn exactly" actually requires — a transitive resolve is not
+# a pin.
 dependencies = [
     "fastapi==0.141.1",
+    "joblib==1.5.3",
     "loguru==0.7.3",
     "numpy==2.5.1",
     "pandas==3.0.5",
     "passlib==1.7.4",
     "pydantic==2.13.4",
     "PyJWT==2.13.0",
-    "scikit-learn==1.8.0",
+    "scikit-learn==1.9.0",
+    "scipy==1.18.0",
     "uvicorn[standard]==0.52.1",
 ]
 

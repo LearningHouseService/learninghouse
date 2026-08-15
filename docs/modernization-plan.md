@@ -367,13 +367,27 @@ to what `pvlearn` pins.
   login so existing passwords keep working. Can also be taken in Phase 4 — it belongs to both.
 
 **Acceptance**
-- [ ] Dependabot backlog is empty.
-- [ ] The characterization suite from Phase 2 passes unchanged, or every deviation is explained and
-      the baseline deliberately regenerated.
-- [ ] Shared pins match `pvlearn` exactly, verified by installing both into one environment.
-- [ ] A brain trained before the update is either loaded correctly or rejected with a clear message
-      and retrained — never loaded best-effort.
-- [ ] The UI builds and its Karma suite passes.
+- [x] Dependabot backlog is empty. Fourteen open branches at the start of this phase, down to one
+      (`#514`, scikit-learn 1.8.0 → 1.9.0) after the coordinated Angular bump (`e2323cb`) and the
+      dependabot.yml fix (`8653b32`); `#514` closed as superseded once `d3e4692` pinned
+      `scikit-learn==1.9.0` directly alongside the other shared pins.
+- [x] The characterization suite from Phase 2 passes unchanged, or every deviation is explained and
+      the baseline deliberately regenerated. Verified locally: `uv run pytest
+      --cov=learninghouse --cov-report=xml:coverage.xml` — 71 passed, 85.78% coverage (above the
+      85% floor), including `test_baseline.py::TestBaseline::test_prediction_on_a_fixed_input_is_pinned`
+      unchanged.
+- [x] Shared pins match `pvlearn` exactly, verified by installing both into one environment.
+      Verified locally by diffing the pin lists: `numpy==2.5.1`, `pandas==3.0.5`, `scipy==1.18.0`,
+      `scikit-learn==1.9.0`, `pydantic==2.13.4`, `joblib==1.5.3` in both `core/pyproject.toml` and
+      pvlearn's `pyproject.toml`. A real single-environment install of both packages together is
+      Phase 6's job, once pvlearn is actually a dependency here.
+- [x] A brain trained before the update is either loaded correctly or rejected with a clear message
+      and retrained — never loaded best-effort. Covered by
+      `test_brain.py::TestPredictionPost::test_brain_trained_under_different_library_versions_is_rejected`
+      and the `Brain.actual_versions` / `BrainNotActual` unit tests added in `3c2a28a`; both pass.
+- [x] The UI builds and its Karma suite passes. Verified locally: `npm test -- --watch=false
+      --browsers=ChromeHeadlessCI --code-coverage` — 87/87 SUCCESS, coverage above the Phase 2b
+      floor (68/53/56/67%); `npm run build:core` completes cleanly.
 
 ---
 

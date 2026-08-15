@@ -41,6 +41,7 @@ dependencies = [
     "passlib==1.7.4",
     "pydantic==2.13.4",
     "PyJWT==2.13.0",
+    "PyYAML==6.0.3",
     "scikit-learn==1.9.0",
     "scipy==1.18.0",
     "uvicorn[standard]==0.52.1",
@@ -66,6 +67,7 @@ dev = [
 
 [project.scripts]
 learninghouse = "learninghouse.service:run"
+learninghouse-migrate-config = "learninghouse.scripts.migrate_config:main"
 
 [build-system]
 requires = [
@@ -132,11 +134,13 @@ omit = [
 
 # Floor set by Phase 2 of docs/modernization-plan.md, at the characterization
 # suite's actual combined line+branch coverage (85.75% measured; 85 leaves a
-# small margin rather than chasing the exact decimal). Phase 3 should ratchet
-# this upward as the dependency-update work adds its own tests; open decision
-# 4 in the plan is which number arrives next and when, not whether one does.
+# small margin rather than chasing the exact decimal). Ratcheted to 87 in
+# Phase 3b: the new configuration.yaml/secrets.yaml loader and the
+# learninghouse-migrate-config tests raised measured coverage to 87.04%.
+# Open decision 4 in the plan is which number arrives next and when, not
+# whether one does.
 [tool.coverage.report]
-fail_under = 85
+fail_under = 87
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

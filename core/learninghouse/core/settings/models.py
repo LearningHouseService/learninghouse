@@ -1,16 +1,25 @@
-from collections.abc import Callable, Generator
-from os import environ, listdir, path
+from os import environ
 from pathlib import Path
 from secrets import token_hex
 from typing import Any, Dict, Optional, Union
 
+import yaml
 from pydantic import BaseModel, DirectoryPath
 
 from learninghouse import versions
 from learninghouse.core.logger.models import LoggingLevelEnum
 from learninghouse.errors import LearningHouseException, LearningHouseValidationError
 
-DOCKER_SECRETS_DIR = "/run/secrets"
+CONFIG_DIRECTORY_ENV = "LEARNINGHOUSE_CONFIG_DIRECTORY"
+
+CONFIGURATION_FILENAME = "configuration.yaml"
+SECRETS_FILENAME = "secrets.yaml"
+
+# Fields that must never end up in configuration.yaml - readable only from
+# secrets.yaml, the environment, or logged output. Shared with
+# learninghouse.scripts.migrate_config so the settings loader and the
+# migration script cannot drift apart on what counts as sensitive.
+SECRET_FIELDS = {"jwt_secret"}
 
 LICENSE_URL = "https://github.com/LearningHouseService/learninghouse/blob/main/LICENSE"
 
@@ -35,15 +44,80 @@ class ServiceSettings(BaseModel):
 
     logging_level: LoggingLevelEnum = LoggingLevelEnum.INFO
 
-    jwt_secret: str = token_hex(16)
+    jwt_secret: str = ""
     jwt_expire_minutes: int = 10
 
     def __init__(self, **data: Any):
-        sources = [self._read_environment, self._read_dotenv, self._read_secrets]
-        data = self._parse_key_and_values(sources, data)
+        # Keys passed explicitly to the constructor take precedence over
+        # every file-backed source below - otherwise an explicit
+        # ServiceSettings(config_directory=...) is silently overwritten by
+        # whatever configuration.yaml a stale directory happens to contain.
+        explicit_keys = set(data.keys())
+
+        config_directory = self._resolve_config_directory(data)
+
+        if "config_directory" not in explicit_keys:
+            data["config_directory"] = config_directory
+
+        configuration = self._read_yaml_file(config_directory / CONFIGURATION_FILENAME)
+        for key, value in configuration.items():
+            # config_directory is the bootstrap value that determined where
+            # this very file lives - it cannot also be set from inside it.
+            if (
+                key in explicit_keys
+                or key == "config_directory"
+                or key in SECRET_FIELDS
+            ):
+                continue
+            data[key] = value
+
+        if "jwt_secret" not in explicit_keys:
+            data["jwt_secret"] = self._resolve_jwt_secret(config_directory)
+
         data = self.set_development_defaults(data)
 
         super().__init__(**data)
+
+    @staticmethod
+    def _resolve_config_directory(data: Dict[str, Any]) -> Path:
+        if "config_directory" in data:
+            return Path(data["config_directory"])
+
+        env_value = environ.get(CONFIG_DIRECTORY_ENV)
+        if env_value:
+            return Path(env_value)
+
+        return Path("./brains")
+
+    @classmethod
+    def _resolve_jwt_secret(cls, config_directory: Path) -> str:
+        secrets_file = config_directory / SECRETS_FILENAME
+        secrets = cls._read_yaml_file(secrets_file)
+
+        jwt_secret = secrets.get("jwt_secret")
+        if not jwt_secret:
+            jwt_secret = token_hex(16)
+            secrets["jwt_secret"] = jwt_secret
+            cls._write_secrets_file(secrets_file, secrets)
+
+        return jwt_secret
+
+    @staticmethod
+    def _read_yaml_file(file_path: Path) -> Dict[str, Any]:
+        if not file_path.exists():
+            return {}
+
+        with open(file_path, "r", encoding="utf-8") as handle:
+            content = yaml.safe_load(handle)
+
+        return content or {}
+
+    @staticmethod
+    def _write_secrets_file(file_path: Path, secrets: Dict[str, Any]) -> None:
+        with open(file_path, "w", encoding="utf-8") as handle:
+            yaml.safe_dump(secrets, handle, sort_keys=False)
+
+        file_path.chmod(0o600)
 
     def set_development_defaults(self, data: Dict[str, Any]) -> Dict[str, Any]:
         if "environment" in data and data["environment"] == "development":
@@ -122,64 +196,3 @@ class ServiceSettings(BaseModel):
     @property
     def jwt_payload_claims(self) -> Dict[str, str]:
         return {"audience": "LearningHouseAPI", "issuer": "LearningHouse Service"}
-
-    def _parse_key_and_values(
-        self,
-        sources: list[Callable[[], Generator[tuple[str, str], None, None]]],
-        data: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        # Keys passed explicitly to the constructor take precedence over every
-        # source below - otherwise an explicit ServiceSettings(config_directory=...)
-        # is silently overwritten whenever the matching environment variable is
-        # set, which is exactly the case in a test process that also carries
-        # LEARNINGHOUSE_CONFIG_DIRECTORY for the default settings instance.
-        explicit_keys = set(data.keys())
-
-        for source in sources:
-            for key, value in source():
-                key = key.lower().strip()[len("learninghouse_") :]  # remove prefix
-                subkeys = key.split("__")  # get nested structure
-                if subkeys[0] in explicit_keys:
-                    continue
-
-                context = data
-                for subkey in subkeys[:-1]:
-                    if subkey not in context:
-                        context[subkey] = {}
-                    context = context[subkey]
-
-                context[subkeys[-1]] = (
-                    value.strip()
-                )  # Missing possibility to set nested json values
-
-        return data
-
-    @classmethod
-    def _read_environment(cls) -> Generator[tuple[str, str], None, None]:
-        for key, value in environ.items():
-            if cls._has_prefix(key):
-                yield key, value
-
-    @classmethod
-    def _read_secrets(cls) -> Generator[tuple[str, str], None, None]:
-        if path.exists(DOCKER_SECRETS_DIR) and path.isdir(DOCKER_SECRETS_DIR):
-            for filename in listdir(DOCKER_SECRETS_DIR):
-                if cls._has_prefix(filename):
-                    with open(
-                        path.join(DOCKER_SECRETS_DIR, filename), "r", encoding="utf-8"
-                    ) as f:
-                        yield filename, f.read()
-
-    @classmethod
-    def _read_dotenv(cls) -> Generator[tuple[str, str], None, None]:
-        if path.exists(".env"):
-            with open(".env", "r", encoding="utf-8") as f:
-                for line in f.readlines():
-                    line = line.strip()
-                    if cls._has_prefix(line) and "=" in line:
-                        key, value = line.split("=", 1)
-                        yield key, value
-
-    @staticmethod
-    def _has_prefix(key: str) -> bool:
-        return key.lower().startswith("learninghouse_")

@@ -1,0 +1,39 @@
+# All settings have a default value like defined in this file.
+# Copy this file to configuration.yaml inside your config directory and
+# uncomment/change the values you want to override.
+#
+# jwt_secret (and any other sensitive value) does NOT go here - it lives in
+# secrets.yaml, see secrets.yaml.example.
+
+# Choose environment settings production (default) or development
+# environment: production
+
+# Set the name of the service
+# title: learningHouse Service
+
+# Set listening host and port
+# host: 127.0.0.1
+# port: 5000
+
+# Count of parallel workers for processing
+# workers: 1
+
+# Set base url for external access
+# base_url:
+
+# File url path to the OpenAPI json file
+# openapi_file: /learninghouse_api.json
+
+# Url path for the interactive documentation. Leave empty to disable it.
+# docs_url: /docs
+
+# JWTs will expire after the given amount of minutes
+# jwt_expire_minutes: 10
+
+# Set logging level to DEBUG, INFO (default), WARNING, ERROR, CRITICAL
+# logging_level: INFO
+
+# Debugger and source reload are automatically activated in the development
+# environment. For security reasons, do not activate these in production.
+# debug: false
+# reload: false

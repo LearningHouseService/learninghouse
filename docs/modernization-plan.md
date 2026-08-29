@@ -570,22 +570,71 @@ same pages twice.
   site should not.
 
 **Acceptance**
-- [ ] `mkdocs build --strict` passes and runs in CI on every push and pull request; a dead internal
-      link, an unknown anchor or a nav entry pointing at a missing file fails the build.
-- [ ] The rendered site is available as a CI artifact for every run.
-- [ ] The site deploys to GitHub Pages on release only, and after the jobs that publish the package
-      and the images it documents.
-- [ ] Nothing that exists only in today's README is lost. Every configuration key, the Phase 3b
+- [x] `mkdocs build --strict` passes and runs in CI on every push and pull request; a dead internal
+      link, an unknown anchor or a nav entry pointing at a missing file fails the build. Verified
+      locally with `uv run mkdocs build --strict --config-file ../mkdocs.yml` from `core/`: clean
+      on the real site, and all three failure modes reproduced deliberately — a link to a
+      non-existent page, a link to a non-existent anchor on an existing page (both
+      `Aborted with 2 warnings in strict mode!`) and a `nav` entry pointing at a missing file
+      (`Aborted with 1 warnings in strict mode!`). The CI half runs in the new `build-docs` job,
+      which is triggered by the workflow's existing `push` (main) / `pull_request` / `release`
+      events — first real run happens when this branch opens its pull request.
+- [x] The rendered site is available as a CI artifact for every run. `build-docs` uploads `site/`
+      as `docs-site-${REF_NAME}` unconditionally, and additionally as a Pages artifact on
+      `release`.
+- [x] The site deploys to GitHub Pages on release only, and after the jobs that publish the package
+      and the images it documents. `deploy-docs` is gated on
+      `if: ${{ github.event_name == 'release' }}` and needs `[build-core, build-docs,
+      merge-manifest]` — `build-core` is what publishes to PyPI and the release assets,
+      `merge-manifest` what pushes the multi-arch image tags. `concurrency: group: pages` with
+      `cancel-in-progress: false`, so overlapping releases queue rather than leaving the site on a
+      previous version. `actions/configure-pages` runs with `enablement: true`, so the first
+      release does not need Pages switched on by hand. Not verifiable locally: needs an actual
+      release event.
+- [x] Nothing that exists only in today's README is lost. Every configuration key, the Phase 3b
       migration instructions, the sensor and brain examples, and the training and prediction calls
-      have a page; verified by diffing the old README's headings against the nav.
-- [ ] The README is reduced to overview, features, quick start and a link to the site.
-- [ ] Documentation dependencies are pinned in `core/pyproject.toml` and locked in `core/uv.lock`,
-      and the docs job uses the same `uv` version and flow as the other jobs.
-- [ ] `docs/modernization-plan.md` is either in the nav or explicitly excluded, and the strict
-      build is clean either way.
-- [ ] `docs/decisions/` exists with an index table and at least the four seed records named above.
-- [ ] Every documented configuration key matches the fields `ServiceSettings` actually reads —
-      checked against the code, not against the old README.
+      have a page; verified by diffing the old README's headings against the nav. Mapping:
+      *Introduction* and *Contact and Feedback* → `index.md`; *Installation and Configuration* /
+      *Prepare configuration directory* → `getting-started/installation.md`; *Service
+      configuration* / *Example configuration* → `getting-started/configuration.md` and
+      `configuration/index.md`; *Upgrading from `LEARNINGHOUSE_*` environment variables* →
+      `migration/environment-variables.md` (moved verbatim in substance); *Run the service* →
+      `getting-started/running.md` and `deployment/docker.md`; *UI* → `usage/ui.md`; *Security* /
+      *Fallback password* / *API Key* → `configuration/security.md`; *Sensors Configuration* →
+      `configuration/sensors.md`; *Example brain* / *Configuration Parameters* / *Estimator* /
+      *Dependent variable* / *Test size* / *Changing configuration via RESTful API* →
+      `configuration/brains.md`; *API Documentation* → `usage/api.md`; *Train the brain* →
+      `usage/training.md`; *Prediction* → `usage/prediction.md`. Two corrections were made in the
+      move rather than carried over: the old *info* example URL was missing the `/api` prefix the
+      router actually mounts, and the persisted-file list now matches `BrainFileType` /
+      `sanitize_filename` (`<brain>/training_data.csv`, not `<brain>/data/training_data.csv`) plus
+      the `security.json` and `info.json` files the old README never mentioned.
+- [x] The README is reduced to overview, features, quick start and a link to the site. 310 lines
+      down to 80.
+- [x] Documentation dependencies are pinned in `core/pyproject.toml` and locked in `core/uv.lock`,
+      and the docs job uses the same `uv` version and flow as the other jobs. `docs = ["mkdocs==
+      1.6.1", "mkdocs-material==9.7.7"]` — the same versions `solaredge2mqtt` pins, so the two
+      sibling sites render with the same theme release. `build-docs` uses the same
+      `astral-sh/setup-uv@v10.0.1`, the same `cache-dependency-glob: "core/uv.lock"` and the same
+      `save-cache: ${{ github.event_name != 'pull_request' }}` as `check-core`/`build-core`, then
+      `uv sync --extra docs --locked`.
+- [x] `docs/modernization-plan.md` is either in the nav or explicitly excluded, and the strict
+      build is clean either way. Excluded via `not_in_nav`, as this phase recommended — naming it
+      there rather than leaving it unmentioned is what keeps `--strict` from failing on a page in
+      `docs/` that no nav entry points at.
+- [x] `docs/decisions/` exists with an index table and at least the four seed records named above.
+      `0001-uv-for-the-python-build.md` (Phase 2c), `0002-yaml-configuration-with-a-one-shot-
+      migration.md` (Phase 3b), `0003-exact-pins-shared-with-pvlearn.md` (Phase 3) and
+      `0004-dependabot-groups-for-framework-majors.md` (Phase 3), with the append-only rule and
+      the "writing a new one" instructions in the index.
+- [x] Every documented configuration key matches the fields `ServiceSettings` actually reads —
+      checked against the code, not against the old README. Verified by importing
+      `ServiceSettings.model_fields` and diffing it against the key column of
+      `docs/configuration/index.md`: no documented key that the model does not read, and the only
+      model field absent from the `configuration.yaml` table is `config_directory` — which is
+      documented in the same page as the one environment variable, because it is the bootstrap
+      value that determines where `configuration.yaml` is read from and therefore cannot be set
+      from inside it.
 
 ---
 

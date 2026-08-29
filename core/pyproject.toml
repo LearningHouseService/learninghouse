@@ -49,7 +49,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/LearningHouseService/learninghouse"
-Documentation = "https://github.com/LearningHouseService/learninghouse/blob/main/README.md"
+Documentation = "https://learninghouseservice.github.io/learninghouse/"
 Repository = "https://github.com/LearningHouseService/learninghouse"
 Issues = "https://github.com/LearningHouseService/learninghouse/issues"
 
@@ -63,6 +63,10 @@ dev = [
     "pytest-cov==7.1.0",
     "pytest-xdist==3.8.0",
     "httpx==0.28.1",
+]
+docs = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.7.7",
 ]
 
 [project.scripts]

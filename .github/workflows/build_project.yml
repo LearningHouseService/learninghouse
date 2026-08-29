@@ -440,3 +440,67 @@ jobs:
               "${ghcr_refs[@]}"
           fi
         shell: bash
+
+  build-docs:
+    runs-on: ubuntu-latest
+    needs: [variables]
+    env:
+      REF_NAME: ${{ needs.variables.outputs.ref_name }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.0.1
+        with:
+          python-version: '3.13'
+          enable-cache: true
+          cache-dependency-glob: "core/uv.lock"
+          save-cache: ${{ github.event_name != 'pull_request' }}
+
+      - name: Install package with documentation dependencies
+        run: uv sync --extra docs --locked
+        working-directory: core
+
+      - name: Build site
+        run: uv run --no-sync mkdocs build --strict --config-file ../mkdocs.yml
+        working-directory: core
+
+      - name: Save site artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: docs-site-${{ env.REF_NAME }}
+          path: site
+
+      - name: Save pages artifact
+        if: ${{ github.event_name == 'release' }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy-docs:
+    runs-on: ubuntu-latest
+    needs: [build-core, build-docs, merge-manifest]
+    if: ${{ github.event_name == 'release' }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+        with:
+          enablement: true
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

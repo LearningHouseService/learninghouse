@@ -49,7 +49,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/LearningHouseService/learninghouse"
-Documentation = "https://github.com/LearningHouseService/learninghouse/blob/main/README.md"
+Documentation = "https://learninghouseservice.github.io/learninghouse/"
 Repository = "https://github.com/LearningHouseService/learninghouse"
 Issues = "https://github.com/LearningHouseService/learninghouse/issues"
 
@@ -63,6 +63,18 @@ dev = [
     "pytest-cov==7.1.0",
     "pytest-xdist==3.8.0",
     "httpx==0.28.1",
+]
+# Documentation dependencies live here, in the only Python project this
+# repository has, even though mkdocs.yml sits at the repository root. A
+# second pyproject.toml/uv.lock pair at the root purely for two packages
+# would be the only Python project outside core/ and would need its own
+# dependency updates; instead the docs build runs from core/ with
+# `--config-file ../mkdocs.yml`. Pinned exactly, like every other extra, and
+# resolved through core/uv.lock. Same versions solaredge2mqtt pins, so the
+# two sibling sites render with the same theme release.
+docs = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.7.7",
 ]
 
 [project.scripts]

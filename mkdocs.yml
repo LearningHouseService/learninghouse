@@ -1,0 +1,133 @@
+site_name: learningHouse Service
+site_description: >-
+  Teach your smart home. A REST service that learns a household's own behaviour from pushed
+  sensor data and predicts values from it - darkness detection, heating setpoints, and anything
+  else you configure.
+site_url: https://learninghouseservice.github.io/learninghouse/
+site_author: Johannes Ott
+
+repo_url: https://github.com/LearningHouseService/learninghouse
+repo_name: LearningHouseService/learninghouse
+edit_uri: edit/main/docs/
+
+copyright: Licensed under the MIT License
+
+docs_dir: docs
+
+# The Python project lives in core/, this file does not. The docs build
+# therefore runs from core/ as
+# `uv run mkdocs build --strict --config-file ../mkdocs.yml`; every path below
+# is resolved relative to this file, not to the working directory.
+#
+# Anchors are validated as well, so a link to a heading somebody renamed fails
+# the build instead of silently landing at the top of the page.
+validation:
+  links:
+    absolute_links: relative_to_docs
+    unrecognized_links: warn
+    anchors: warn
+
+# The modernization plan is written for the people doing the work. It reads as
+# unfinished promises to anybody else, so it stays out of the site's navigation
+# - listed here rather than left unmentioned, because --strict fails a build
+# that has a page in docs/ which no nav entry points at.
+not_in_nav: |
+  modernization-plan.md
+
+theme:
+  name: material
+  language: en
+  logo: assets/learninghouse_logo.svg
+  favicon: assets/learninghouse_icon.png
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.instant
+    - navigation.tracking
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/LearningHouseService/learninghouse
+      name: Source on GitHub
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/U9axHEYqqB
+      name: Discord community
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/learninghouse/
+      name: Package on PyPI
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/installation.md
+      - getting-started/configuration.md
+      - getting-started/running.md
+  - Configuration:
+      - configuration/index.md
+      - configuration/sensors.md
+      - configuration/brains.md
+      - configuration/security.md
+  - Usage:
+      - usage/training.md
+      - usage/prediction.md
+      - usage/ui.md
+      - usage/api.md
+  - Deployment:
+      - deployment/docker.md
+      - deployment/docker-compose.md
+  - Migration:
+      - migration/environment-variables.md
+  - Troubleshooting: troubleshooting.md
+  - Reference:
+      - decisions/index.md
+      - decisions/0001-uv-for-the-python-build.md
+      - decisions/0002-yaml-configuration-with-a-one-shot-migration.md
+      - decisions/0003-exact-pins-shared-with-pvlearn.md
+      - decisions/0004-dependabot-groups-for-framework-majors.md

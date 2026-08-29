@@ -1,2 +1,5 @@
 .venv
 .ropeproject
+# Rendered documentation site. mkdocs.yml lives at the repository root, so
+# `mkdocs build` writes site/ here even when it is invoked from core/.
+site/

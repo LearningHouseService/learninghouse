@@ -94,8 +94,6 @@ class ListModel(RootModel):
     def __len__(self):
         return len(self.root)
 
-    # Iterating the list itself instead of pydantic's (field, value) tuples is
-    # the whole point of this wrapper.
     def __iter__(self):  # pyright: ignore[reportIncompatibleMethodOverride]
         return iter(self.root)
 

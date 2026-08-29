@@ -34,10 +34,11 @@ The site is MkDocs Material, built from `docs/`, with `mkdocs.yml` at the reposi
   plus `anchors: warn` under `--strict` means a link to a heading somebody renamed fails the build
   instead of quietly landing at the top of the page. The same setting makes a `nav` entry pointing
   at a missing file, and a page in `docs/` that no `nav` entry points at, both build failures.
-- **The modernization plan is excluded via `not_in_nav`.** It is written for the people doing the
-  work and reads as unfinished promises to anybody else. Naming it there rather than leaving it
-  unmentioned is what the previous point requires: `--strict` fails on an unreferenced page, so
-  the exclusion has to be explicit.
+- **Working documents are excluded via `not_in_nav`.** Planning notes are written for the people
+  doing the work and read as unfinished promises to anybody else. Naming such a file there rather
+  than leaving it unmentioned is what the previous point requires: `--strict` fails on an
+  unreferenced page, so the exclusion has to be explicit. What survives such a document is a
+  decision record in this series, not a link to it.
 - **The API is not restated.** The service serves its own OpenAPI document at `/docs`, generated
   from the code that handles the requests. A second, hand-written endpoint list on the site would
   be stale the first time a route changes, and nothing would fail when it did.

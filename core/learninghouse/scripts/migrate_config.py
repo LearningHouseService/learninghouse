@@ -1,5 +1,6 @@
 """One-shot migration from LEARNINGHOUSE_* environment variables to
-configuration.yaml / secrets.yaml (docs/modernization-plan.md, Phase 3b).
+configuration.yaml / secrets.yaml. See
+docs/decisions/0002-yaml-configuration-with-a-one-shot-migration.md.
 
 Run once, by hand, on upgrade - not on every start. Only migrates settings;
 it does not touch brain data, sensors or the security database.
@@ -53,14 +54,9 @@ def read_environment(environ: Dict[str, str]) -> Dict[str, str]:
 
 
 def collect_settings(dotenv_path: Path, environ: Dict[str, str]) -> Dict[str, str]:
-    # dotenv first, environment overrides - matches the precedence the
-    # settings loader this replaces used to have (environment read before
-    # dotenv, first-write-wins).
     values = read_dotenv(dotenv_path)
     values.update(read_environment(environ))
 
-    # The bootstrap value, not migrated content: it says where this very
-    # pair of files goes, it cannot also be a key inside them.
     values.pop("config_directory", None)
 
     return values

@@ -32,10 +32,6 @@ from learninghouse.services.preprocessing import DatasetPreprocessing
 
 
 class BrainService:
-    # Keyed by (brains_directory, name), not name alone - two different
-    # brains directories in the same process (Phase 2 de-globalization) can
-    # each have a brain of the same name, and a name-only key would serve the
-    # wrong one.
     brains: Dict[Tuple[str, str], Tuple[float, Brain]] = {}
 
     @classmethod
@@ -85,8 +81,6 @@ class BrainService:
 
         if sensors_data is not None:
             if dependent_value is None:
-                # Todo this is never thrown, the API layer already rejects a
-                # training request without a dependent value.
                 raise BrainBadRequest("Missing dependent variable!")
 
             sensors_data[name] = dependent_value

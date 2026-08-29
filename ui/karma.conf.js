@@ -13,12 +13,7 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
-      jasmine: {
-        // you can add configuration options for Jasmine here
-        // the possible options are listed at https://jasmine.github.io/api/edge/Configuration.html
-        // for example, you can disable the random execution with `random: false`
-        // or set a specific seed with `seed: 4321`
-      },
+      jasmine: {},
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
     jasmineHtmlReporter: {
@@ -31,10 +26,6 @@ module.exports = function (config) {
         { type: 'html' },
         { type: 'text-summary' }
       ],
-      // Phase 2b of the modernization plan: floor at what the UI test foundation
-      // suite reaches (68.17/53.73/56.03/67.24% measured, rounded down for margin),
-      // mirroring the Python coverage-floor decision from Phase 2. Ratchet upward
-      // as later phases add specs.
       check: {
         global: {
           statements: 68,

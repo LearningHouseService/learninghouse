@@ -40,7 +40,9 @@ core/                       # the Python service — everything installable live
 └── pyproject.toml          # packaging, dependency pins and tool configuration
 ui/                         # Angular frontend
 docker/                     # Dockerfile; the image installs the wheel, it has no source tree
-docs/                       # documentation and the modernization plan
+docs/                       # the MkDocs site sources (mkdocs.yml is at the repository root)
+├── decisions/              # numbered, append-only architecture decision records
+└── modernization-plan.md   # the phased roadmap; deliberately not part of the site's nav
 ```
 
 `core/README.md`, `core/LICENSE` and `core/THIRD-PARTY-NOTICES` are symlinks to the files at the
@@ -78,8 +80,19 @@ uv run pytest tests/path/to/test_file.py
 
 UI commands run in `ui/`: `npm install`, `npm run build:core`, `npm test`.
 
+Documentation commands also run in `core/`, even though `mkdocs.yml` sits at the repository root
+— the documentation dependencies are the `docs` extra of `core/pyproject.toml`, locked in
+`core/uv.lock`, because this is the only Python project in the repository:
+
+```bash
+uv sync --extra docs
+uv run mkdocs build --strict --config-file ../mkdocs.yml   # writes site/ at the repo root
+uv run mkdocs serve --config-file ../mkdocs.yml            # live preview on :8000
+```
+
 CI runs `ruff check`, `ruff format --check`, `pyright` and `pytest` on every push and pull
-request, before the UI and the wheel are built.
+request, before the UI and the wheel are built. `mkdocs build --strict` runs alongside them and
+uploads the rendered site as an artifact; the site is published to GitHub Pages on release only.
 
 ### Commits and pull requests
 
@@ -108,6 +121,12 @@ carries the reasoning that survives into `main`'s history.
   singular `example` is pydantic v1 and a positional default is not recognized by pyright, which
   is how the whole codebase ended up claiming fields were optional when they are not.
 - For diagrams use Mermaid.
+- User-facing documentation lives in `docs/` and is published as a MkDocs Material site; the
+  README carries only the overview, the feature list, a quick start and a link to the site. A new
+  page needs a `nav` entry in `mkdocs.yml`, or the `--strict` build fails.
+- Decisions that the code cannot explain by itself go into `docs/decisions/` as a numbered
+  `NNNN-kebab-case-title.md`, with a row in `docs/decisions/index.md`. The series is append-only:
+  a decision that no longer holds is superseded by a later one, never edited or deleted.
 
 ### Project Patterns
 

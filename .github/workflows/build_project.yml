@@ -441,11 +441,6 @@ jobs:
           fi
         shell: bash
 
-  # mkdocs.yml sits at the repository root, the Python that builds it lives in
-  # core/ - so the build runs from core/ with --config-file ../mkdocs.yml and
-  # writes site/ at the root. Same uv version and flow as check-core/build-core;
-  # the docs dependencies are the `docs` extra in core/pyproject.toml, locked in
-  # core/uv.lock.
   build-docs:
     runs-on: ubuntu-latest
     needs: [variables]
@@ -457,8 +452,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          # setuptools-scm derives the version from tags on the repository
-          # root, and `uv sync` installs the project itself.
           fetch-depth: 0
 
       - name: Set up uv
@@ -467,24 +460,16 @@ jobs:
           python-version: '3.13'
           enable-cache: true
           cache-dependency-glob: "core/uv.lock"
-          # A cache written from a pull request is only ever read back by a
-          # re-run of that same PR, so saving one on every PR push is pure
-          # cache-quota spend for no reuse.
           save-cache: ${{ github.event_name != 'pull_request' }}
 
       - name: Install package with documentation dependencies
         run: uv sync --extra docs --locked
         working-directory: core
 
-      # --strict turns every dead internal link, every unknown anchor and every
-      # nav entry pointing at a missing file into a build failure, so a broken
-      # cross-reference cannot reach a release.
       - name: Build site
         run: uv run --no-sync mkdocs build --strict --config-file ../mkdocs.yml
         working-directory: core
 
-      # Downloadable copy of the rendered site for every run, so a documentation
-      # change can be reviewed as a browsable site and not only as Markdown.
       - name: Save site artifact
         uses: actions/upload-artifact@v7
         with:
@@ -497,18 +482,10 @@ jobs:
         with:
           path: site
 
-  # The published site tracks releases, not branches: a push to main can carry
-  # documentation for code that is not released yet. This is the last job of a
-  # release, so it waits for every part of one that the documentation describes:
-  # build-core publishes the package to PyPI and the release assets,
-  # merge-manifest pushes the multi-arch images. A site that documents a version
-  # must not go live before that version is actually installable.
   deploy-docs:
     runs-on: ubuntu-latest
     needs: [build-core, build-docs, merge-manifest]
     if: ${{ github.event_name == 'release' }}
-    # Pages allows one deployment at a time and a cancelled one leaves the site
-    # on the previous version, so releases queue instead of cancelling.
     concurrency:
       group: pages
       cancel-in-progress: false
@@ -519,8 +496,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # enablement turns Pages on for the repository if it is still off, so the
-      # first release does not need a manual click in the settings.
       - name: Configure Pages
         uses: actions/configure-pages@v6
         with:

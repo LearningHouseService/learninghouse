@@ -14,23 +14,12 @@ copyright: Licensed under the MIT License
 
 docs_dir: docs
 
-# The Python project lives in core/, this file does not. The docs build
-# therefore runs from core/ as
-# `uv run mkdocs build --strict --config-file ../mkdocs.yml`; every path below
-# is resolved relative to this file, not to the working directory.
-#
-# Anchors are validated as well, so a link to a heading somebody renamed fails
-# the build instead of silently landing at the top of the page.
 validation:
   links:
     absolute_links: relative_to_docs
     unrecognized_links: warn
     anchors: warn
 
-# The modernization plan is written for the people doing the work. It reads as
-# unfinished promises to anybody else, so it stays out of the site's navigation
-# - listed here rather than left unmentioned, because --strict fails a build
-# that has a page in docs/ which no nav entry points at.
 not_in_nav: |
   modernization-plan.md
 
@@ -131,3 +120,4 @@ nav:
       - decisions/0002-yaml-configuration-with-a-one-shot-migration.md
       - decisions/0003-exact-pins-shared-with-pvlearn.md
       - decisions/0004-dependabot-groups-for-framework-majors.md
+      - decisions/0005-the-documentation-site.md

@@ -341,20 +341,41 @@ to what `pvlearn` pins.
   `BrainNotActual` per the risk below before merging it rather than redoing the bump from scratch.
   `#511` (`typescript` 5.9.3 → 6.0.3) is a major version; confirm it compiles against the pinned
   Angular 21 toolchain before merging, don't wave it through with the patch-level bumps.
-- Angular and the npm toolchain to current.
+  - A second backlog of thirteen had accumulated by 2026-08-29 and was cleared the same way; see the
+    acceptance criterion below. The prediction in this bullet held: the queue refills whenever it is
+    left alone.
+- Angular and the npm toolchain to current. Done twice: v21 during the first pass, then v21 → v22
+  on 2026-08-29 (`#588`), which dragged `typescript` to `~6.0.3` because
+  `@angular-devkit/build-angular@22` declares `peer typescript@">=6.0 <6.1"`. `ngx-translate`
+  17 → 18 (`#589`) came with it — v18 drops the NgModule API, so `TranslateModule` had to become
+  `provideTranslateService()` plus the standalone `TranslatePipe` across `AppModule`,
+  `SharedModule` and 22 specs.
+  - **Framework majors are not Dependabot's job.** Both of the above needed migration schematics or
+    hand-written API changes that a version bump alone cannot produce. Dependabot's PRs for them
+    (`#570`–`#572`, `#578`, `#583`, `#587`) could never go green and were closed in favour of
+    branches that ran `ng update` / rewrote the call sites.
+  - `typescript` is now bounded from above by whatever Angular's build tooling accepts. TS 7.0.2
+    exists and Dependabot will keep proposing it (`#586`, closed); it cannot land before Angular
+    supports it.
 - Python dependencies to current — **with one constraint that shapes this phase**: `pvlearn` pins
   its dependencies *exactly*, not as ranges. Once Phase 6 adds `pvlearn` to `install_requires`, pip
   will refuse any different pin of a shared package. In practice learninghouse inherits pvlearn's
   pins for `numpy`, `pandas`, `scipy`, `scikit-learn`, `pydantic` and `joblib`. Aligning them here
   keeps Phase 6 a one-line change instead of a resolution fight.
 
-  | Package | learninghouse today | pvlearn pin |
-  |---|---|---|
-  | `numpy` | 2.4.4 | 2.5.1 |
-  | `pandas` | 3.0.3 | 3.0.5 |
-  | `scipy` | — | 1.18.0 |
-  | `scikit-learn` | 1.8.0 | 1.9.0 |
-  | `pydantic` | 2.13.4 | 2.13.4 ✓ |
+  | Package | learninghouse at phase start | pvlearn pin then | both sides on 2026-08-29 |
+  |---|---|---|---|
+  | `numpy` | 2.4.4 | 2.5.1 | 2.5.2 |
+  | `pandas` | 3.0.3 | 3.0.5 | 3.0.5 |
+  | `scipy` | — | 1.18.0 | 1.18.1 |
+  | `scikit-learn` | 1.8.0 | 1.9.0 | 1.9.0 |
+  | `pydantic` | 2.13.4 | 2.13.4 ✓ | 2.13.4 |
+  | `joblib` | 1.5.3 | 1.5.3 ✓ | 1.5.3 |
+
+  The third column is the point: `numpy` and `scipy` have both moved on since this phase closed
+  (`#569`, `#581`), and pvlearn moved with them, so the pins still match. They will keep moving.
+  Whoever merges a shared-package bump here has to check pvlearn's `pyproject.toml` in the same
+  breath — Dependabot has no idea this constraint exists.
 
 - **The scikit-learn bump is the one with consequences.** `pvlearn`'s frozen baseline is only
   reproducible against exactly 1.9.0 (chapter 6.6 of the pvlearn plan), so this pin is load-bearing
@@ -370,24 +391,34 @@ to what `pvlearn` pins.
 - [x] Dependabot backlog is empty. Fourteen open branches at the start of this phase, down to one
       (`#514`, scikit-learn 1.8.0 → 1.9.0) after the coordinated Angular bump (`e2323cb`) and the
       dependabot.yml fix (`8653b32`); `#514` closed as superseded once `d3e4692` pinned
-      `scikit-learn==1.9.0` directly alongside the other shared pins.
+      `scikit-learn==1.9.0` directly alongside the other shared pins. Emptied a second time on
+      2026-08-29: `#569`, `#573`, `#574`, `#579`, `#580`, `#581`, `#584`, `#585` merged;
+      `#570`–`#572`, `#578`, `#583`, `#586`, `#587` closed in favour of `#588` and `#589`. The
+      npm ecosystem in `.github/dependabot.yml` grew an `angular` group (`#582`) so a framework
+      major arrives as one installable PR instead of per-package bumps that each fail `npm ci`
+      with `ERESOLVE`.
 - [x] The characterization suite from Phase 2 passes unchanged, or every deviation is explained and
       the baseline deliberately regenerated. Verified locally: `uv run pytest
       --cov=learninghouse --cov-report=xml:coverage.xml` — 71 passed, 85.78% coverage (above the
       85% floor), including `test_baseline.py::TestBaseline::test_prediction_on_a_fixed_input_is_pinned`
-      unchanged.
+      unchanged. Re-verified on 2026-08-29 after the second backlog and the Phase 3b work:
+      `uv run pytest` in `core/` — 93 passed.
 - [x] Shared pins match `pvlearn` exactly, verified by installing both into one environment.
-      Verified locally by diffing the pin lists: `numpy==2.5.1`, `pandas==3.0.5`, `scipy==1.18.0`,
-      `scikit-learn==1.9.0`, `pydantic==2.13.4`, `joblib==1.5.3` in both `core/pyproject.toml` and
-      pvlearn's `pyproject.toml`. A real single-environment install of both packages together is
-      Phase 6's job, once pvlearn is actually a dependency here.
+      Verified locally by diffing the pin lists, re-checked on 2026-08-29 after `#569` and `#581`:
+      `numpy==2.5.2`, `pandas==3.0.5`, `scipy==1.18.1`, `scikit-learn==1.9.0`, `pydantic==2.13.4`,
+      `joblib==1.5.3` in both `core/pyproject.toml` and pvlearn's `pyproject.toml` (`4be14d8`).
+      A real single-environment install of both packages together is Phase 6's job, once pvlearn
+      is actually a dependency here.
 - [x] A brain trained before the update is either loaded correctly or rejected with a clear message
       and retrained — never loaded best-effort. Covered by
       `test_brain.py::TestPredictionPost::test_brain_trained_under_different_library_versions_is_rejected`
       and the `Brain.actual_versions` / `BrainNotActual` unit tests added in `3c2a28a`; both pass.
 - [x] The UI builds and its Karma suite passes. Verified locally: `npm test -- --watch=false
       --browsers=ChromeHeadlessCI --code-coverage` — 87/87 SUCCESS, coverage above the Phase 2b
-      floor (68/53/56/67%); `npm run build:core` completes cleanly.
+      floor (68/53/56/67%); `npm run build:core` completes cleanly. Re-verified on Angular 22 and
+      ngx-translate 18 — still 87/87, but coverage now clears the floor by a rounding step
+      (statements 68.13% against 68%, lines 67.2% against 67%). The next change that touches
+      untested code turns `check-ui` red on the thresholds, not on a failing test.
 
 ---
 

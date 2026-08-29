@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -45,6 +45,7 @@ export interface TableConfig {
   selector: 'learninghouse-table',
   standalone: false,
   templateUrl: './table.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./table.component.scss']
 })
 export class TableComponent<T> implements AfterViewInit {

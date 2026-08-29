@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconRegistry } from "@angular/material/icon";
 import { DomSanitizer } from "@angular/platform-browser";
 import { AuthService } from './modules/auth/auth.service';
@@ -7,6 +7,7 @@ import defaultLanguage from "./../assets/i18n/en.json";
 @Component({
   selector: 'app-root',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {

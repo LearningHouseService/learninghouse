@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, catchError, map, Subject, takeUntil } from 'rxjs';
@@ -18,6 +18,7 @@ interface APIKeyForm {
 @Component({
   selector: 'learninghouse-add-apikey',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-apikey-dialog.component.html'
 })
 export class AddAPIKeyDialogComponent extends AbstractFormResponse implements OnDestroy {

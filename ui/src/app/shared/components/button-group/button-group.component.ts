@@ -1,6 +1,6 @@
 import { FocusMonitor } from '@angular/cdk/a11y';
 import { BooleanInput, coerceBooleanProperty } from '@angular/cdk/coercion';
-import { Component, ElementRef, Inject, Input, OnDestroy, Optional, QueryList, Self, ViewChildren } from '@angular/core';
+import { Component, ElementRef, Inject, Input, OnDestroy, Optional, QueryList, Self, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
 import { ControlValueAccessor, FormBuilder, NgControl } from '@angular/forms';
 import { MatFormField, MatFormFieldControl, MAT_FORM_FIELD } from '@angular/material/form-field';
 import { Subject } from 'rxjs';
@@ -12,6 +12,7 @@ import { SelectOption } from '../select/select.component';
   templateUrl: './button-group.component.html',
   styleUrls: ['./button-group.component.scss'],
   providers: [{ provide: MatFormFieldControl, useExisting: ButtonGroupComponent }],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[class.group-floating]': 'shouldLabelFloat',
     '[id]': 'id',

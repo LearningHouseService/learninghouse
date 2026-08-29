@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { AlertType } from '../alert/alert.component';
 
 export interface FormResponseConfig {
@@ -9,6 +9,7 @@ export interface FormResponseConfig {
   selector: 'learninghouse-form-response',
   standalone: false,
   templateUrl: './form-response.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./form-response.component.scss']
 })
 export class FormResponseComponent {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, catchError, map, of } from 'rxjs';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { VersionItem } from 'src/app/shared/models/api.model';
@@ -10,6 +10,7 @@ import { AppService } from 'src/app/shared/services/app.service';
   selector: 'lh-info-dialog',
   standalone: false,
   templateUrl: './info-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./info-dialog.component.scss']
 })
 export class InfoDialogComponent implements OnInit {

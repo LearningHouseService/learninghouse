@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { AuthService } from '../../auth.service';
 
@@ -19,12 +19,13 @@ describe('ChangePasswordComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         ReactiveFormsModule,
-        TranslateModule.forRoot()
       ],
       declarations: [ChangePasswordComponent],
       providers: [
+        provideTranslateService(),
         { provide: AuthService, useValue: authService }
       ],
       schemas: [NO_ERRORS_SCHEMA]

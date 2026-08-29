@@ -30,7 +30,6 @@ export class AppComponent implements OnInit {
   private initializeTranslation(): void {
     this.translate.addLangs(['en', 'de']);
     this.translate.setTranslation('en', defaultLanguage);
-    this.translate.setDefaultLang('en');
     let currentLanguage = this.translate.getBrowserLang() || 'en';
     if (this.translate.getLangs().includes(currentLanguage)) {
       this.translate.use(currentLanguage);

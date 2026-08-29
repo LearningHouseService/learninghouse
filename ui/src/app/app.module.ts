@@ -11,7 +11,7 @@ import { AuthInterceptor } from './shared/interceptors/auth.interceptor';
 // import ngx-translate and the http loader
 import { LocationStrategy } from '@angular/common';
 import { MatPaginatorIntl } from '@angular/material/paginator';
-import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-paginator-intl';
 
@@ -21,12 +21,6 @@ import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-pagin
         AppComponent
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
-        TranslateModule.forRoot({
-            loader: {
-                provide: TranslateLoader,
-                useClass: TranslateHttpLoader
-            }
-        }),
         AppRoutingModule,
         BrowserAnimationsModule,
         LayoutModule], providers: [{
@@ -46,5 +40,9 @@ import { TranslateMatPaginatorIntl } from './shared/material/translate-mat-pagin
             }),
             deps: [LocationStrategy]
         },
-        provideHttpClient(withXhr(), withInterceptorsFromDi())] })
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideTranslateService({
+            loader: TranslateHttpLoader,
+            fallbackLang: 'en'
+        })] })
 export class AppModule { }

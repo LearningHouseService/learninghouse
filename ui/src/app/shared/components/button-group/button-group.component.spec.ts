@@ -6,7 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MAT_FORM_FIELD } from '@angular/material/form-field';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 
 import { ButtonGroupComponent } from './button-group.component';
 
@@ -17,14 +17,15 @@ describe('ButtonGroupComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatButtonToggleModule,
-        TranslateModule.forRoot()
       ],
       declarations: [ButtonGroupComponent],
       providers: [
+        provideTranslateService(),
         {
           provide: FocusMonitor, useValue: {
             stopMonitoring: () => undefined,

@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { Role } from 'src/app/modules/auth/auth.model';
 import { AuthService } from 'src/app/modules/auth/auth.service';
@@ -28,12 +28,13 @@ describe('BrainsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         MatSortModule,
-        TranslateModule.forRoot()
       ],
       declarations: [BrainsComponent],
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: dialog },
         { provide: Router, useValue: router },
         { provide: BrainsService, useValue: brainsService },

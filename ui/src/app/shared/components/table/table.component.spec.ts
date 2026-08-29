@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { BreakpointService } from '../../services/breakpoint.service';
 import { TableActionsService } from '../../services/table-actions.service';
@@ -19,11 +19,12 @@ describe('TableComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
-        TranslateModule.forRoot()
       ],
       declarations: [TableComponent],
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: dialog },
         { provide: BreakpointService, useValue: breakpoints },
         TableActionsService

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateDirective, TranslatePipe } from '@ngx-translate/core';
 import { AlertComponent } from './components/alert/alert.component';
 import { EditDialogComponent } from './components/edit-dialog/edit-dialog.component';
 import { FormResponseComponent } from './components/form-response/form-response.component';
@@ -38,14 +38,16 @@ const components = [
     FormsModule,
     ReactiveFormsModule,
     MaterialModule,
-    TranslateModule
+    TranslateDirective,
+    TranslatePipe
   ],
   exports: [
     components,
     FormsModule,
     MaterialModule,
     ReactiveFormsModule,
-    TranslateModule
+    TranslateDirective,
+    TranslatePipe
   ]
 })
 export class SharedModule { }

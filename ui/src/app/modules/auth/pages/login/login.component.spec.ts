@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { ServiceMode } from 'src/app/shared/models/api.model';
 import { APIService } from 'src/app/shared/services/api.service';
@@ -30,12 +30,13 @@ describe('LoginComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         ReactiveFormsModule,
-        TranslateModule.forRoot()
       ],
       declarations: [LoginComponent],
       providers: [
+        provideTranslateService(),
         { provide: APIService, useValue: api },
         { provide: AuthService, useValue: authService },
         { provide: Router, useValue: router }

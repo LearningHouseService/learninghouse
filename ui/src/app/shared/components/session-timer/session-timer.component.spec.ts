@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 
 import { SessionTimerComponent } from './session-timer.component';
 
@@ -12,9 +12,10 @@ describe('SessionTimerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
-        TranslateModule.forRoot()
       ],
+      providers: [provideTranslateService()],
       declarations: [SessionTimerComponent],
       schemas: [NO_ERRORS_SCHEMA]
     })

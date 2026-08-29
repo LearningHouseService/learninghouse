@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { AppComponent } from './app.component';
 import { AuthService } from './modules/auth/auth.service';
 
@@ -14,13 +14,14 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         RouterTestingModule,
-        TranslateModule.forRoot()
       ],
       declarations: [
         AppComponent
       ],
       providers: [
+        provideTranslateService(),
         { provide: AuthService, useValue: authService },
         { provide: MatIconRegistry, useValue: matIconRegistry },
         {

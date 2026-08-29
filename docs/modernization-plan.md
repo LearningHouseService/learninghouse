@@ -62,6 +62,7 @@ following phases is riskier than it needs to be.
 | 2c | uv for the Python build and Docker image | added in review, patterned after `solaredge2mqtt` |
 | 3 | Dependency updates | your list #2 |
 | 3b | Configuration via `configuration.yaml` / `secrets.yaml` | added in review, patterned after `solaredge2mqtt` |
+| 3c | Documentation site | added in review, patterned after `solaredge2mqtt` |
 | 4 | Security hardening | added in review |
 | 5 | Persistence on SQLite | your list #3 |
 | 6 | pvlearn as a library dependency | your list #4 |
@@ -69,8 +70,8 @@ following phases is riskier than it needs to be.
 | 8 | Brain on a scikit-learn pipeline | your list #6 |
 | 9 | Home Assistant add-on | from the add-on assessment |
 
-Phases 2, 2b, 2c, 3b and 4 did not come from the original list; they were added during review and
-confirmed. The reasoning for each is in its own section.
+Phases 2, 2b, 2c, 3b, 3c and 4 did not come from the original list; they were added during review
+and confirmed. The reasoning for each is in its own section.
 
 **One pull request per phase**, matching the convention adopted in `pvlearn`. Commits within a
 branch stay individually meaningful; the pull request description carries the reasoning that
@@ -341,20 +342,41 @@ to what `pvlearn` pins.
   `BrainNotActual` per the risk below before merging it rather than redoing the bump from scratch.
   `#511` (`typescript` 5.9.3 → 6.0.3) is a major version; confirm it compiles against the pinned
   Angular 21 toolchain before merging, don't wave it through with the patch-level bumps.
-- Angular and the npm toolchain to current.
+  - A second backlog of thirteen had accumulated by 2026-08-29 and was cleared the same way; see the
+    acceptance criterion below. The prediction in this bullet held: the queue refills whenever it is
+    left alone.
+- Angular and the npm toolchain to current. Done twice: v21 during the first pass, then v21 → v22
+  on 2026-08-29 (`#588`), which dragged `typescript` to `~6.0.3` because
+  `@angular-devkit/build-angular@22` declares `peer typescript@">=6.0 <6.1"`. `ngx-translate`
+  17 → 18 (`#589`) came with it — v18 drops the NgModule API, so `TranslateModule` had to become
+  `provideTranslateService()` plus the standalone `TranslatePipe` across `AppModule`,
+  `SharedModule` and 22 specs.
+  - **Framework majors are not Dependabot's job.** Both of the above needed migration schematics or
+    hand-written API changes that a version bump alone cannot produce. Dependabot's PRs for them
+    (`#570`–`#572`, `#578`, `#583`, `#587`) could never go green and were closed in favour of
+    branches that ran `ng update` / rewrote the call sites.
+  - `typescript` is now bounded from above by whatever Angular's build tooling accepts. TS 7.0.2
+    exists and Dependabot will keep proposing it (`#586`, closed); it cannot land before Angular
+    supports it.
 - Python dependencies to current — **with one constraint that shapes this phase**: `pvlearn` pins
   its dependencies *exactly*, not as ranges. Once Phase 6 adds `pvlearn` to `install_requires`, pip
   will refuse any different pin of a shared package. In practice learninghouse inherits pvlearn's
   pins for `numpy`, `pandas`, `scipy`, `scikit-learn`, `pydantic` and `joblib`. Aligning them here
   keeps Phase 6 a one-line change instead of a resolution fight.
 
-  | Package | learninghouse today | pvlearn pin |
-  |---|---|---|
-  | `numpy` | 2.4.4 | 2.5.1 |
-  | `pandas` | 3.0.3 | 3.0.5 |
-  | `scipy` | — | 1.18.0 |
-  | `scikit-learn` | 1.8.0 | 1.9.0 |
-  | `pydantic` | 2.13.4 | 2.13.4 ✓ |
+  | Package | learninghouse at phase start | pvlearn pin then | both sides on 2026-08-29 |
+  |---|---|---|---|
+  | `numpy` | 2.4.4 | 2.5.1 | 2.5.2 |
+  | `pandas` | 3.0.3 | 3.0.5 | 3.0.5 |
+  | `scipy` | — | 1.18.0 | 1.18.1 |
+  | `scikit-learn` | 1.8.0 | 1.9.0 | 1.9.0 |
+  | `pydantic` | 2.13.4 | 2.13.4 ✓ | 2.13.4 |
+  | `joblib` | 1.5.3 | 1.5.3 ✓ | 1.5.3 |
+
+  The third column is the point: `numpy` and `scipy` have both moved on since this phase closed
+  (`#569`, `#581`), and pvlearn moved with them, so the pins still match. They will keep moving.
+  Whoever merges a shared-package bump here has to check pvlearn's `pyproject.toml` in the same
+  breath — Dependabot has no idea this constraint exists.
 
 - **The scikit-learn bump is the one with consequences.** `pvlearn`'s frozen baseline is only
   reproducible against exactly 1.9.0 (chapter 6.6 of the pvlearn plan), so this pin is load-bearing
@@ -370,24 +392,34 @@ to what `pvlearn` pins.
 - [x] Dependabot backlog is empty. Fourteen open branches at the start of this phase, down to one
       (`#514`, scikit-learn 1.8.0 → 1.9.0) after the coordinated Angular bump (`e2323cb`) and the
       dependabot.yml fix (`8653b32`); `#514` closed as superseded once `d3e4692` pinned
-      `scikit-learn==1.9.0` directly alongside the other shared pins.
+      `scikit-learn==1.9.0` directly alongside the other shared pins. Emptied a second time on
+      2026-08-29: `#569`, `#573`, `#574`, `#579`, `#580`, `#581`, `#584`, `#585` merged;
+      `#570`–`#572`, `#578`, `#583`, `#586`, `#587` closed in favour of `#588` and `#589`. The
+      npm ecosystem in `.github/dependabot.yml` grew an `angular` group (`#582`) so a framework
+      major arrives as one installable PR instead of per-package bumps that each fail `npm ci`
+      with `ERESOLVE`.
 - [x] The characterization suite from Phase 2 passes unchanged, or every deviation is explained and
       the baseline deliberately regenerated. Verified locally: `uv run pytest
       --cov=learninghouse --cov-report=xml:coverage.xml` — 71 passed, 85.78% coverage (above the
       85% floor), including `test_baseline.py::TestBaseline::test_prediction_on_a_fixed_input_is_pinned`
-      unchanged.
+      unchanged. Re-verified on 2026-08-29 after the second backlog and the Phase 3b work:
+      `uv run pytest` in `core/` — 93 passed.
 - [x] Shared pins match `pvlearn` exactly, verified by installing both into one environment.
-      Verified locally by diffing the pin lists: `numpy==2.5.1`, `pandas==3.0.5`, `scipy==1.18.0`,
-      `scikit-learn==1.9.0`, `pydantic==2.13.4`, `joblib==1.5.3` in both `core/pyproject.toml` and
-      pvlearn's `pyproject.toml`. A real single-environment install of both packages together is
-      Phase 6's job, once pvlearn is actually a dependency here.
+      Verified locally by diffing the pin lists, re-checked on 2026-08-29 after `#569` and `#581`:
+      `numpy==2.5.2`, `pandas==3.0.5`, `scipy==1.18.1`, `scikit-learn==1.9.0`, `pydantic==2.13.4`,
+      `joblib==1.5.3` in both `core/pyproject.toml` and pvlearn's `pyproject.toml` (`4be14d8`).
+      A real single-environment install of both packages together is Phase 6's job, once pvlearn
+      is actually a dependency here.
 - [x] A brain trained before the update is either loaded correctly or rejected with a clear message
       and retrained — never loaded best-effort. Covered by
       `test_brain.py::TestPredictionPost::test_brain_trained_under_different_library_versions_is_rejected`
       and the `Brain.actual_versions` / `BrainNotActual` unit tests added in `3c2a28a`; both pass.
 - [x] The UI builds and its Karma suite passes. Verified locally: `npm test -- --watch=false
       --browsers=ChromeHeadlessCI --code-coverage` — 87/87 SUCCESS, coverage above the Phase 2b
-      floor (68/53/56/67%); `npm run build:core` completes cleanly.
+      floor (68/53/56/67%); `npm run build:core` completes cleanly. Re-verified on Angular 22 and
+      ngx-translate 18 — still 87/87, but coverage now clears the floor by a rounding step
+      (statements 68.13% against 68%, lines 67.2% against 67%). The next change that touches
+      untested code turns `check-ui` red on the thresholds, not on a failing test.
 
 ---
 
@@ -478,6 +510,82 @@ sensitive values) without needing the Docker-specific mechanism.
 - [x] README documents console and Docker invocation of the migration script, and the changelog
       records the breaking change. See README "Upgrading from `LEARNINGHOUSE_*` environment
       variables" and `CHANGELOG.md`'s Unreleased section.
+
+---
+
+### Phase 3c — Documentation site
+
+**Goal:** A published documentation site built from `docs/` with MkDocs Material, the way
+`solaredge2mqtt` does it, replacing the single 310-line `README.md` that currently carries every
+piece of user-facing documentation this project has.
+
+Everything a user needs — configuration keys, the migration script from Phase 3b, sensor and brain
+configuration, training and prediction examples, Docker instructions — lives in one Markdown file
+that is read on a repository page. It has no navigation, no search, no dead-link checking, and a
+change to any of it is invisible in review beyond the diff. The later phases make this worse rather
+than better: Phase 4 adds CORS and session settings, Phase 5 changes where data lives, Phase 9 adds
+an add-on with its own installation path. Splitting the file after those phases means writing the
+same pages twice.
+
+- **`mkdocs.yml` at the repository root**, `docs_dir: docs`, `mkdocs-material` as the theme, with
+  the same `validation` block `solaredge2mqtt` uses: `unrecognized_links: warn` and
+  `anchors: warn`, so a link to a heading somebody renamed fails the build instead of quietly
+  landing at the top of the page.
+- **Documentation dependencies as a `docs` extra in `core/pyproject.toml`**, pinned exactly like
+  the `dev` extra already is, and resolved through `core/uv.lock`. This project keeps its Python in
+  `core/` while the documentation sits at the root, so the build runs as
+  `uv run mkdocs build --strict --config-file ../mkdocs.yml` from `core/`. A second lockfile at the
+  root purely for two documentation packages was rejected — it would be the only Python project
+  outside `core/` and would need its own dependency updates.
+- **Split the README into pages.** Proposed nav, following the shape of the existing headings:
+  - *Getting Started*: installation, first configuration, running the service
+  - *Configuration*: `configuration.yaml` / `secrets.yaml` reference, sensors, brains, security
+    (fallback password, API keys)
+  - *Usage*: training, prediction, the UI, where the API documentation lives
+  - *Deployment*: Docker, Docker Compose
+  - *Migration*: `LEARNINGHOUSE_*` environment variables (the Phase 3b section, moved verbatim)
+  - *Troubleshooting*
+  - *Reference*: architecture decisions
+- **The README keeps only what a repository page is for**: badges, what the service does, the
+  feature list, a quick start, and a prominent link to the site. `solaredge2mqtt`'s README is 87
+  lines against this project's 310.
+- **Do not restate the API.** The service already serves its OpenAPI documentation at `/docs`;
+  the site links there instead of growing a second, immediately stale copy of the endpoint list.
+- **An architecture decision record series**, `docs/decisions/`, with the index table and the
+  append-only rule `solaredge2mqtt` uses: numbered `NNNN-kebab-case-title.md`, superseded rather
+  than edited. Seed it with the decisions this plan has already made and that the code cannot
+  explain by itself — uv for the build (Phase 2c), YAML configuration with a one-shot migration
+  instead of an env-var fallback (Phase 3b), the exact-pin coupling to `pvlearn` (Phase 3), and the
+  Dependabot grouping that a framework major forced (Phase 3). Writing them now, while the reasoning
+  is still recoverable from the pull requests, is the point; after Phase 5 it is archaeology.
+- **`docs/modernization-plan.md` is not user documentation.** Either give it a place in the site
+  under a clearly internal section, or exclude it via `not_in_nav` so a `--strict` build stays
+  clean. Excluding it is the recommendation: this plan is written for the people doing the work,
+  and it will read as unfinished promises to anybody else.
+- **CI, patterned on `solaredge2mqtt`'s `build_project.yml`**: a `build-docs` job that runs
+  `mkdocs build --strict` on every push and pull request and uploads the rendered `site/` as an
+  artifact, so a documentation change can be reviewed as a browsable site; plus a `deploy-docs` job
+  that publishes to GitHub Pages **on release only**, after the jobs that publish what the site
+  describes. A push to `main` can carry documentation for an unreleased version — the published
+  site should not.
+
+**Acceptance**
+- [ ] `mkdocs build --strict` passes and runs in CI on every push and pull request; a dead internal
+      link, an unknown anchor or a nav entry pointing at a missing file fails the build.
+- [ ] The rendered site is available as a CI artifact for every run.
+- [ ] The site deploys to GitHub Pages on release only, and after the jobs that publish the package
+      and the images it documents.
+- [ ] Nothing that exists only in today's README is lost. Every configuration key, the Phase 3b
+      migration instructions, the sensor and brain examples, and the training and prediction calls
+      have a page; verified by diffing the old README's headings against the nav.
+- [ ] The README is reduced to overview, features, quick start and a link to the site.
+- [ ] Documentation dependencies are pinned in `core/pyproject.toml` and locked in `core/uv.lock`,
+      and the docs job uses the same `uv` version and flow as the other jobs.
+- [ ] `docs/modernization-plan.md` is either in the nav or explicitly excluded, and the strict
+      build is clean either way.
+- [ ] `docs/decisions/` exists with an index table and at least the four seed records named above.
+- [ ] Every documented configuration key matches the fields `ServiceSettings` actually reads —
+      checked against the code, not against the old README.
 
 ---
 
@@ -721,9 +829,11 @@ request says why — a deviation inside the tolerance is a reason to look, not a
 That lesson is written down in the pvlearn plan (chapter 6, addendum to point 6) and was learned the
 hard way there.
 
-**Documentation.** Currently `docs/` holds one PlantUML diagram. `pvlearn` standardises on Mermaid;
-adopting that here keeps diagrams reviewable in a pull request. Before the add-on ships, the README
-needs the armv7 limitation and a description of what changes for existing users.
+**Documentation.** Phase 3c moves the user-facing documentation out of the README and into a
+published MkDocs site. Diagrams are Mermaid, the convention `pvlearn` already standardises on and
+the one that stays reviewable in a pull request; the single stale PlantUML model that used to sit
+in `docs/diagrams/` was deleted rather than converted. Before the add-on ships, the site needs the
+armv7 limitation and a description of what changes for existing users.
 
 **Pydantic style.** Field definitions across the models use `Field(None, example=...)`. `example` is
 the Pydantic v1 spelling, and `Field(None, ...)` gives a required-looking field a `None` default.
@@ -793,6 +903,8 @@ P2c uv build + Docker + CI caching  ← pins land in a lockfile once, not pip th
 P3  Dependency updates              ← aligns shared pins with pvlearn
  │
 P3b Config via YAML + secrets       ← gives Phase 4's jwt_secret a home before Phase 4 needs it
+ │
+P3c Documentation site              ← split the README before four more phases add pages to it
  │
 P4  Security hardening              ← cheaper now than after the add-on ships
  │

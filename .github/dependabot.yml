@@ -24,3 +24,12 @@ updates:
     directory: "/ui" 
     schedule:
       interval: "daily"
+    # Angular's runtime packages, its build tooling and zone.js only resolve
+    # against each other's major, so a lone bump of any of them fails
+    # check-ui's `npm ci` with ERESOLVE. Ship them as one pull request.
+    groups:
+      angular:
+        patterns:
+          - "@angular/*"
+          - "@angular-devkit/*"
+          - "zone.js"

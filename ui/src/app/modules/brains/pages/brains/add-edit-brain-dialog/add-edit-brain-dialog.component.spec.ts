@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
 import { BrainsService } from '../../../brains.service';
@@ -22,12 +22,13 @@ describe('AddEditBrainDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         ReactiveFormsModule,
-        TranslateModule.forRoot()
       ],
       declarations: [AddEditBrainDialogComponent],
       providers: [
+        provideTranslateService(),
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: null },
         { provide: BrainsService, useValue: brainsService },

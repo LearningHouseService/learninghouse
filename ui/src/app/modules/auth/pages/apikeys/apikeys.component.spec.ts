@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSortModule } from '@angular/material/sort';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { TableActionsService } from 'src/app/shared/services/table-actions.service';
 import { AuthService } from '../../auth.service';
@@ -22,12 +22,13 @@ describe('APIKeysComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         MatSortModule,
-        TranslateModule.forRoot()
       ],
       declarations: [APIKeysComponent],
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: dialog },
         { provide: AuthService, useValue: authService },
         TableActionsService

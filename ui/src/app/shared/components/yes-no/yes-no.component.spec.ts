@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 
 import { YesNoComponent } from './yes-no.component';
 
@@ -13,10 +13,11 @@ describe('YesNoComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         ReactiveFormsModule,
-        TranslateModule.forRoot()
       ],
+      providers: [provideTranslateService()],
       declarations: [YesNoComponent],
       schemas: [NO_ERRORS_SCHEMA]
     })

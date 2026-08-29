@@ -5,7 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { EditDialogActionsService } from 'src/app/shared/services/edit-dialog-actions.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { SensorConfigurationService } from '../../../services/sensor-configuration.service';
 
 import { AddEditSensorDialogComponent } from './add-edit-sensor-dialog.component';
@@ -22,12 +22,13 @@ describe('AddEditSensorDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
         ReactiveFormsModule,
-        TranslateModule.forRoot()
       ],
       declarations: [AddEditSensorDialogComponent],
       providers: [
+        provideTranslateService(),
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: null },
         { provide: SensorConfigurationService, useValue: configService },

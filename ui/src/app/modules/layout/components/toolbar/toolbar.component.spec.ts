@@ -3,7 +3,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslatePipe } from '@ngx-translate/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { BreakpointService } from 'src/app/shared/services/breakpoint.service';
@@ -27,11 +27,12 @@ describe('ToolbarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
+        TranslatePipe,
         CommonModule,
-        TranslateModule.forRoot()
       ],
       declarations: [ToolbarComponent],
       providers: [
+        provideTranslateService(),
         { provide: SidenavService, useValue: sidenavService },
         { provide: AuthService, useValue: authService },
         { provide: BreakpointService, useValue: breakpoints },

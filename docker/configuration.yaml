@@ -1,0 +1,5 @@
+# Default configuration baked into the image. Overridable by mounting your
+# own configuration.yaml over this path, or by pre-populating the volume
+# before the container's first start.
+host: 0.0.0.0
+port: 5000

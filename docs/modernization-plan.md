@@ -446,19 +446,38 @@ sensitive values) without needing the Docker-specific mechanism.
   for a breaking change; this is one.
 
 **Acceptance**
-- [ ] Every setting currently readable from a `LEARNINGHOUSE_*` environment variable is readable from
-      `configuration.yaml`.
-- [ ] `jwt_secret` (and any other sensitive value) is read only from `secrets.yaml`, never from
-      `configuration.yaml`, the environment, or logged output.
-- [ ] `jwt_secret` persists across a service restart without depending on Phase 5.
-- [ ] The Docker image starts correctly with only a mounted `configuration.yaml`, no `LEARNINGHOUSE_*`
-      environment variables set.
-- [ ] The migration script converts a representative set of `LEARNINGHOUSE_*` variables (including at
+- [x] Every setting currently readable from a `LEARNINGHOUSE_*` environment variable is readable from
+      `configuration.yaml`. `ServiceSettings.__init__` merges every top-level key of
+      `configuration.yaml` (except `config_directory` and `SECRET_FIELDS`) the same way the old
+      generic env-var reader did; covered by `tests/core/test_settings.py::TestConfigurationYaml`.
+- [x] `jwt_secret` (and any other sensitive value) is read only from `secrets.yaml`, never from
+      `configuration.yaml`, the environment, or logged output. `SECRET_FIELDS` is excluded from the
+      `configuration.yaml` merge in code; `test_jwt_secret_in_configuration_yaml_is_ignored` and
+      `test_other_learninghouse_env_vars_are_no_longer_read` pin this. Grepped
+      `services/auth.py` - `settings.jwt_secret` is only ever passed to `jwt.encode`/`decode`, never
+      logged or printed.
+- [x] `jwt_secret` persists across a service restart without depending on Phase 5. Generated once and
+      written to `secrets.yaml` (`0600`) on first read; `test_the_jwt_secret_survives_across_restarts`
+      pins two `ServiceSettings` instances against the same directory. Verified against a real restart
+      too, via the Docker check below (`secrets.yaml` on the bind-mounted volume survived the
+      container being stopped and a fresh container started against the same volume).
+- [x] The Docker image starts correctly with only a mounted `configuration.yaml`, no `LEARNINGHOUSE_*`
+      environment variables set. Verified locally: built the image (`docker/configuration.yaml` now
+      baked in at `/learninghouse/brains/configuration.yaml`, the `LEARNINGHOUSE_HOST`/`_PORT` image
+      `ENV` lines removed), ran it with zero environment variables and no mount - `/api/versions`
+      returned 200 using the baked-in default (`host: 0.0.0.0`, `port: 5000`). Ran it again with a
+      volume mounted over `/learninghouse/brains` containing a `configuration.yaml` with a custom
+      `title` - the mounted file's values won, and `secrets.yaml` (`0600`) was written to the mounted
+      volume, not just image-local storage.
+- [x] The migration script converts a representative set of `LEARNINGHOUSE_*` variables (including at
       least one that must land in `secrets.yaml`) into a correct `configuration.yaml` /
       `secrets.yaml` pair, verified against a fixture of the old environment-variable layout.
-- [ ] The migration script refuses to overwrite existing YAML files without `--force`.
-- [ ] README documents console and Docker invocation of the migration script, and the changelog
-      records the breaking change.
+      `tests/scripts/test_migrate_config.py::TestMigrate::test_writes_a_correct_configuration_and_secrets_pair`.
+- [x] The migration script refuses to overwrite existing YAML files without `--force`.
+      `test_refuses_to_overwrite_without_force` / `test_force_overwrites_an_existing_pair`.
+- [x] README documents console and Docker invocation of the migration script, and the changelog
+      records the breaking change. See README "Upgrading from `LEARNINGHOUSE_*` environment
+      variables" and `CHANGELOG.md`'s Unreleased section.
 
 ---
 

@@ -32,15 +32,20 @@ FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/venv/bin:$PATH" \
-    LHS_HOME=/learninghouse \
-    LEARNINGHOUSE_HOST=0.0.0.0 \
-    LEARNINGHOUSE_PORT=5000
+    LHS_HOME=/learninghouse
 
 WORKDIR /learninghouse
 
 RUN adduser --uid 1000 --disabled-password --gecos '' --no-create-home learninghouse; \
     mkdir -p ${LHS_HOME}/brains; \
     chown -R learninghouse:learninghouse ${LHS_HOME}
+
+# Baked-in default so the image starts with no environment variables at all,
+# matching what LEARNINGHOUSE_HOST=0.0.0.0 / LEARNINGHOUSE_PORT=5000 used to
+# do. Docker seeds a fresh named volume from the image directory it's
+# mounted over, so a first-time `-v brains:/learninghouse/brains` still
+# picks this up; an existing volume's own configuration.yaml wins.
+COPY --chown=learninghouse:learninghouse configuration.yaml ${LHS_HOME}/brains/configuration.yaml
 
 COPY --chown=learninghouse:learninghouse --from=buildimage /venv /venv
 

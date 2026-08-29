@@ -40,32 +40,77 @@ all data from your sensors and an object dump of the trained model to a file cal
 
 ### Service configuration
 
-The service is configured by environment variables. The following options can be set:
+The service is configured by two files inside the config directory (`brains` by default):
+`configuration.yaml` for everything except secrets, and `secrets.yaml` for sensitive values.
+Neither file needs to exist - every setting has a default, and `secrets.yaml`'s `jwt_secret` is
+generated and written on first start if it isn't already there.
 
-Environment Variable             | default (production/development) | description                                            
--------------------------------- | -------------------------------- | ------------------------------------------------------ 
-LEARNINGHOUSE_ENVIRONMENT        | production                       | Choose the default environment settings: production or development. 
-LEARNINGHOUSE_HOST               | 127.0.0.1                        | Set the address that the service should bind to. (use 0.0.0.0 for all available)
-LEARNINGHOUSE_PORT               | 5000                             | Set the port on which the service should listen.
-LEARNINGHOUSE_BASE_URL           | _Not set_                        | Set the base URL for external access, for example, the hostname of your Docker host.
-LEARNINGHOUSE_CONFIG_DIRECTORY   | ./brains                         | Define the directory where all configuration data goes.
-LEARNINGHOUSE_OPENAPI_FILE       | /learninghouse_api.json          | Provide the file URL path to the OpenAPI JSON file.
-LEARNINGHOUSE_DOCS_URL           | /docs                            | Define the URL path for the interactive [API documentation](#api-documentation). If you leave it empty, the documentation will be disabled.
-LEARNINGHOUSE_JWT_SECRET         | _Generated on startup_           | For administration authentication, a JWT is generated after login. This JWT is signed with a secret. By default, it is generated on startup, which will invalidate existing JWTs on each restart.
-LEARNINGHOUSE_JWT_EXPIRE_MINUTES | 10                               | The refresh token of JWTs will expire after a given amount of minutes.
-LEARNINGHOUSE_LOGGING_LEVEL      | INFO                             | Set logging level to DEBUG, INFO, WARNING, ERROR, CRITICAL
-LEARNINGHOUSE_DEBUG              | (False/True)                     | The debugger will be automatically activated in the development environment. For security reasons, it is recommended not to activate it in production. 
-LEARNINGHOUSE_RELOAD             | (False/True)                     | The source will be automatically reloaded in the development environment. For security reasons, it is recommended not to activate it in production.
+Only one thing is still set via an environment variable, because it has to be known before either
+YAML file can be located:
+
+Environment Variable           | default   | description
+------------------------------ | --------- | ------------------------------------------------------
+LEARNINGHOUSE_CONFIG_DIRECTORY | ./brains  | Define the directory that holds `configuration.yaml` and `secrets.yaml`, and everything else the service persists.
+
+Everything else moves into `configuration.yaml`:
+
+Key                  | default (production/development) | description
+--------------------- | --------------------------------- | ------------------------------------------------------
+environment           | production                       | Choose the default environment settings: production or development.
+title                 | learningHouse Service             | Set the name of the service.
+host                  | 127.0.0.1                         | Set the address that the service should bind to. (use 0.0.0.0 for all available)
+port                  | 5000                              | Set the port on which the service should listen.
+workers               | 1                                 | Count of parallel workers for processing.
+base_url              | _Not set_                         | Set the base URL for external access, for example, the hostname of your Docker host.
+openapi_file          | /learninghouse_api.json           | Provide the file URL path to the OpenAPI JSON file.
+docs_url              | /docs                             | Define the URL path for the interactive [API documentation](#api-documentation). If you leave it empty, the documentation will be disabled.
+jwt_expire_minutes    | 10                                | The refresh token of JWTs will expire after a given amount of minutes.
+logging_level         | INFO                              | Set logging level to DEBUG, INFO, WARNING, ERROR, CRITICAL
+debug                 | (False/True)                      | The debugger will be automatically activated in the development environment. For security reasons, it is recommended not to activate it in production.
+reload                | (False/True)                      | The source will be automatically reloaded in the development environment. For security reasons, it is recommended not to activate it in production.
+
+`secrets.yaml` currently holds one key:
+
+Key         | default                 | description
+----------- | ------------------------ | ------------------------------------------------------
+jwt_secret  | _Generated on first start and persisted_ | For administration authentication, a JWT is generated after login. This JWT is signed with this secret. It survives a restart once it has been generated once.
 
 #### Example configuration
 
-You can download [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/core/.env.example) and rename it to `.env`. Inside, you can modify the default configuration values to meet your needs in this file.
+Copy [configuration.yaml.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/main/core/configuration.yaml.example)
+to `configuration.yaml` and [secrets.yaml.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/main/core/secrets.yaml.example)
+to `secrets.yaml`, both inside your config directory, and uncomment/change what you need.
+
+#### Upgrading from `LEARNINGHOUSE_*` environment variables
+
+Versions before this configuration mechanism read every setting from `LEARNINGHOUSE_*`
+environment variables (and an optional `.env` file). That is a breaking change as of this release
+- environment variables other than `LEARNINGHOUSE_CONFIG_DIRECTORY` are no longer read. A one-shot
+migration script converts the old layout for you; it only touches settings, never brain data,
+sensors, or the security database.
+
+Console, run once from wherever your old `.env`/environment lived, before starting the new
+version:
+```
+learninghouse-migrate-config --config-directory ./brains
+```
+
+Docker, run once against the mounted volume before switching the container to the version that
+requires YAML config, reusing the same `.env`/`LEARNINGHOUSE_*` variables the old container was
+started with:
+```
+docker run --rm --env-file .env -v brains:/learninghouse/brains ghcr.io/learninghouseservice/learninghouse:latest learninghouse-migrate-config --config-directory /learninghouse/brains
+```
+
+The script refuses to overwrite an existing `configuration.yaml` / `secrets.yaml` unless you pass
+`--force`, so re-running it after a manual edit won't silently clobber it.
 
 ## Run the service 
 
 ### In the console
 
-Copy the [.env.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/master/core/.env.example) file to .env and modify it according to your needs.
+Copy [configuration.yaml.example](https://raw.githubusercontent.com/LearningHouseService/learninghouse/main/core/configuration.yaml.example)
+to `configuration.yaml` inside your config directory and modify it according to your needs.
 
 Then, simply run `learninghouse` to start the service. By default, the service will listen on http://localhost:5000/.
 

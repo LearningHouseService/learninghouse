@@ -30,6 +30,8 @@ core/                       # the Python service — everything installable live
 │   ├── core/               # settings and logging infrastructure
 │   ├── errors/             # LearningHouseException subclasses and their OpenAPI shape
 │   ├── models/             # pydantic models and the brain/dataset domain objects
+│   ├── scripts/            # console-script entry points shipped with the package
+│   │                       # (e.g. learninghouse-migrate-config)
 │   ├── services/           # brain training and prediction, sensors, auth
 │   ├── static/             # swagger assets served by the service
 │   └── ui/                 # built Angular UI, copied in by CI — not in git

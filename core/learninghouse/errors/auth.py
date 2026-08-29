@@ -64,6 +64,33 @@ class NoAPIKey(LearningHouseException):
         }
 
 
+class APIKeyInQueryStringNotAllowed(LearningHouseSecurityException):
+    IN_QUERY = "APIKEY_IN_QUERY"
+    DESCRIPTION = (
+        "API keys in the query string are deprecated and not accepted. "
+        "Send the key in the X-LEARNINGHOUSE-API-KEY header instead, or set "
+        "allow_api_key_query: true in configuration.yaml while you migrate."
+    )
+
+    def __init__(self):
+        super().__init__(self.DESCRIPTION, self.IN_QUERY)
+
+    @classmethod
+    def api_description(cls) -> Dict[str, Any]:
+        return {
+            "model": LearningHouseErrorMessage,
+            "description": "An API key was sent as a query parameter.",
+            "content": {
+                MIMETYPE_JSON: {
+                    "example": {
+                        "error": cls.IN_QUERY,
+                        "description": cls.DESCRIPTION,
+                    }
+                }
+            },
+        }
+
+
 class InvalidPassword(LearningHouseSecurityException):
     INVALID_PASSWORD = "INVALID_PASSWORD"
     DESCRIPTION = "Invalid password"

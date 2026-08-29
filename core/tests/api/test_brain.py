@@ -209,10 +209,10 @@ class TestPredictionPost:
     def test_brain_trained_under_different_library_versions_is_rejected(
         self, isolated_client, unlocked_admin_headers, monkeypatch
     ):
-        """Guards Brain.actual_versions (models/brain.py), the check Phase 3's
+        """Guards Brain.actual_versions (models/brain.py), the check every
         scikit-learn bump relies on: a brain trained under one library set
         must be rejected, not silently loaded, once the running versions
-        differ - see docs/modernization-plan.md Phase 3.
+        differ.
 
         Training happens first with the real `versions`, so the pickled
         Brain.versions snapshot captures it; the running versions.sklearn is

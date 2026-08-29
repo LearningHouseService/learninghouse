@@ -24,7 +24,7 @@ export interface LearningHouseVersions {
     numpy: string;
     pandas: string;
     jwt: string;
-    passlib: string;
+    argon2: string;
     loguru: string;
 }
 

@@ -10,9 +10,11 @@ deleted, it is superseded by a later one that says so.
 |---|---|---|---|
 | [0001](0001-uv-for-the-python-build.md) | uv for the Python build and the Docker image | Accepted | Dependencies resolve through a committed `uv.lock`; the Docker image syncs that lockfile and installs the built wheel on top, and `piwheels` is gone with `armv7`. |
 | [0002](0002-yaml-configuration-with-a-one-shot-migration.md) | YAML configuration with a one-shot migration | Accepted | `configuration.yaml` and `secrets.yaml` replace the `LEARNINGHOUSE_*` variables outright; a script migrates once instead of a permanent fallback. |
-| [0003](0003-exact-pins-shared-with-pvlearn.md) | Shared dependencies are pinned exactly, to pvlearn's values | Accepted | `numpy`, `pandas`, `scipy`, `scikit-learn`, `pydantic` and `joblib` match pvlearn's pins so the Phase 6 dependency is a one-line change. |
+| [0003](0003-exact-pins-shared-with-pvlearn.md) | Shared dependencies are pinned exactly, to pvlearn's values | Accepted | `numpy`, `pandas`, `scipy`, `scikit-learn`, `pydantic` and `joblib` match pvlearn's pins, so depending on pvlearn stays a one-line change. |
 | [0004](0004-dependabot-groups-for-framework-majors.md) | Dependabot groups the Angular ecosystem, and does not own framework majors | Accepted | Angular's packages ship as one grouped pull request; a framework major is done by hand with migration schematics, not by a version bump. |
 | [0005](0005-the-documentation-site.md) | The documentation site is built from `core/`, and published on release only | Accepted | MkDocs Material builds from `docs/` with the docs dependencies in `core/`'s lockfile; a dead link fails the build, and Pages deploys after the release it documents. |
+| [0006](0006-argon2id-passwords-and-hashed-api-keys.md) | Argon2id for the password, a salted SHA-256 for API keys, and no legacy format | Accepted | `passlib` is unmaintained and its cost was being paid per request on keys that never needed it; the old format is not read at all — the password falls back and API keys are removed, once. |
+| [0007](0007-multi-worker-support-is-the-goal.md) | Multi-worker support is the goal; one worker is an interim guard | Accepted (interim) | Refresh tokens and the security database are per process, so `workers` above `1` is refused until shared storage brings it back. |
 
 ## Writing a new one
 

@@ -1,7 +1,7 @@
-"""Characterization of `learninghouse-migrate-config`
-(docs/modernization-plan.md, Phase 3b): converts LEARNINGHOUSE_* environment
-variables (plus an optional .env file) into a configuration.yaml /
-secrets.yaml pair, without touching anything else.
+"""Characterization of `learninghouse-migrate-config`: converts
+LEARNINGHOUSE_* environment variables (plus an optional .env file) into a
+configuration.yaml / secrets.yaml pair, without touching anything else. See
+docs/decisions/0002-yaml-configuration-with-a-one-shot-migration.md.
 """
 
 import pytest

@@ -121,3 +121,5 @@ nav:
       - decisions/0003-exact-pins-shared-with-pvlearn.md
       - decisions/0004-dependabot-groups-for-framework-majors.md
       - decisions/0005-the-documentation-site.md
+      - decisions/0006-argon2id-passwords-and-hashed-api-keys.md
+      - decisions/0007-multi-worker-support-is-the-goal.md

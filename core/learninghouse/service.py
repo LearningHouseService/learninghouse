@@ -54,7 +54,7 @@ def get_application(settings: ServiceSettings | None = None) -> FastAPI:
 
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=settings.cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -85,14 +85,7 @@ def run():
     logger.info(f"Running in {settings.environment} mode")
     logger.info(f"Listening on {settings.host}:{settings.port}")
     logger.info(f"Configuration directory {settings.brains_directory}")
-
-    if settings.workers > 1:
-        if settings.reload:
-            logger.warning(
-                f"Reloading active. Workers {settings.workers} setting will be ignored."
-            )
-        else:
-            logger.info(f"Running with {settings.workers} workers")
+    logger.info(f"Allowed CORS origins {', '.join(settings.cors_origins)}")
 
     logger.info(f"URL to OpenAPI file {settings.openapi_url}")
 

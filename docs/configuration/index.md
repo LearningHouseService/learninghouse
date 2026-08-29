@@ -27,21 +27,33 @@ value that determined where that file was read from.
 | `title` | `learningHouse Service` | Set the name of the service. |
 | `host` | `127.0.0.1` | The address the service binds to. Use `0.0.0.0` for all available interfaces. |
 | `port` | `5000` | The port the service listens on. |
-| `workers` | `1` | Count of parallel workers for processing. |
+| `workers` | `1` | Count of parallel workers for processing. Only `1` is supported; anything higher is refused at startup. |
 | `base_url` | *not set* | Base URL for external access, for example the hostname of your Docker host. |
 | `openapi_file` | `/learninghouse_api.json` | File URL path to the OpenAPI JSON file. |
 | `docs_url` | `/docs` | URL path for the interactive [API documentation](../usage/api.md). Leave it empty to disable the documentation. |
 | `jwt_expire_minutes` | `10` | The refresh token of JWTs expires after this many minutes. |
+| `cors_allowed_origins` | *empty* | Additional origins allowed to send credentialed cross-origin requests, as a YAML list. The service's own origin is always allowed. See [CORS](security.md#cors). |
+| `allow_api_key_query` | `False` | Accept API keys from the `?api_key=` query parameter. Deprecated, see [API keys](security.md#api-keys). |
 | `logging_level` | `INFO` | One of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. |
 | `debug` | `False` / `True` | The debugger is activated automatically in the development environment. For security reasons it is recommended not to activate it in production. |
 | `reload` | `False` / `True` | The source is reloaded automatically in the development environment. For security reasons it is recommended not to activate it in production. |
 
-Setting `environment: development` changes the defaults of `debug`, `reload` and `title` - an
-explicit value for any of those still wins.
+Setting `environment: development` changes the defaults of `debug`, `reload`, `title` and
+`cors_allowed_origins` (which gains `http://localhost:4200` for `ng serve`) - an explicit value for
+any of those still wins.
 
-!!! warning "`workers` above 1 is not supported yet"
-    Refresh tokens are held in a per-process dictionary, so a token issued by one worker is
-    rejected by another. Keep `workers` at `1` until that changes.
+!!! warning "`workers` above 1 is refused for now"
+    Refresh tokens and the security database are held per process, so a session issued by one
+    worker would be rejected by every other one. Rather than handing out sessions that work every
+    n-th request, the service refuses to start with `workers` above `1`:
+
+    ```
+    workers must be 1 for now: refresh tokens and the security database are held per
+    process, so a session issued by one worker is rejected by all the others.
+    ```
+
+    This is temporary. Several workers are supported again once that state moves into shared
+    storage - see [decision 0007](../decisions/0007-multi-worker-support-is-the-goal.md).
 
 ## `secrets.yaml`
 

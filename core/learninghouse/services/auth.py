@@ -9,11 +9,12 @@ from fastapi.security.api_key import APIKeyHeader, APIKeyQuery
 
 from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
+from learninghouse.core.settings.models import ServiceSettings
 from learninghouse.errors import (
     LearningHouseSecurityException,
     LearningHouseUnauthorizedException,
 )
-from learninghouse.errors.auth import InvalidPassword
+from learninghouse.errors.auth import APIKeyInQueryStringNotAllowed, InvalidPassword
 from learninghouse.models.auth import (
     APIKey,
     APIKeyInfo,
@@ -27,7 +28,33 @@ from learninghouse.models.auth import (
 
 API_KEY_NAME = "X-LEARNINGHOUSE-API-KEY"
 
-api_key_query = APIKeyQuery(name="api_key", auto_error=False)
+API_KEY_QUERY_DEPRECATION = (
+    "Deprecated. Query strings end up in access logs, proxy logs and browser "
+    "history, so an API key sent this way has to be considered leaked. Send "
+    "it in the {header} header instead. Only read at all while "
+    "allow_api_key_query is set in configuration.yaml."
+).format(header=API_KEY_NAME)
+
+API_KEY_QUERY_WARNING = (
+    "An API key was accepted from the query string. This is deprecated and "
+    "the request's URL may have been written to access or proxy logs - treat "
+    "the key as leaked and replace it once the client sends the "
+    f"{API_KEY_NAME} header."
+)
+
+UNKNOWN_API_KEY_WARNING = (
+    "Rejected an unknown API key presented in the {source}. Repeated "
+    "occurrences mean somebody is trying keys against this service."
+)
+
+INVALID_PASSWORD_WARNING = (
+    "Rejected an administration login with a wrong password. Repeated "
+    "occurrences mean somebody is trying passwords against this service."
+)
+
+api_key_query = APIKeyQuery(
+    name="api_key", auto_error=False, description=API_KEY_QUERY_DEPRECATION
+)
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 jwt_bearer = HTTPBearer(bearerFormat="JWT", auto_error=False)
 
@@ -50,6 +77,7 @@ class AuthServiceInternal:
 
     def create_token(self, password: str) -> Token:
         if not self.database.authenticate_password(password):
+            logger.warning(INVALID_PASSWORD_WARNING)
             raise InvalidPassword()
 
         self.cleanup_refresh_tokens()
@@ -150,7 +178,11 @@ class AuthServiceInternal:
         return confirm
 
     def is_admin_user_or_trainer(
-        self, credentials: HTTPAuthorizationCredentials, query: str, header: str
+        self,
+        credentials: HTTPAuthorizationCredentials,
+        query: str,
+        header: str,
+        allow_api_key_query: bool = False,
     ) -> UserRole:
         role: UserRole
 
@@ -159,12 +191,22 @@ class AuthServiceInternal:
         if is_valid:
             role = UserRole.ADMIN
         else:
-            key = query or header
+            key = header
+            source = "header"
+            if not key and query:
+                if not allow_api_key_query:
+                    raise APIKeyInQueryStringNotAllowed()
+
+                logger.warning(API_KEY_QUERY_WARNING)
+                key = query
+                source = "query string"
+
             if not key:
                 raise LearningHouseSecurityException("Invalid credentials")
 
             api_key_info = self.database.find_apikey_by_key(key)
             if not api_key_info:
+                logger.warning(UNKNOWN_API_KEY_WARNING.format(source=source))
                 raise LearningHouseUnauthorizedException()
 
             role = UserRole.from_string(str(api_key_info.role))
@@ -250,14 +292,6 @@ def auth_service_cached() -> AuthServiceInternal:
     return service
 
 
-# The FastAPI dependency callables below used to be bound methods of the
-# `authservice` singleton, attached to routers at import time. That meant
-# every router permanently referenced whichever AuthServiceInternal instance
-# happened to exist when the module was first imported. As free functions
-# resolving the service through `Depends(auth_service_cached)`, the service
-# is looked up per request instead of being baked into the router.
-
-
 async def protect_admin(
     credentials: HTTPAuthorizationCredentials = Security(jwt_bearer),
     auth_service: AuthServiceInternal = Depends(auth_service_cached),
@@ -292,8 +326,11 @@ async def protect_user(
     query: str = Security(api_key_query),
     header: str = Security(api_key_header),
     auth_service: AuthServiceInternal = Depends(auth_service_cached),
+    settings: ServiceSettings = Depends(service_settings),
 ) -> UserRole:
-    return auth_service.is_admin_user_or_trainer(credentials, query, header)
+    return auth_service.is_admin_user_or_trainer(
+        credentials, query, header, settings.allow_api_key_query
+    )
 
 
 async def protect_trainer(
@@ -301,8 +338,11 @@ async def protect_trainer(
     query: str = Security(api_key_query),
     header: str = Security(api_key_header),
     auth_service: AuthServiceInternal = Depends(auth_service_cached),
+    settings: ServiceSettings = Depends(service_settings),
 ) -> UserRole:
-    role = auth_service.is_admin_user_or_trainer(credentials, query, header)
+    role = auth_service.is_admin_user_or_trainer(
+        credentials, query, header, settings.allow_api_key_query
+    )
 
     if role.role not in ["admin", APIKeyRole.TRAINER.role]:
         raise LearningHouseUnauthorizedException()

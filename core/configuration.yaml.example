@@ -15,8 +15,29 @@
 # host: 127.0.0.1
 # port: 5000
 
-# Count of parallel workers for processing
+# Count of parallel workers for processing. Only 1 is supported: refresh
+# tokens are held per process, so a session issued by one worker would be
+# rejected by all the others. Anything above 1 is refused at startup.
 # workers: 1
+
+# Additional origins allowed to send credentialed cross-origin requests.
+# The service's own origin (base_url if set, otherwise host and port) is
+# always allowed - that is where the bundled UI is served from. Add an entry
+# only for a page on a different origin that has to call this service, for
+# example a dashboard on your Home Assistant. "*" is refused: combined with
+# credentials it lets every page a user visits call this service with their
+# session. In the development environment http://localhost:4200 is added as
+# well, for `ng serve`.
+# cors_allowed_origins:
+#   - https://home.example
+#   - http://homeassistant.local:8123
+
+# Accept API keys from the ?api_key= query parameter. Deprecated and off by
+# default: query strings end up in access logs, proxy logs and browser
+# history, so a key sent that way has to be considered leaked. Turn it on
+# only for as long as it takes to move a client to the
+# X-LEARNINGHOUSE-API-KEY header.
+# allow_api_key_query: false
 
 # Set base url for external access
 # base_url:

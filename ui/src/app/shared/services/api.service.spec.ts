@@ -129,7 +129,7 @@ describe('APIService', () => {
         numpy: '2.0',
         pandas: '3.0',
         jwt: '2.0',
-        passlib: '1.0',
+        argon2: '1.0',
         loguru: '0.1'
       };
       let result: { label: string; version: string }[] = [];

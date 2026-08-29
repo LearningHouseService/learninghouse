@@ -661,13 +661,65 @@ because by then someone is depending on the current behaviour.
 - **Refresh tokens in memory.** `AuthServiceInternal.refresh_tokens` is a per-process dict, which is
   the second half of the same multi-worker problem. Either persist it or document that `workers`
   must stay at 1.
-- Password hashing per Phase 3, if not already taken there.
+  - This is the reported symptom in
+    [#306](https://github.com/LearningHouseService/learninghouse/issues/306) ("JWT refresh not
+    working reliably" - a refresh that works, then fails seconds later). The answer given there was
+    Redis (#373, closed); the shared storage this plan brings instead is Phase 5's SQLite. Phase 3b
+    closed the regenerated-secret half of the symptom, this phase refuses the configuration that
+    triggers the rest, and Phase 5 removes the cause and allows `workers > 1` again. The refusal is
+    a stopgap with an expiry date, not a decision that this service runs on one worker - see
+    decision 0007. The issue stays open until Phase 5.
+  - The dictionary is not the only per-process state in the way: `AuthServiceInternal` reads
+    `security.json` once in its constructor and is cached for the life of the process, so a
+    password change or a new API key made through one worker is invisible to the others. Both have
+    to move in Phase 5.
+- Password hashing per Phase 3, if not already taken there. It was not - it is taken here.
 
 **Acceptance**
-- [ ] A cross-origin credentialed request from an origin that is not configured is rejected.
-- [ ] Sessions survive a service restart.
-- [ ] `workers > 1` either works correctly or is rejected at startup with an explanation.
-- [ ] No secret, token or API key appears in log output at any level.
+- [x] A cross-origin credentialed request from an origin that is not configured is rejected.
+      `allow_origins=["*"]` is gone; `cors_allowed_origins` in `configuration.yaml` defaults to the
+      service's own origin (`ServiceSettings.cors_origins`) and refuses `*` outright, because a
+      wildcard next to `allow_credentials=True` makes Starlette reflect the request's own `Origin`.
+      Pinned by `tests/test_service.py::TestCors` - an unconfigured origin gets no
+      `Access-Control-Allow-Origin` header and its credentialed preflight is answered with `400` -
+      and by `tests/core/test_settings.py::TestCorsOrigins`.
+- [x] Sessions survive a service restart. Delivered in Phase 3b (`jwt_secret` in `secrets.yaml`,
+      `test_the_jwt_secret_survives_across_restarts`); this phase adds the warning log for the
+      start that had to generate it, asserted not to contain the secret itself by
+      `tests/test_secret_logging.py::TestJwtSecretGeneration`.
+- [x] `workers > 1` either works correctly or is rejected at startup with an explanation. Rejected
+      **for now**: a `ServiceSettings` field validator fails the load with the reason (refresh
+      tokens and the security database are held per process), so the service does not start rather
+      than issuing sessions that a sibling worker rejects. `learninghouse.__main__` turns that into
+      a message rather than a pydantic traceback and exits `1`; both console script and
+      `python -m learninghouse` go through it. `tests/core/test_settings.py::TestWorkers` and
+      `tests/test_main.py`, the latter starting a real process the way the image does.
+      **This is a guard, not the target.** Several workers are a supported configuration again in
+      Phase 5, which is where the acceptance criterion for it now lives; decision 0007 records the
+      guard as interim and names the two things that have to change to lift it.
+- [x] No secret, token or API key appears in log output at any level.
+      `tests/test_secret_logging.py` attaches a loguru sink at `DEBUG`, runs a full administration
+      flow (login, password change, API key creation, use, listing and deletion) and asserts that
+      the password, the API key, `jwt_secret` and both tokens are absent from everything written.
+
+**Beyond the listed bullets**
+- API keys are hashed with a salted SHA-256 rather than `sha512_crypt` at 400,000-999,000 rounds.
+  The password hash's cost was being paid on every prediction request, against a 128-bit key that
+  no one guesses; it also gave any unauthenticated caller a cheap way to spend the service's CPU.
+- **The old hash format is not read at all, and `passlib` is gone.** A `security.json` with `$6$`
+  hashes has its administration password reset to the fallback (initial-password gate armed again)
+  and its API keys removed, once, on load. Verifying the old hashes instead would have kept an
+  unmaintained dependency alive indefinitely, since nothing forces an installation to log in again.
+  Breaking change, recorded in the changelog and on the security page - see decision 0006.
+- `/api/versions` reports `argon2` where it reported `passlib`; `argon2-cffi-bindings` is pinned
+  explicitly next to `argon2-cffi`, because that is the half carrying the C implementation.
+- A rejected API key and a rejected administration login now write a warning naming neither value.
+  Guessing is bounded by the request rate, not by the hash, and until this the attempts left no
+  trace at all. A rate limit for the authentication surface is a separate piece of work.
+- The condition the API key hashing depends on - server-generated, 128 bits, no client-supplied
+  keys - is pinned by `tests/models/test_auth.py::TestApiKeyEntropy` rather than left implicit.
+- `SecurityDatabase.salt` was a class-level `token_hex(8)`, evaluated once per process, so every
+  database created by one process shared a salt. It is a `default_factory` now.
 
 ---
 
@@ -697,8 +749,20 @@ rewriting it.
   the originals aside rather than deleting them. Must be idempotent and must be covered by tests
   against a fixture of the old layout.
 - Schema versioning via `PRAGMA user_version` and a small migration runner. See open decisions.
+- **Restoring multi-worker support is part of this phase, not a side effect.** Two pieces of
+  per-process state stand in the way, and the tables here are what remove them: refresh tokens
+  (`AuthServiceInternal.refresh_tokens`, a plain dictionary) and the security database, which is
+  read once per process in that service's constructor and therefore never sees another worker's
+  password change or new API key. Phase 4 refuses `workers > 1` rather than building a second
+  storage mechanism for them one phase early (decision 0007, explicitly interim); this is where
+  that guard comes off and where
+  [#306](https://github.com/LearningHouseService/learninghouse/issues/306) can be closed.
 
 **Acceptance**
+- [ ] `workers > 1` starts and works: a session issued by one worker is accepted by every other
+      one, and a password change or new API key made through one is effective in all of them
+      without a restart. The Phase 4 guard is removed in the same pull request, and decision 0007
+      is superseded by a record of that.
 - [ ] A configuration directory in the old layout is migrated on first start, and the service
       behaves identically afterwards — verified against the Phase 2 characterization suite.
 - [ ] Migration run twice changes nothing the second time.

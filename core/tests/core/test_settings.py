@@ -1,5 +1,5 @@
-"""Characterization of the Phase 3b configuration.yaml / secrets.yaml
-loader (docs/modernization-plan.md). Each test builds a `ServiceSettings`
+"""Characterization of the configuration.yaml / secrets.yaml loader. Each
+test builds a `ServiceSettings`
 directly against a fresh `tmp_path`, bypassing the process environment
 entirely except where a test is specifically about the env var bootstrap.
 """
@@ -7,7 +7,9 @@ entirely except where a test is specifically about the env var bootstrap.
 import os
 import stat
 
+import pytest
 import yaml
+from pydantic import ValidationError
 
 from learninghouse.core.settings.models import (
     CONFIG_DIRECTORY_ENV,
@@ -50,14 +52,14 @@ class TestConfigurationYaml:
     def test_values_are_read_from_configuration_yaml(self, tmp_path):
         write_yaml(
             tmp_path / CONFIGURATION_FILENAME,
-            {"host": "0.0.0.0", "port": 8080, "workers": 4},
+            {"host": "0.0.0.0", "port": 8080, "jwt_expire_minutes": 30},
         )
 
         settings = ServiceSettings(config_directory=tmp_path)
 
         assert settings.host == "0.0.0.0"
         assert settings.port == 8080
-        assert settings.workers == 4
+        assert settings.jwt_expire_minutes == 30
 
     def test_an_explicit_constructor_argument_wins_over_the_file(self, tmp_path):
         write_yaml(tmp_path / CONFIGURATION_FILENAME, {"host": "0.0.0.0"})
@@ -143,3 +145,103 @@ class TestDevelopmentDefaults:
 
         assert settings.debug is True
         assert settings.reload is True
+
+
+class TestCorsOrigins:
+    """The CORS configuration that replaced `allow_origins=["*"]`."""
+
+    def test_the_default_is_the_services_own_origin(self, tmp_path):
+        settings = ServiceSettings(config_directory=tmp_path)
+
+        assert settings.cors_origins == ["http://localhost:5000"]
+
+    def test_configured_origins_are_added_to_the_services_own(self, tmp_path):
+        write_yaml(
+            tmp_path / CONFIGURATION_FILENAME,
+            {"cors_allowed_origins": ["https://home.example", "http://10.0.0.2:8123"]},
+        )
+
+        settings = ServiceSettings(config_directory=tmp_path)
+
+        assert settings.cors_origins == [
+            "https://home.example",
+            "http://10.0.0.2:8123",
+            "http://localhost:5000",
+        ]
+
+    def test_the_own_origin_follows_base_url(self, tmp_path):
+        write_yaml(
+            tmp_path / CONFIGURATION_FILENAME, {"base_url": "https://learninghouse.lan"}
+        )
+
+        settings = ServiceSettings(config_directory=tmp_path)
+
+        assert settings.cors_origins == ["https://learninghouse.lan:5000"]
+
+    def test_the_development_environment_adds_the_angular_dev_server(self, tmp_path):
+        # `ng serve` runs the UI on :4200 against the service on :5000.
+        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"environment": "development"})
+
+        settings = ServiceSettings(config_directory=tmp_path)
+
+        assert settings.cors_origins == [
+            "http://localhost:4200",
+            "http://localhost:5000",
+        ]
+
+    def test_a_trailing_slash_is_stripped(self, tmp_path):
+        # Browsers send an Origin without a trailing slash; a configured
+        # "https://home.example/" would otherwise never match anything.
+        write_yaml(
+            tmp_path / CONFIGURATION_FILENAME,
+            {"cors_allowed_origins": ["https://home.example/"]},
+        )
+
+        settings = ServiceSettings(config_directory=tmp_path)
+
+        assert settings.cors_origins == [
+            "https://home.example",
+            "http://localhost:5000",
+        ]
+
+    def test_a_wildcard_origin_is_refused(self, tmp_path):
+        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"cors_allowed_origins": ["*"]})
+
+        with pytest.raises(ValidationError) as excinfo:
+            ServiceSettings(config_directory=tmp_path)
+
+        assert "cors_allowed_origins" in str(excinfo.value)
+        assert "credentials" in str(excinfo.value)
+
+
+class TestWorkers:
+    """Refresh tokens are per process, so only one worker is valid for now -
+    see docs/decisions/0007-multi-worker-support-is-the-goal.md.
+    """
+
+    def test_one_worker_is_accepted(self, tmp_path):
+        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"workers": 1})
+
+        assert ServiceSettings(config_directory=tmp_path).workers == 1
+
+    def test_more_than_one_worker_is_refused_with_an_explanation(self, tmp_path):
+        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"workers": 4})
+
+        with pytest.raises(ValidationError) as excinfo:
+            ServiceSettings(config_directory=tmp_path)
+
+        message = str(excinfo.value)
+        assert "workers" in message
+        assert "refresh tokens" in message
+        # An interim guard, and the message has to say so - decision 0007.
+        assert "comes back" in message
+
+
+class TestApiKeyQuerySetting:
+    def test_the_query_variant_is_off_by_default(self, tmp_path):
+        assert ServiceSettings(config_directory=tmp_path).allow_api_key_query is False
+
+    def test_it_can_be_turned_on_for_a_migration(self, tmp_path):
+        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"allow_api_key_query": True})
+
+        assert ServiceSettings(config_directory=tmp_path).allow_api_key_query is True

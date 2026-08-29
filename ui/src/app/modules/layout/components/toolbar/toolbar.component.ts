@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/auth/auth.service';
@@ -9,6 +9,7 @@ import { BreakpointService } from 'src/app/shared/services/breakpoint.service';
 @Component({
   selector: 'app-toolbar',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './toolbar.component.html'
 })
 export class ToolbarComponent {

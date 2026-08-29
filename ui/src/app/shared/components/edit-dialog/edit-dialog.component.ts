@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { EditDialogActionsService } from '../../services/edit-dialog-actions.service';
 import { FormResponseConfig } from '../form-response/form-response.component';
@@ -22,6 +22,7 @@ export interface EditDialogConfig {
   selector: 'learninghouse-edit-dialog',
   standalone: false,
   templateUrl: './edit-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./edit-dialog.component.scss']
 })
 export class EditDialogComponent {

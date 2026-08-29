@@ -1,10 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, ChangeDetectionStrategy } from "@angular/core";
 import { InputDirective } from "../input/input.directive";
 import { SelectOption } from "../select/select.component";
 
 @Component({
     selector: 'learninghouse-yes-no',
     standalone: false,
+    changeDetection: ChangeDetectionStrategy.Eager,
     templateUrl: './yes-no.component.html'
 })
 export class YesNoComponent extends InputDirective {

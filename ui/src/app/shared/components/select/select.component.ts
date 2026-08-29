@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { InputDirective } from '../input/input.directive';
 
 export interface SelectOption<T> {
@@ -10,6 +10,7 @@ export interface SelectOption<T> {
   selector: 'learninghouse-select',
   standalone: false,
   templateUrl: './select.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./select.component.scss']
 })
 export class SelectComponent<T> extends InputDirective {

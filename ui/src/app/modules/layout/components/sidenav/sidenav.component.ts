@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/auth/auth.service';
 import { Role } from 'src/app/modules/auth/auth.model';
@@ -18,6 +18,7 @@ export interface SidenavItem {
   selector: 'app-sidenav',
   standalone: false,
   templateUrl: './sidenav.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidenav.component.scss']
 })
 export class SidenavComponent {

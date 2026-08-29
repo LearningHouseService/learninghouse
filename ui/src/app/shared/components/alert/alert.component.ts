@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export class AlertType {
   static readonly success = new AlertType('success', 'check');
@@ -18,6 +18,7 @@ export class AlertType {
   selector: 'learninghouse-alert',
   standalone: false,
   templateUrl: './alert.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./alert.component.scss']
 })
 export class AlertComponent {

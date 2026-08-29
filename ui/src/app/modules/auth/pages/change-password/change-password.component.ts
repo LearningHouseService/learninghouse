@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { catchError, map } from 'rxjs';
 import { AbstractFormResponse } from 'src/app/shared/components/form-response/form-response.class';
@@ -20,6 +20,7 @@ export interface ChangePasswordForm {
   selector: 'learninghouse-change-password',
   standalone: false,
   templateUrl: './change-password.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./change-password.component.scss']
 })
 export class ChangePasswordComponent extends AbstractFormResponse {

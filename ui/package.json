@@ -15,16 +15,16 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": "^21.2.14",
-    "@angular/cdk": "^21.2.10",
-    "@angular/common": "^21.2.14",
-    "@angular/compiler": "^21.2.14",
-    "@angular/core": "^21.2.14",
-    "@angular/forms": "^21.2.14",
-    "@angular/material": "^21.2.13",
-    "@angular/platform-browser": "^21.2.14",
-    "@angular/platform-browser-dynamic": "^21.2.14",
-    "@angular/router": "^21.2.14",
+    "@angular/animations": "^22.1.4",
+    "@angular/cdk": "^22.1.4",
+    "@angular/common": "^22.1.4",
+    "@angular/compiler": "^22.1.4",
+    "@angular/core": "^22.1.4",
+    "@angular/forms": "^22.1.4",
+    "@angular/material": "^22.1.4",
+    "@angular/platform-browser": "^22.1.4",
+    "@angular/platform-browser-dynamic": "^22.1.4",
+    "@angular/router": "^22.1.4",
     "@auth0/angular-jwt": "^5.2.0",
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
@@ -34,9 +34,9 @@
     "zone.js": "~0.16.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^21.2.10",
-    "@angular/cli": "~21.2.10",
-    "@angular/compiler-cli": "^21.2.14",
+    "@angular-devkit/build-angular": "^22.1.6",
+    "@angular/cli": "~22.1.6",
+    "@angular/compiler-cli": "^22.1.4",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.3.0",
     "@tailwindcss/typography": "0.5.20",
@@ -44,6 +44,7 @@
     "autoprefixer": "^10.5.0",
     "fs-extra": "11.3.5",
     "git-describe": "4.1.1",
+    "istanbul-lib-instrument": "^6.0.3",
     "jasmine-core": "~6.3.0",
     "karma": "~6.4.3",
     "karma-chrome-launcher": "~3.2.0",
@@ -53,6 +54,6 @@
     "ngx-tailwind": "^4.0.0",
     "postcss": "^8.5.23",
     "tailwindcss": "^4.3.0",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.3"
   }
 }

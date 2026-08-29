@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { BrainInfoModel } from '../../brains.model';
 import { ActivatedRoute } from '@angular/router';
 
@@ -7,6 +7,7 @@ import { ActivatedRoute } from '@angular/router';
   selector: 'app-training',
   standalone: false,
   templateUrl: './training.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./training.component.scss']
 })
 export class TrainingComponent implements OnInit {

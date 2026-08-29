@@ -6,7 +6,7 @@
         <mat-list>
             <mat-list-item>
                 <h3 matListItemTitle>{{'pages.brains.fields.typed' | translate}}</h3>
-                <span matListItemLine>{{'common.enums.estimatortype.' + brainInfo?.configuration?.estimator?.typed |
+                <span matListItemLine>{{'common.enums.estimatortype.' + $safeNavigationMigration(brainInfo?.configuration?.estimator?.typed) |
                     translate}}</span>
             </mat-list-item>
             <mat-list-item>

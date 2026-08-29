@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BehaviorSubject, catchError, map, Subject, takeUntil } from 'rxjs';
@@ -18,6 +18,7 @@ interface SensorForm {
 @Component({
   selector: 'app-add-edit-sensor-dialog',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-edit-sensor-dialog.component.html'
 })
 export class AddEditSensorDialogComponent extends AbstractFormResponse implements OnInit, OnDestroy {

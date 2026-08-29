@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, map } from 'rxjs';
@@ -20,6 +20,7 @@ interface NormalPasswordForm {
   selector: 'learninghouse-login',
   standalone: false,
   templateUrl: './login.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent extends AbstractFormResponse implements OnInit {

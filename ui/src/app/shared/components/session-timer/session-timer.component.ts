@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, interval, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'learninghouse-session-timer',
   standalone: false,
   templateUrl: './session-timer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./session-timer.component.scss']
 })
 export class SessionTimerComponent implements OnInit, OnDestroy {

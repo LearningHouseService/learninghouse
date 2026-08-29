@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -25,6 +25,7 @@ interface BrainsTableModel extends BrainInfoModel {
 @Component({
   selector: 'app-brains',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './brains.component.html'
 })
 export class BrainsComponent implements AfterViewInit, OnDestroy {

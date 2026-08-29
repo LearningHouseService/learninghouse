@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BehaviorSubject, Subject, catchError, map, takeUntil } from 'rxjs';
@@ -25,6 +25,7 @@ interface BrainConfigurationForm {
   selector: 'app-add-edit-brain-dialog',
   standalone: false,
   templateUrl: './add-edit-brain-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./add-edit-brain-dialog.component.scss']
 })
 export class AddEditBrainDialogComponent extends AbstractFormResponse implements OnInit, OnDestroy {

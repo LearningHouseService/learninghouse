@@ -62,6 +62,7 @@ following phases is riskier than it needs to be.
 | 2c | uv for the Python build and Docker image | added in review, patterned after `solaredge2mqtt` |
 | 3 | Dependency updates | your list #2 |
 | 3b | Configuration via `configuration.yaml` / `secrets.yaml` | added in review, patterned after `solaredge2mqtt` |
+| 3c | Documentation site | added in review, patterned after `solaredge2mqtt` |
 | 4 | Security hardening | added in review |
 | 5 | Persistence on SQLite | your list #3 |
 | 6 | pvlearn as a library dependency | your list #4 |
@@ -69,8 +70,8 @@ following phases is riskier than it needs to be.
 | 8 | Brain on a scikit-learn pipeline | your list #6 |
 | 9 | Home Assistant add-on | from the add-on assessment |
 
-Phases 2, 2b, 2c, 3b and 4 did not come from the original list; they were added during review and
-confirmed. The reasoning for each is in its own section.
+Phases 2, 2b, 2c, 3b, 3c and 4 did not come from the original list; they were added during review
+and confirmed. The reasoning for each is in its own section.
 
 **One pull request per phase**, matching the convention adopted in `pvlearn`. Commits within a
 branch stay individually meaningful; the pull request description carries the reasoning that
@@ -512,6 +513,82 @@ sensitive values) without needing the Docker-specific mechanism.
 
 ---
 
+### Phase 3c — Documentation site
+
+**Goal:** A published documentation site built from `docs/` with MkDocs Material, the way
+`solaredge2mqtt` does it, replacing the single 310-line `README.md` that currently carries every
+piece of user-facing documentation this project has.
+
+Everything a user needs — configuration keys, the migration script from Phase 3b, sensor and brain
+configuration, training and prediction examples, Docker instructions — lives in one Markdown file
+that is read on a repository page. It has no navigation, no search, no dead-link checking, and a
+change to any of it is invisible in review beyond the diff. The later phases make this worse rather
+than better: Phase 4 adds CORS and session settings, Phase 5 changes where data lives, Phase 9 adds
+an add-on with its own installation path. Splitting the file after those phases means writing the
+same pages twice.
+
+- **`mkdocs.yml` at the repository root**, `docs_dir: docs`, `mkdocs-material` as the theme, with
+  the same `validation` block `solaredge2mqtt` uses: `unrecognized_links: warn` and
+  `anchors: warn`, so a link to a heading somebody renamed fails the build instead of quietly
+  landing at the top of the page.
+- **Documentation dependencies as a `docs` extra in `core/pyproject.toml`**, pinned exactly like
+  the `dev` extra already is, and resolved through `core/uv.lock`. This project keeps its Python in
+  `core/` while the documentation sits at the root, so the build runs as
+  `uv run mkdocs build --strict --config-file ../mkdocs.yml` from `core/`. A second lockfile at the
+  root purely for two documentation packages was rejected — it would be the only Python project
+  outside `core/` and would need its own dependency updates.
+- **Split the README into pages.** Proposed nav, following the shape of the existing headings:
+  - *Getting Started*: installation, first configuration, running the service
+  - *Configuration*: `configuration.yaml` / `secrets.yaml` reference, sensors, brains, security
+    (fallback password, API keys)
+  - *Usage*: training, prediction, the UI, where the API documentation lives
+  - *Deployment*: Docker, Docker Compose
+  - *Migration*: `LEARNINGHOUSE_*` environment variables (the Phase 3b section, moved verbatim)
+  - *Troubleshooting*
+  - *Reference*: architecture decisions
+- **The README keeps only what a repository page is for**: badges, what the service does, the
+  feature list, a quick start, and a prominent link to the site. `solaredge2mqtt`'s README is 87
+  lines against this project's 310.
+- **Do not restate the API.** The service already serves its OpenAPI documentation at `/docs`;
+  the site links there instead of growing a second, immediately stale copy of the endpoint list.
+- **An architecture decision record series**, `docs/decisions/`, with the index table and the
+  append-only rule `solaredge2mqtt` uses: numbered `NNNN-kebab-case-title.md`, superseded rather
+  than edited. Seed it with the decisions this plan has already made and that the code cannot
+  explain by itself — uv for the build (Phase 2c), YAML configuration with a one-shot migration
+  instead of an env-var fallback (Phase 3b), the exact-pin coupling to `pvlearn` (Phase 3), and the
+  Dependabot grouping that a framework major forced (Phase 3). Writing them now, while the reasoning
+  is still recoverable from the pull requests, is the point; after Phase 5 it is archaeology.
+- **`docs/modernization-plan.md` is not user documentation.** Either give it a place in the site
+  under a clearly internal section, or exclude it via `not_in_nav` so a `--strict` build stays
+  clean. Excluding it is the recommendation: this plan is written for the people doing the work,
+  and it will read as unfinished promises to anybody else.
+- **CI, patterned on `solaredge2mqtt`'s `build_project.yml`**: a `build-docs` job that runs
+  `mkdocs build --strict` on every push and pull request and uploads the rendered `site/` as an
+  artifact, so a documentation change can be reviewed as a browsable site; plus a `deploy-docs` job
+  that publishes to GitHub Pages **on release only**, after the jobs that publish what the site
+  describes. A push to `main` can carry documentation for an unreleased version — the published
+  site should not.
+
+**Acceptance**
+- [ ] `mkdocs build --strict` passes and runs in CI on every push and pull request; a dead internal
+      link, an unknown anchor or a nav entry pointing at a missing file fails the build.
+- [ ] The rendered site is available as a CI artifact for every run.
+- [ ] The site deploys to GitHub Pages on release only, and after the jobs that publish the package
+      and the images it documents.
+- [ ] Nothing that exists only in today's README is lost. Every configuration key, the Phase 3b
+      migration instructions, the sensor and brain examples, and the training and prediction calls
+      have a page; verified by diffing the old README's headings against the nav.
+- [ ] The README is reduced to overview, features, quick start and a link to the site.
+- [ ] Documentation dependencies are pinned in `core/pyproject.toml` and locked in `core/uv.lock`,
+      and the docs job uses the same `uv` version and flow as the other jobs.
+- [ ] `docs/modernization-plan.md` is either in the nav or explicitly excluded, and the strict
+      build is clean either way.
+- [ ] `docs/decisions/` exists with an index table and at least the four seed records named above.
+- [ ] Every documented configuration key matches the fields `ServiceSettings` actually reads —
+      checked against the code, not against the old README.
+
+---
+
 ### Phase 4 — Security hardening
 
 **Goal:** Close the findings that would otherwise ship into people's homes in Phase 9.
@@ -752,9 +829,11 @@ request says why — a deviation inside the tolerance is a reason to look, not a
 That lesson is written down in the pvlearn plan (chapter 6, addendum to point 6) and was learned the
 hard way there.
 
-**Documentation.** Currently `docs/` holds one PlantUML diagram. `pvlearn` standardises on Mermaid;
-adopting that here keeps diagrams reviewable in a pull request. Before the add-on ships, the README
-needs the armv7 limitation and a description of what changes for existing users.
+**Documentation.** Phase 3c moves the user-facing documentation out of the README and into a
+published MkDocs site. Diagrams are Mermaid, the convention `pvlearn` already standardises on and
+the one that stays reviewable in a pull request; the single stale PlantUML model that used to sit
+in `docs/diagrams/` was deleted rather than converted. Before the add-on ships, the site needs the
+armv7 limitation and a description of what changes for existing users.
 
 **Pydantic style.** Field definitions across the models use `Field(None, example=...)`. `example` is
 the Pydantic v1 spelling, and `Field(None, ...)` gives a required-looking field a `None` default.
@@ -824,6 +903,8 @@ P2c uv build + Docker + CI caching  ← pins land in a lockfile once, not pip th
 P3  Dependency updates              ← aligns shared pins with pvlearn
  │
 P3b Config via YAML + secrets       ← gives Phase 4's jwt_secret a home before Phase 4 needs it
+ │
+P3c Documentation site              ← split the README before four more phases add pages to it
  │
 P4  Security hardening              ← cheaper now than after the add-on ships
  │

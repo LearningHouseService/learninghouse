@@ -43,7 +43,7 @@ dependencies = [
     "PyJWT==2.13.0",
     "PyYAML==6.0.3",
     "scikit-learn==1.9.0",
-    "scipy==1.18.0",
+    "scipy==1.18.1",
     "uvicorn[standard]==0.52.4",
 ]
 

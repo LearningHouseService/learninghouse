@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@utility flex-icon {
+    flex: 1 1 36px;
+}

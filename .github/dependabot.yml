@@ -12,6 +12,9 @@ updates:
     directory: "/ui" 
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "jasmine-core"
+        update-types: ["version-update:semver-major"]
     groups:
       angular:
         patterns:

@@ -15,6 +15,7 @@ deleted, it is superseded by a later one that says so.
 | [0005](0005-the-documentation-site.md) | The documentation site is built from `core/`, and published on release only | Accepted | MkDocs Material builds from `docs/` with the docs dependencies in `core/`'s lockfile; a dead link fails the build, and Pages deploys after the release it documents. |
 | [0006](0006-argon2id-passwords-and-hashed-api-keys.md) | Argon2id for the password, a salted SHA-256 for API keys | Accepted | `passlib` is unmaintained and its cost was being paid per request on keys that never needed it; the old format is not read and nothing migrates it — the persistence release starts the security store empty. |
 | [0007](0007-no-comments-in-code.md) | Code carries no comments; the reasoning lives here | Accepted | A comment survives the code it described and then misleads; naming explains the code, this series explains the choices. |
+| [0008](0008-jasmine-6-until-karma-is-replaced.md) | The UI test stack stays on Jasmine 6 until Karma is replaced | Accepted (interim) | Jasmine 7 freezes its `Env` and `zone.js` patches it in place; both upstreams have declared Karma finished, so the major is ignored until the runner moves. |
 
 ## Writing a new one
 

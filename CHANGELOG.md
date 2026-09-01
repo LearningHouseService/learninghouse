@@ -30,6 +30,13 @@ behind the larger entries lives in [docs/decisions/](docs/decisions/index.md).
 - A start that has to generate `jwt_secret` says so in the log, naming the file it wrote and not
   the secret.
 
+### Fixed
+
+- Opening the service's root URL while the administration password is still the fallback one now
+  redirects to the UI instead of answering `401`. The redirect was blocked by the gate that
+  deactivates every other endpoint until the password is changed, so a fresh installation had to be
+  sent to `/ui` by hand.
+
 ### Changed (breaking)
 
 - **Credentials from an earlier release are not carried over.** `sha512_crypt` hashes are not read

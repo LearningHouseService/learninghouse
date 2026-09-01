@@ -115,7 +115,7 @@ export class TableComponent<T> implements AfterViewInit {
   onRowAction(actionId: string, row: T) {
     if (actionId === TableActionButton.DELETE_ROW.id) {
       const dialogRef = this.dialog.open(DeleteDialogComponent, {
-        width: '400px'
+        width: 'min(92vw, 560px)'
       });
 
       dialogRef.afterClosed().subscribe((result) => {

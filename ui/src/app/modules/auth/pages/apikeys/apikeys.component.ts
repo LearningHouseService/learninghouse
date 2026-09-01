@@ -81,7 +81,7 @@ export class APIKeysComponent implements AfterViewInit, OnDestroy {
 
   onAdd(): void {
     const dialogRef = this.dialog.open(AddAPIKeyDialogComponent, {
-      width: '480px'
+      width: 'min(92vw, 560px)'
     });
 
     dialogRef.afterClosed().subscribe((apikey: APIKeyModel | null) => {

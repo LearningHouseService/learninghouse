@@ -22,6 +22,7 @@ https://github.com/LearningHouseService/learninghouse/issues
 class EnforceInitialPasswordChange(BaseHTTPMiddleware):
     # pylint: disable=too-few-public-methods
     ALLOWED_ENDPOINTS = [
+        "/",
         "/api/auth/token",
         "/api/auth/password",
         "/api/mode",

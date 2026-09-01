@@ -168,7 +168,7 @@
 					"change": "Change password"
 				},
 				"common": {
-					"fallback_warning": "\n                    You have to change <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">fallback\n                        password</a> to\n                    unlock.",
+					"fallback_warning": "\n                    You have to change <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://learninghouseservice.github.io/learninghouse/configuration/security/#fallback-password\">fallback\n                        password</a> to\n                    unlock.",
 					"success": "Successful",
 					"title": "Login"
 				},

@@ -62,7 +62,7 @@ jwt_bearer = HTTPBearer(bearerFormat="JWT", auto_error=False)
 INITIAL_PASSWORD_WARNING = """
 In order to activate the service you have to replace the fallback password.
 
-See https://github.com/LearningHouseService/learninghouse-monorepo/tree/main/learninghouse#fallback-password
+See https://learninghouseservice.github.io/learninghouse/configuration/security/#fallback-password
 """
 
 

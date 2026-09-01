@@ -168,7 +168,7 @@
 					"change": "Ändere das Kennwort"
 				},
 				"common": {
-					"fallback_warning": "\n                    Sie müssen das <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://github.com/LearningHouseService/learninghouse-core#security\">Fallbackkennwort</a> ändern um den Service zu entsperren.",
+					"fallback_warning": "\n                    Sie müssen das <a target=\"_blank\" rel=\"noreferrer noopener\"\n                        href=\"https://learninghouseservice.github.io/learninghouse/configuration/security/#fallback-password\">Fallbackkennwort</a> ändern um den Service zu entsperren.",
 					"success": "Erfolgreich",
 					"title": "Anmeldung"
 				},

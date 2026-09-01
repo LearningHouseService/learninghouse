@@ -78,7 +78,7 @@ export class SensorsComponent implements AfterViewInit, OnDestroy {
 
   onAddEdit(sensor: SensorConfigurationModel | null): void {
     const dialogRef = this.dialog.open(AddEditSensorDialogComponent, {
-      width: '480px',
+      width: 'min(92vw, 560px)',
       data: sensor
     });
 

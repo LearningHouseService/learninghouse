@@ -137,7 +137,7 @@ export class BrainsComponent implements AfterViewInit, OnDestroy {
 
   onAddEdit(brainConfiguration: BrainConfigurationModel | null): void {
     const dialogRef = this.dialog.open(AddEditBrainDialogComponent, {
-      width: '480px',
+      width: 'min(92vw, 560px)',
       data: brainConfiguration
     });
 

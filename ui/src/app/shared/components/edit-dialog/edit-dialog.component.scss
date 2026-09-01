@@ -1,4 +1,6 @@
-div.container {
+div.dialog-container {
+    box-sizing: border-box;
+    width: 100%;
     padding: 16px;
 
     mat-dialog-actions {

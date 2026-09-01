@@ -27,7 +27,7 @@ value that determined where that file was read from.
 | `title` | `learningHouse Service` | Set the name of the service. |
 | `host` | `127.0.0.1` | The address the service binds to. Use `0.0.0.0` for all available interfaces. |
 | `port` | `5000` | The port the service listens on. |
-| `workers` | `1` | Count of parallel workers for processing. Only `1` is supported; anything higher is refused at startup. |
+| `workers` | `1` | Count of parallel workers for processing. Only `1` works today, see the warning below. |
 | `base_url` | *not set* | Base URL for external access, for example the hostname of your Docker host. |
 | `openapi_file` | `/learninghouse_api.json` | File URL path to the OpenAPI JSON file. |
 | `docs_url` | `/docs` | URL path for the interactive [API documentation](../usage/api.md). Leave it empty to disable the documentation. |
@@ -42,18 +42,10 @@ Setting `environment: development` changes the defaults of `debug`, `reload`, `t
 `cors_allowed_origins` (which gains `http://localhost:4200` for `ng serve`) - an explicit value for
 any of those still wins.
 
-!!! warning "`workers` above 1 is refused for now"
+!!! warning "`workers` above 1 does not work yet"
     Refresh tokens and the security database are held per process, so a session issued by one
-    worker would be rejected by every other one. Rather than handing out sessions that work every
-    n-th request, the service refuses to start with `workers` above `1`:
-
-    ```
-    workers must be 1 for now: refresh tokens and the security database are held per
-    process, so a session issued by one worker is rejected by all the others.
-    ```
-
-    This is temporary. Several workers are supported again once that state moves into shared
-    storage - see [decision 0007](../decisions/0007-multi-worker-support-is-the-goal.md).
+    worker is rejected by every other one, and a password change or a new API key made through one
+    is invisible to the rest. Keep `workers` at `1` until both live in shared storage.
 
 ## `secrets.yaml`
 

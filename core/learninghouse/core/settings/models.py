@@ -26,13 +26,6 @@ written there with mode 0600. Every session issued before this start is
 invalid. Keep that file with your backups - losing it logs everyone out.
 """
 
-WORKERS_UNSUPPORTED = (
-    "workers must be 1 for now: refresh tokens and the security database are "
-    "held per process, so a session issued by one worker is rejected by all "
-    "the others. Support for several workers comes back once both move into "
-    "shared storage."
-)
-
 UI_DEVELOPMENT_ORIGIN = "http://localhost:4200"
 
 WILDCARD_ORIGIN_REFUSED = (
@@ -69,14 +62,6 @@ class ServiceSettings(BaseModel):
 
     jwt_secret: str = ""
     jwt_expire_minutes: int = 10
-
-    @field_validator("workers")
-    @classmethod
-    def validate_workers(cls, value: int) -> int:
-        if value > 1:
-            raise ValueError(WORKERS_UNSUPPORTED)
-
-        return value
 
     @field_validator("cors_allowed_origins")
     @classmethod

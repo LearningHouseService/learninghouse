@@ -1,37 +1,22 @@
 """Password and API key hashing in `learninghouse.models.auth`, see
 docs/decisions/0006-argon2id-passwords-and-hashed-api-keys.md.
 
-Passwords are argon2id, API keys a salted SHA-256. Neither format written by
-an earlier release (sha512_crypt, `$6$...`) can be read any more: a database
-carrying them has its administration password reset to the fallback and its
-API keys removed, once, on load.
+Passwords are argon2id, API keys a salted SHA-256.
 
 `_security_filename` is patched per test: `SecurityDatabase.write()` resolves
 it through the process-wide settings otherwise, and these tests deliberately
-write the database to disk to show the reset is persisted.
+write the database to disk.
 """
-
-import json
 
 import pytest
 
 from learninghouse.models.auth import (
     API_KEY_BYTES,
     API_KEY_HASH_PREFIX,
-    INITIAL_ADMIN_PASSWORD,
-    APIKey,
     APIKeyRequest,
     APIKeyRole,
     SecurityDatabase,
 )
-
-SALT = "0123456789abcdef"
-
-# A hash in passlib's sha512_crypt format. Its content is irrelevant - the
-# code only detects the format and refuses to read it, which is the whole
-# point of dropping the dependency that could.
-LEGACY_PASSWORD_HASH = "$6$rounds=535000$0123456789abcdef$Nx4ck.LegacyHashValue"
-LEGACY_API_KEY_HASH = "$6$rounds=535000$0123456789abcdef$Zz9pQ.LegacyKeyValue"
 
 
 @pytest.fixture()
@@ -41,27 +26,6 @@ def security_file(tmp_path, monkeypatch):
         "learninghouse.models.auth._security_filename", lambda: filename
     )
     return filename
-
-
-def write_legacy_database(filename, with_api_key: bool = True) -> None:
-    """Write a security.json in the format an earlier release produced."""
-    content = {
-        "admin_password": LEGACY_PASSWORD_HASH,
-        "api_keys": {},
-        "salt": SALT,
-        "rounds": 535000,
-        "initial_password": False,
-    }
-
-    if with_api_key:
-        content["api_keys"][LEGACY_API_KEY_HASH] = {
-            "description": "app_as_user",
-            "role": "user",
-            "key": LEGACY_API_KEY_HASH,
-        }
-
-    with open(filename, "w", encoding="utf-8") as handle:
-        json.dump(content, handle)
 
 
 class TestPasswordHashing:
@@ -86,65 +50,6 @@ class TestPasswordHashing:
         assert database.admin_password.startswith("$argon2")
         assert database.initial_password is False
         assert database.authenticate_password("a-new-password") is True
-
-
-class TestLegacyDatabaseIsReset:
-    """A database in the old format is not migrated, it is emptied of
-    credentials - see the module docstring. This is the breaking half of the
-    hashing change, and the reason `passlib` is gone rather than kept for
-    verification.
-    """
-
-    def test_the_admin_password_falls_back_to_the_initial_one(self, security_file):
-        write_legacy_database(security_file)
-
-        database = SecurityDatabase.load_or_write_default()
-
-        assert database.admin_password.startswith("$argon2")
-        assert database.authenticate_password(INITIAL_ADMIN_PASSWORD) is True
-
-    def test_the_initial_password_gate_is_armed_again(self, security_file):
-        # Every endpoint outside the login/password allow-list stays blocked
-        # until an administrator sets a new password.
-        write_legacy_database(security_file)
-
-        database = SecurityDatabase.load_or_write_default()
-
-        assert database.initial_password is True
-
-    def test_legacy_api_keys_are_removed(self, security_file):
-        write_legacy_database(security_file)
-
-        database = SecurityDatabase.load_or_write_default()
-
-        assert database.api_keys == {}
-        assert database.list_api_keys() == []
-
-    def test_the_reset_is_written_back_once(self, security_file):
-        write_legacy_database(security_file)
-
-        SecurityDatabase.load_or_write_default()
-        reloaded = SecurityDatabase.load_or_write_default()
-
-        # The second load finds nothing left to reset, so a password set in
-        # between would survive - the reset does not repeat on every start.
-        assert reloaded.reset_legacy_credentials() is False
-        assert "$6$" not in security_file.read_text(encoding="utf-8")
-
-    def test_a_current_database_is_left_alone(self, security_file):
-        database = SecurityDatabase.load_or_write_default()
-        database.update_password("a-new-password")
-        created = database.create_apikey(
-            APIKeyRequest(description="app_as_user", role=APIKeyRole.USER)
-        )
-        database.write()
-
-        reloaded = SecurityDatabase.load_or_write_default()
-
-        assert reloaded.reset_legacy_credentials() is False
-        assert reloaded.initial_password is False
-        assert reloaded.authenticate_password("a-new-password") is True
-        assert reloaded.find_apikey_by_key(created.key) is not None
 
 
 class TestApiKeyHashing:
@@ -179,34 +84,6 @@ class TestApiKeyHashing:
         )
 
         assert database.find_apikey_by_key("00000000000000000000000000000000") is None
-
-
-class TestLegacyApiKeyIsNotAccepted:
-    def test_a_key_hashed_by_an_earlier_release_no_longer_authenticates(
-        self, security_file
-    ):
-        write_legacy_database(security_file)
-        database = SecurityDatabase.load_or_write_default()
-
-        # Even the raw key that produced the stored hash is worthless now:
-        # the entry is gone, and its owner has to create a new key.
-        assert database.find_apikey_by_key("the-old-key") is None
-
-    def test_a_stray_legacy_entry_is_dropped_without_touching_current_ones(
-        self, security_file
-    ):
-        database = SecurityDatabase.load_or_write_default()
-        created = database.create_apikey(
-            APIKeyRequest(description="app_as_user", role=APIKeyRole.USER)
-        )
-        database.api_keys[LEGACY_API_KEY_HASH] = APIKey(
-            description="app_as_trainer",
-            role=APIKeyRole.TRAINER,
-            key=LEGACY_API_KEY_HASH,
-        )
-
-        assert database.reset_legacy_credentials() is True
-        assert list(database.api_keys) == [database.hash_api_key(created.key)]
 
 
 class TestApiKeyEntropy:

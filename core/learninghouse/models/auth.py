@@ -15,7 +15,6 @@ from argon2.exceptions import (
 )
 from pydantic import Field
 
-from learninghouse.core.logger import logger
 from learninghouse.core.settings import service_settings
 from learninghouse.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.models.base import EnumModel, LHBaseModel
@@ -23,19 +22,6 @@ from learninghouse.models.base import EnumModel, LHBaseModel
 password_hasher = PasswordHasher()
 
 INITIAL_ADMIN_PASSWORD = "learninghouse"
-
-LEGACY_HASH_PREFIX = "$6$"
-
-LEGACY_CREDENTIALS_RESET_WARNING = """
-The security database was written by a release that hashed credentials with
-sha512_crypt. Those hashes cannot be read any more:
-
-  * the administration password has been reset to the initial fallback
-    password, and every endpoint stays deactivated until you set a new one
-  * all API keys have been removed and have to be created again
-
-This happens once. Nothing else in {filename} was touched.
-"""
 
 API_KEY_BYTES = 16
 
@@ -155,36 +141,11 @@ class SecurityDatabase(LHBaseModel):
         database = None
         if path.exists(filename):
             database = cls.parse_file(filename, encoding="utf-8")
-            if database.reset_legacy_credentials():
-                logger.warning(
-                    LEGACY_CREDENTIALS_RESET_WARNING.format(filename=filename)
-                )
-                database.write()
         else:
             database = cls(admin_password=password_hasher.hash(INITIAL_ADMIN_PASSWORD))
             database.write()
 
         return database
-
-    def reset_legacy_credentials(self) -> bool:
-        legacy_password = self.admin_password.startswith(LEGACY_HASH_PREFIX)
-        legacy_api_keys = [
-            stored
-            for stored in self.api_keys
-            if not stored.startswith(API_KEY_HASH_PREFIX)
-        ]
-
-        if not legacy_password and not legacy_api_keys:
-            return False
-
-        if legacy_password:
-            self.admin_password = password_hasher.hash(INITIAL_ADMIN_PASSWORD)
-            self.initial_password = True
-
-        for stored in legacy_api_keys:
-            del self.api_keys[stored]
-
-        return True
 
     def write(self):
         self.write_to_file(_security_filename(), 4)

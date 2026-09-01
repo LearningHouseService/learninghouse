@@ -87,6 +87,14 @@ def run():
     logger.info(f"Configuration directory {settings.brains_directory}")
     logger.info(f"Allowed CORS origins {', '.join(settings.cors_origins)}")
 
+    if settings.workers > 1:
+        if settings.reload:
+            logger.warning(
+                f"Reloading active. Workers {settings.workers} setting will be ignored."
+            )
+        else:
+            logger.info(f"Running with {settings.workers} workers")
+
     logger.info(f"URL to OpenAPI file {settings.openapi_url}")
 
     if settings.environment == "production":

@@ -214,29 +214,6 @@ class TestCorsOrigins:
         assert "credentials" in str(excinfo.value)
 
 
-class TestWorkers:
-    """Refresh tokens are per process, so only one worker is valid for now -
-    see docs/decisions/0007-multi-worker-support-is-the-goal.md.
-    """
-
-    def test_one_worker_is_accepted(self, tmp_path):
-        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"workers": 1})
-
-        assert ServiceSettings(config_directory=tmp_path).workers == 1
-
-    def test_more_than_one_worker_is_refused_with_an_explanation(self, tmp_path):
-        write_yaml(tmp_path / CONFIGURATION_FILENAME, {"workers": 4})
-
-        with pytest.raises(ValidationError) as excinfo:
-            ServiceSettings(config_directory=tmp_path)
-
-        message = str(excinfo.value)
-        assert "workers" in message
-        assert "refresh tokens" in message
-        # An interim guard, and the message has to say so - decision 0007.
-        assert "comes back" in message
-
-
 class TestApiKeyQuerySetting:
     def test_the_query_variant_is_off_by_default(self, tmp_path):
         assert ServiceSettings(config_directory=tmp_path).allow_api_key_query is False

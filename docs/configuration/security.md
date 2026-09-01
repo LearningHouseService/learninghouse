@@ -13,12 +13,11 @@ You can change the password on the initial login screen of the UI.
 The password is stored as an [argon2id](https://en.wikipedia.org/wiki/Argon2) hash, never in clear
 text.
 
-!!! danger "Upgrading from a release before argon2id resets your credentials"
-    The old hashes (`sha512_crypt`) are not read any more. On the first start after the upgrade the
-    administration password falls back to `learninghouse` and **all API keys are deleted**. Log in
-    with the fallback password, set a new one, create the API keys again and update your clients.
-    The service says so in its log when it happens, and every endpoint outside login stays
-    deactivated until the password is changed. See
+!!! danger "Credentials from an earlier release are not carried over"
+    The old hashes (`sha512_crypt`) are not read any more, and nothing migrates them. After the
+    upgrade the administration account is back on the fallback password `learninghouse` and there
+    are **no API keys**. Log in, set a new password, create the API keys again and update your
+    clients. Every endpoint outside login stays deactivated until the password is changed. See
     [decision 0006](../decisions/0006-argon2id-passwords-and-hashed-api-keys.md).
 
 !!! warning "Use a separate password"
@@ -55,9 +54,9 @@ You can also test the API key by logging in to the UI.
     for as long as it takes to move that client to the header. Every request accepted this way
     logs a warning naming the key as compromised. The header always wins when both are present.
 
-Keys are stored as a salted SHA-256 hash, so the file cannot be read back into working keys - and
-neither can you: a key created by a release before argon2id is removed on upgrade and has to be
-created again.
+Keys are stored as a salted SHA-256 hash, so the stored form cannot be read back into working keys
+- and neither can you: keys created by a release before argon2id are not carried over and have to
+be created again.
 
 A rejected key is logged as a warning, without the key itself, so repeated attempts against your
 instance are visible.

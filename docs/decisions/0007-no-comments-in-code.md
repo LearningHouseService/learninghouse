@@ -1,4 +1,4 @@
-# 8. Code carries no comments; the reasoning lives here
+# 7. Code carries no comments; the reasoning lives here
 
 - **Status:** accepted
 - **Date:** 2026-08-29
@@ -102,3 +102,7 @@ above.
   `joblib` declarations in [0003](0003-exact-pins-shared-with-pvlearn.md), and the Dependabot
   `angular` group in [0004](0004-dependabot-groups-for-framework-majors.md) - those comments
   duplicated records that already existed, which is the other half of why they went.
+- **`workers` above `1` does not work** while `AuthServiceInternal.refresh_tokens` is a per-process
+  dictionary and its security database is read once per process. The setting is documented as
+  single-worker-only rather than refused, because the persistence work removes the cause and no
+  release falls in between.

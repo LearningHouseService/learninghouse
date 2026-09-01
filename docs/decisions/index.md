@@ -13,9 +13,8 @@ deleted, it is superseded by a later one that says so.
 | [0003](0003-exact-pins-shared-with-pvlearn.md) | Shared dependencies are pinned exactly, to pvlearn's values | Accepted | `numpy`, `pandas`, `scipy`, `scikit-learn`, `pydantic` and `joblib` match pvlearn's pins, so depending on pvlearn stays a one-line change. |
 | [0004](0004-dependabot-groups-for-framework-majors.md) | Dependabot groups the Angular ecosystem, and does not own framework majors | Accepted | Angular's packages ship as one grouped pull request; a framework major is done by hand with migration schematics, not by a version bump. |
 | [0005](0005-the-documentation-site.md) | The documentation site is built from `core/`, and published on release only | Accepted | MkDocs Material builds from `docs/` with the docs dependencies in `core/`'s lockfile; a dead link fails the build, and Pages deploys after the release it documents. |
-| [0006](0006-argon2id-passwords-and-hashed-api-keys.md) | Argon2id for the password, a salted SHA-256 for API keys, and no legacy format | Accepted | `passlib` is unmaintained and its cost was being paid per request on keys that never needed it; the old format is not read at all — the password falls back and API keys are removed, once. |
-| [0007](0007-multi-worker-support-is-the-goal.md) | Multi-worker support is the goal; one worker is an interim guard | Accepted (interim) | Refresh tokens and the security database are per process, so `workers` above `1` is refused until shared storage brings it back. |
-| [0008](0008-no-comments-in-code.md) | Code carries no comments; the reasoning lives here | Accepted | A comment survives the code it described and then misleads; naming explains the code, this series explains the choices. |
+| [0006](0006-argon2id-passwords-and-hashed-api-keys.md) | Argon2id for the password, a salted SHA-256 for API keys | Accepted | `passlib` is unmaintained and its cost was being paid per request on keys that never needed it; the old format is not read and nothing migrates it — the persistence release starts the security store empty. |
+| [0007](0007-no-comments-in-code.md) | Code carries no comments; the reasoning lives here | Accepted | A comment survives the code it described and then misleads; naming explains the code, this series explains the choices. |
 
 ## Writing a new one
 

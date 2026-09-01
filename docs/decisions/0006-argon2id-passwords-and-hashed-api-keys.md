@@ -1,4 +1,4 @@
-# 6. Argon2id for the password, a salted SHA-256 for API keys, and no legacy format
+# 6. Argon2id for the password, a salted SHA-256 for API keys
 
 - **Status:** accepted
 - **Date:** 2026-08-29
@@ -30,31 +30,37 @@ CPU.
 - **API keys move to a salted SHA-256** - `sha256(salt + key)`, stored with a `sha256$` prefix.
   The construction is appropriate for a high-entropy secret that has to be verified on every
   request, and lookup stays a dict hit rather than a scan.
-- **The old format is not read at all.** A `security.json` still holding `$6$` hashes has its
-  administration password reset to the documented fallback password with `initial_password` set
-  again, and its API keys removed. It happens once, on load, and is written back with a log entry
-  that says what was done. The initial-password gate then blocks every endpoint outside the
-  login/password allow-list until an administrator sets a new password.
-- **`passlib` is gone from the dependencies**, and with it the `rounds` field that only ever
-  existed to reproduce its hashes.
+- **The old format is not read at all, and nothing migrates it.** `passlib` is gone from the
+  dependencies, and with it the `rounds` field that only ever existed to reproduce its hashes. A
+  `security.json` written by an earlier release is therefore unusable: its `$6$` password fails
+  verification and its API keys hash to nothing that is stored.
+- **What replaces it is not a migration step but the persistence work that follows.** No release
+  ships between this change and the move to a SQLite database, and that move creates the security
+  tables empty - initial administration password, no API keys - rather than reading the old file.
+  One breaking change at one release, instead of a reset mechanism written now and deleted a phase
+  later.
 - `argon2-cffi-bindings` is pinned explicitly next to `argon2-cffi`. The bindings carry the Argon2
   reference implementation and the wheels; a transitive resolve is not a pin, and this is the part
   where a fix would land.
 
-### Why a reset rather than a migration
+### Why nothing carries the old credentials forward
 
-Verifying a legacy hash once and rewriting it - the obvious, friendlier option, and the one this
-decision originally took - keeps `passlib` in the dependency list indefinitely. Nothing forces an
-installation to log in again, so there is no point at which the dependency can be dropped without
-breaking that installation anyway. It also keeps a second code path alive in the hot one: a lookup
-that misses has to decide whether to try the old format, and doing that unguarded would let any
-caller spend several hundred thousand hash rounds per request.
+Verifying a legacy hash once and rewriting it - the obvious, friendlier option - keeps `passlib` in
+the dependency list indefinitely. Nothing forces an installation to log in again, so there is no
+point at which the unmaintained dependency can be dropped without breaking that installation
+anyway. It also keeps a second code path alive inside the hot one: a lookup that misses has to
+decide whether to try the old format, and doing that unguarded would let any caller spend several
+hundred thousand hash rounds per request.
 
-The reset trades a smaller inconvenience for both. The administration password has a documented
-fallback and a gate that forces it to be changed; API keys are shown exactly once when created and
-cannot be recovered from the database in any case, so a key nobody wrote down was already lost.
-What is left is: log in with the fallback password, set a new one, create the keys again, update
-the clients.
+Resetting the old file on load was the next candidate, and was written and then removed. Its only
+purpose is to bridge releases, and there is no release to bridge: the next one is the persistence
+release, which creates its schema from scratch anyway. Code whose entire reason to exist is a
+transition nobody will experience is code to delete before it ships.
+
+What the users of that release face is small and documented: log in with the fallback password, set
+a new one, create the API keys again, update the clients. API keys are shown exactly once when
+created and cannot be recovered from any stored form in any case, so a key nobody wrote down was
+already lost.
 
 ### The condition the API key hashing rests on
 
@@ -71,10 +77,16 @@ authentication surface rather than to hashing, and is a decision of its own.
 
 ## Consequence
 
-**This is a breaking change for every existing installation.** Upgrading resets the administration
-password to `learninghouse` and deletes all API keys. The changelog and the security page say so,
-and the log says it again at the moment it happens. An installation that upgrades unattended will
-answer `401` to every application until someone sets a new password and reissues the keys.
+**This is a breaking change for every existing installation**, and it lands with the persistence
+release: the administration password is the initial one again, and there are no API keys. The
+changelog and the security page say so. An installation that upgrades unattended answers `401` to
+every application until someone sets a new password and reissues the keys.
+
+Between this change and that release, a working tree or a `:main` image pointed at an old
+`security.json` cannot authenticate at all - the password fails verification with no special
+message, and the old API keys are unknown. Deleting `security.json` is the fix there. That is
+acceptable for installations following `main`, and it is exactly what the persistence release
+resolves for everyone else.
 
 The per-database `salt` also stopped being a class-level default. `salt: str = token_hex(8)` is
 evaluated once, when the class object is created, so every database written by one process shared
@@ -85,5 +97,5 @@ around a stable C library looks like, not what abandonment looks like; `argon2-c
 half that carries the C code and the wheels, released in 2026. The signals that would change this
 assessment are concrete: no wheels for a Python release the project supports, or a security report
 left unanswered. If it comes to that, the exit is contained - hashing lives behind
-`SecurityDatabase.authenticate_password` and `update_password`, and `reset_legacy_credentials`
-already establishes how a format that can no longer be read is handled.
+`SecurityDatabase.authenticate_password` and `update_password`, and this decision already
+establishes what happens to a format that can no longer be read: it is not read.

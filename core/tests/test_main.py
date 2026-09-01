@@ -1,7 +1,7 @@
 """The startup path in `learninghouse.__main__`.
 
-`workers` above 1 has to be rejected at startup *with an explanation*, so the
-explanation itself is what these tests pin, not just the fact that the
+An invalid setting has to be rejected at startup *with an explanation*, so
+the explanation itself is what these tests pin, not just the fact that the
 settings refuse the value.
 """
 
@@ -24,7 +24,7 @@ def write_configuration(directory, data) -> None:
 
 class TestReportInvalidConfiguration:
     def test_it_names_the_setting_and_the_reason(self, tmp_path, capsys):
-        write_configuration(tmp_path, {"workers": 4})
+        write_configuration(tmp_path, {"cors_allowed_origins": ["*"]})
 
         with pytest.raises(ValidationError) as excinfo:
             ServiceSettings(config_directory=tmp_path)
@@ -32,23 +32,10 @@ class TestReportInvalidConfiguration:
         assert report_invalid_configuration(excinfo.value) == 1
 
         error_output = capsys.readouterr().err
-        assert "workers: workers must be 1 for now" in error_output
-        assert "held per process" in error_output
-        # No pydantic frames, no "Value error," prefix, and a place to read on.
-        assert "Value error," not in error_output
-        assert "learninghouse/configuration/" in error_output
-
-    def test_a_wildcard_origin_is_reported_the_same_way(self, tmp_path, capsys):
-        write_configuration(tmp_path, {"cors_allowed_origins": ["*"]})
-
-        with pytest.raises(ValidationError) as excinfo:
-            ServiceSettings(config_directory=tmp_path)
-
-        report_invalid_configuration(excinfo.value)
-
-        error_output = capsys.readouterr().err
         assert "cors_allowed_origins" in error_output
         assert "credentials" in error_output
+        assert "Value error," not in error_output
+        assert "learninghouse/configuration/" in error_output
 
 
 class TestStartup:
@@ -56,8 +43,8 @@ class TestStartup:
     way the Docker image starts it, against a configuration it must refuse.
     """
 
-    def test_workers_above_one_exits_with_the_explanation(self, tmp_path):
-        write_configuration(tmp_path, {"workers": 4})
+    def test_a_wildcard_origin_exits_with_the_explanation(self, tmp_path):
+        write_configuration(tmp_path, {"cors_allowed_origins": ["*"]})
 
         result = subprocess.run(
             [sys.executable, "-m", "learninghouse"],
@@ -70,7 +57,5 @@ class TestStartup:
 
         assert result.returncode == 1
         assert "learningHouse cannot start" in result.stderr
-        assert "held per process" in result.stderr
-        # The refusal has to read as temporary - see decision 0007.
-        assert "comes back" in result.stderr
+        assert "cors_allowed_origins" in result.stderr
         assert "Traceback" not in result.stderr

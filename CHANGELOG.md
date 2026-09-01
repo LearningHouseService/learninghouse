@@ -20,29 +20,24 @@ behind the larger entries lives in [docs/decisions/](docs/decisions/index.md).
   request accepted that way.
 - **The administration password is hashed with argon2id** instead of `passlib`'s `sha512_crypt`,
   and API keys with a salted SHA-256. An API key is no longer verified through several hundred
-  thousand hash rounds on every prediction request. See "Changed (breaking)" for what this costs
-  on upgrade.
+  thousand hash rounds on every prediction request. See "Changed (breaking)" for what this costs on
+  upgrade.
 - **A rejected API key and a rejected administration login are logged** as a warning naming
   neither value, so repeated attempts against an instance are visible. Guessing is bounded by the
   request rate, not by the hash.
-- **`workers` above `1` is refused at startup for now**, with an explanation, instead of quietly
-  issuing sessions that a different worker rejects: refresh tokens and the security database are
-  still held per process. This is temporary - several workers become a supported configuration
-  again once that state moves into shared storage. An invalid configuration of any kind now ends in
-  a readable message and exit code `1` rather than a pydantic traceback.
+- An invalid configuration now ends in a readable message and exit code `1` rather than a pydantic
+  traceback.
 - The first start logs a warning when it has to generate `jwt_secret`, naming the file it wrote
   and not the secret.
 
 ### Changed (breaking)
 
-- **Credentials hashed by an earlier release are reset on the first start.** `sha512_crypt` hashes
-  are not read any more: the administration password falls back to `learninghouse` (with the
-  initial-password gate armed again, so every other endpoint stays deactivated until you change it)
-  and **all API keys are deleted**. Log in, set a new password, create the keys again and update
-  your clients. The service logs the reset when it performs it, and performs it once. The
-  alternative - verifying the old hashes once and rewriting them - would have kept the unmaintained
-  `passlib` in the dependency list indefinitely, since nothing forces an installation to log in
-  again; see
+- **Credentials from an earlier release are not carried over.** `sha512_crypt` hashes are not read
+  any more, and nothing migrates them: the administration account is back on the fallback password
+  `learninghouse`, with the initial-password gate armed, and there are no API keys. Log in, set a
+  new password, create the keys again and update your clients. Verifying the old hashes instead
+  would have kept the unmaintained `passlib` in the dependency list indefinitely, since nothing
+  forces an installation to log in again; see
   [decision 0006](https://learninghouseservice.github.io/learninghouse/decisions/0006-argon2id-passwords-and-hashed-api-keys/).
 - `/api/versions` reports `argon2` where it used to report `passlib`.
 - **Configuration moved from `LEARNINGHOUSE_*` environment variables to `configuration.yaml` /

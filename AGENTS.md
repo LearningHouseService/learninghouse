@@ -142,8 +142,9 @@ that survives into `main`'s history — and anything that outlives the pull requ
 - **Nothing may be process-global.** Settings, the auth service and brain paths are resolved per
   request through FastAPI dependencies, not read at import time. New code must not add another
   module-level `settings = service_settings()` or another singleton — that coupling is what made
-  the service hard to test and is why it cannot yet run with more than one worker (see
-  [decision 0007](docs/decisions/0007-multi-worker-support-is-the-goal.md)).
+  the service hard to test and is why the service cannot yet run with more than one worker:
+  `AuthServiceInternal.refresh_tokens` is a per-process dictionary and its security database is
+  read once per process. Both have to move into shared storage before `workers` above `1` works.
 - **Model persistence:** joblib pickles with version metadata. A model whose service or
   scikit-learn version does not match the running one is rejected and retrained, never loaded
   best-effort.
@@ -185,9 +186,6 @@ that survives into `main`'s history — and anything that outlives the pull requ
     strings reach access logs, proxy logs and browser history.
   - **`jwt_secret`** persists in `secrets.yaml` (mode `0600`), generated once with a warning that
     names the file and never the value.
-  - **`workers > 1` is refused at startup.** Interim guard while refresh tokens and the security
-    database are per process — restoring multi-worker support is the goal, see
-    [decision 0007](docs/decisions/0007-multi-worker-support-is-the-goal.md).
   - **Hashing** is argon2id for the administration password and a salted SHA-256 for API keys, see
     [decision 0006](docs/decisions/0006-argon2id-passwords-and-hashed-api-keys.md). The
     `sha512_crypt` format of earlier releases is not read at all: such a database has its password

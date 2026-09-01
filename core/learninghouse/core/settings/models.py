@@ -20,11 +20,10 @@ SECRET_FIELDS = {"jwt_secret"}
 
 LICENSE_URL = "https://github.com/LearningHouseService/learninghouse/blob/main/LICENSE"
 
-JWT_SECRET_GENERATED_WARNING = """
-No jwt_secret was found in {secrets_file}. A new one has been generated and
-written there with mode 0600. Every session issued before this start is
-invalid. Keep that file with your backups - losing it logs everyone out.
-"""
+JWT_SECRET_GENERATED = (
+    "No jwt_secret found, generated one and wrote it to {secrets_file} with "
+    "mode 0600. Open sessions from before this start need a new login."
+)
 
 UI_DEVELOPMENT_ORIGIN = "http://localhost:4200"
 
@@ -119,9 +118,7 @@ class ServiceSettings(BaseModel):
             jwt_secret = token_hex(16)
             secrets["jwt_secret"] = jwt_secret
             cls._write_secrets_file(secrets_file, secrets)
-            logger.warning(
-                JWT_SECRET_GENERATED_WARNING.format(secrets_file=secrets_file)
-            )
+            logger.info(JWT_SECRET_GENERATED.format(secrets_file=secrets_file))
 
         return jwt_secret
 

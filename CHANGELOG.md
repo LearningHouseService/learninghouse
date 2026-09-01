@@ -27,8 +27,8 @@ behind the larger entries lives in [docs/decisions/](docs/decisions/index.md).
   request rate, not by the hash.
 - An invalid configuration now ends in a readable message and exit code `1` rather than a pydantic
   traceback.
-- The first start logs a warning when it has to generate `jwt_secret`, naming the file it wrote
-  and not the secret.
+- A start that has to generate `jwt_secret` says so in the log, naming the file it wrote and not
+  the secret.
 
 ### Changed (breaking)
 

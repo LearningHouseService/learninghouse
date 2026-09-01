@@ -92,6 +92,5 @@ survive a service restart. See the [configuration reference](index.md#secretsyam
 
 `jwt_expire_minutes` (default: 10) controls how long a refresh token stays valid.
 
-The first start writes a freshly generated secret and logs a warning saying so. Keep `secrets.yaml`
-with your backups: losing it logs everyone out, and it is the one value that has to survive a
-restart for sessions to.
+A start that finds no secret generates one and notes that in the log; open sessions then need a new
+login. `secrets.yaml` is what makes sessions survive a restart, so it belongs in your backups.

@@ -73,12 +73,6 @@ async def update_password(
     return auth_service.update_password(request.old_password, request.new_password)
 
 
-# Registered unconditionally: EnforceInitialPasswordChange already blocks every
-# non-allowlisted endpoint, including these, while the admin password is still
-# the initial one. Gating registration itself on that same flag at import time
-# used to mean these routes stayed 404 forever after the first request in the
-# process saw an initial password - changing the password did not bring them
-# back without a full restart.
 @router_protected.get("/apikeys", response_model=List[APIKeyInfo])
 async def list_api_keys(
     auth_service: AuthServiceInternal = Depends(auth_service_cached),

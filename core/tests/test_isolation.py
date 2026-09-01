@@ -1,13 +1,12 @@
-"""Direct evidence for the Phase 2 acceptance criterion "two tests in the
-same session can use two different brains directories" (see
-docs/modernization-plan.md). The rest of the suite relies on this
-implicitly - every test using `isolated_client` gets its own directory, and
-none of them collide - but this test makes the claim explicit within a
-single test function, where no test-ordering assumption is needed.
+"""Direct evidence that two tests in the same session can use two different
+brains directories. The rest of the suite relies on this implicitly - every
+test using `isolated_client` gets its own directory, and none of them
+collide - but this test makes the claim explicit within a single test
+function, where no test-ordering assumption is needed.
 
-`service_settings()` is a process-wide `lru_cache` with no arguments (Phase
-2 de-globalized *how* it's read, not the fact that there is one cache slot
-per process - see docs/modernization-plan.md). Two isolated_client fixtures
+`service_settings()` is a process-wide `lru_cache` with no arguments: what
+was de-globalized is *how* settings are read, not the fact that there is one
+cache slot per process. Two isolated_client fixtures
 cannot be requested from the same test, so this test reproduces
 isolated_client's own mechanism - point the config directory env var at a
 fresh directory and clear the cache - twice in sequence, and shows that

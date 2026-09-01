@@ -17,28 +17,14 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.13",
 ]
-# Runtime dependencies are pinned exactly, matching pvlearn and
-# solaredge2mqtt. Updates arrive as individual dependabot pull requests that
-# run the full test suite, rather than silently on whatever day a transitive
-# resolve changes. The build-system requirements below stay on lower bounds:
-# they shape how the wheel is built, not how the installed package behaves.
-#
-# The shared pins (numpy, pandas, scikit-learn, scipy, pydantic, joblib) now
-# match pvlearn exactly, aligned in Phase 3 of docs/modernization-plan.md —
-# verified by installing both into one environment (see that phase's
-# acceptance criteria). scipy and joblib are pinned explicitly even though
-# scikit-learn already pulls both in transitively: joblib is imported
-# directly (models/brain.py, joblib.dump/load), and pinning scipy here rather
-# than leaving it to whatever scikit-learn's own range resolves to is what
-# "matches pvlearn exactly" actually requires — a transitive resolve is not
-# a pin.
 dependencies = [
+    "argon2-cffi==25.1.0",
+    "argon2-cffi-bindings==26.1.0",
     "fastapi==0.141.1",
     "joblib==1.5.3",
     "loguru==0.7.3",
     "numpy==2.5.2",
     "pandas==3.0.5",
-    "passlib==1.7.4",
     "pydantic==2.13.4",
     "PyJWT==2.13.0",
     "PyYAML==6.0.3",
@@ -70,7 +56,7 @@ docs = [
 ]
 
 [project.scripts]
-learninghouse = "learninghouse.service:run"
+learninghouse = "learninghouse.__main__:main"
 learninghouse-migrate-config = "learninghouse.scripts.migrate_config:main"
 
 [build-system]
@@ -84,19 +70,12 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 include-package-data = true
 
-# `namespaces = true` is what picks up learninghouse/static and the
-# learninghouse/ui tree, which carry no __init__.py. The UI is built
-# separately and copied in before the wheel is built, so it is present in CI
-# and absent in a plain local checkout — a find must tolerate both.
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["learninghouse*"]
 exclude = ["tests*", "*.egg-info*"]
 namespaces = true
 
-# The git repository is the monorepo root, one level above this file. The
-# version therefore comes from tags on that repository, not from this
-# directory.
 [tool.setuptools_scm]
 root = ".."
 version_scheme = "post-release"
@@ -136,13 +115,6 @@ omit = [
     "*/__pycache__/*",
 ]
 
-# Floor set by Phase 2 of docs/modernization-plan.md, at the characterization
-# suite's actual combined line+branch coverage (85.75% measured; 85 leaves a
-# small margin rather than chasing the exact decimal). Ratcheted to 87 in
-# Phase 3b: the new configuration.yaml/secrets.yaml loader and the
-# learninghouse-migrate-config tests raised measured coverage to 87.04%.
-# Open decision 4 in the plan is which number arrives next and when, not
-# whether one does.
 [tool.coverage.report]
 fail_under = 87
 exclude_lines = [

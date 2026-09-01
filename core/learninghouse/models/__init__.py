@@ -16,7 +16,7 @@ class LearningHouseVersions(LHBaseModel):
     numpy: str = Field(..., examples=["1.0.0"])
     pandas: str = Field(..., examples=["1.0.0"])
     jwt: str = Field(..., examples=["1.0.0"])
-    passlib: str = Field(..., examples=["1.0.0"])
+    argon2: str = Field(..., examples=["1.0.0"])
     loguru: str = Field(..., examples=["1.0.0"])
 
     @property
@@ -25,7 +25,7 @@ class LearningHouseVersions(LHBaseModel):
             f"Libraries FastAPI: {self.fastapi}, uvicorn: {self.uvicorn}, "
             + f"pydantic: {self.pydantic}, scikit-learn: {self.sklearn}, "
             + f"numpy: {self.numpy}, pandas: {self.pandas}, pyjwt: {self.jwt}, "
-            + f"passlib: {self.passlib}, loguru: {self.loguru}"
+            + f"argon2-cffi: {self.argon2}, loguru: {self.loguru}"
         )
 
 

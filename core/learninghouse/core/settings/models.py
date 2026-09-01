@@ -1,12 +1,13 @@
 from os import environ
 from pathlib import Path
 from secrets import token_hex
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
-from pydantic import BaseModel, DirectoryPath
+from pydantic import BaseModel, DirectoryPath, Field, field_validator
 
 from learninghouse import versions
+from learninghouse.core.logger import logger
 from learninghouse.core.logger.models import LoggingLevelEnum
 from learninghouse.errors import LearningHouseException, LearningHouseValidationError
 
@@ -15,13 +16,23 @@ CONFIG_DIRECTORY_ENV = "LEARNINGHOUSE_CONFIG_DIRECTORY"
 CONFIGURATION_FILENAME = "configuration.yaml"
 SECRETS_FILENAME = "secrets.yaml"
 
-# Fields that must never end up in configuration.yaml - readable only from
-# secrets.yaml, the environment, or logged output. Shared with
-# learninghouse.scripts.migrate_config so the settings loader and the
-# migration script cannot drift apart on what counts as sensitive.
 SECRET_FIELDS = {"jwt_secret"}
 
 LICENSE_URL = "https://github.com/LearningHouseService/learninghouse/blob/main/LICENSE"
+
+JWT_SECRET_GENERATED = (
+    "No jwt_secret found, generated one and wrote it to {secrets_file} with "
+    "mode 0600. Open sessions from before this start need a new login."
+)
+
+UI_DEVELOPMENT_ORIGIN = "http://localhost:4200"
+
+WILDCARD_ORIGIN_REFUSED = (
+    'cors_allowed_origins must not contain "*": the service answers '
+    "credentialed cross-origin requests, and a wildcard combined with "
+    "credentials makes every web page a user visits able to call this "
+    "service with their session. List the origins that need access instead."
+)
 
 
 class ServiceSettings(BaseModel):
@@ -35,6 +46,10 @@ class ServiceSettings(BaseModel):
 
     workers: int = 1
 
+    cors_allowed_origins: List[str] = Field(default_factory=list)
+
+    allow_api_key_query: bool = False
+
     reload: bool = False
     base_url: str = ""
 
@@ -47,11 +62,17 @@ class ServiceSettings(BaseModel):
     jwt_secret: str = ""
     jwt_expire_minutes: int = 10
 
+    @field_validator("cors_allowed_origins")
+    @classmethod
+    def validate_cors_allowed_origins(cls, value: List[str]) -> List[str]:
+        origins = [origin.strip().rstrip("/") for origin in value]
+
+        if "*" in origins:
+            raise ValueError(WILDCARD_ORIGIN_REFUSED)
+
+        return [origin for origin in origins if origin]
+
     def __init__(self, **data: Any):
-        # Keys passed explicitly to the constructor take precedence over
-        # every file-backed source below - otherwise an explicit
-        # ServiceSettings(config_directory=...) is silently overwritten by
-        # whatever configuration.yaml a stale directory happens to contain.
         explicit_keys = set(data.keys())
 
         config_directory = self._resolve_config_directory(data)
@@ -61,8 +82,6 @@ class ServiceSettings(BaseModel):
 
         configuration = self._read_yaml_file(config_directory / CONFIGURATION_FILENAME)
         for key, value in configuration.items():
-            # config_directory is the bootstrap value that determined where
-            # this very file lives - it cannot also be set from inside it.
             if (
                 key in explicit_keys
                 or key == "config_directory"
@@ -99,6 +118,7 @@ class ServiceSettings(BaseModel):
             jwt_secret = token_hex(16)
             secrets["jwt_secret"] = jwt_secret
             cls._write_secrets_file(secrets_file, secrets)
+            logger.info(JWT_SECRET_GENERATED.format(secrets_file=secrets_file))
 
         return jwt_secret
 
@@ -126,6 +146,7 @@ class ServiceSettings(BaseModel):
                     "debug": True,
                     "reload": True,
                     "title": "learningHouse Service - Development",
+                    "cors_allowed_origins": [UI_DEVELOPMENT_ORIGIN],
                 },
                 **data,
             }
@@ -168,6 +189,15 @@ class ServiceSettings(BaseModel):
     @property
     def brains_directory(self) -> Path:
         return Path(self.config_directory).absolute()
+
+    @property
+    def cors_origins(self) -> List[str]:
+        origins = list(self.cors_allowed_origins)
+
+        if self.base_url_calculated not in origins:
+            origins.append(self.base_url_calculated)
+
+        return origins
 
     @property
     def base_url_calculated(self) -> str:

@@ -1,7 +1,6 @@
 """Pins the predictions the current code produces from a committed, fixed
-training dataset - the learninghouse equivalent of the pvlearn baseline (see
-docs/modernization-plan.md Phase 2). Phases 5, 7 and 8 change persistence,
-feature encoding and the estimator respectively; each of those is measured
+training dataset - the learninghouse equivalent of the pvlearn baseline. Any
+work that touches persistence, feature encoding or the estimator is measured
 against this test. A failure here means predictions changed - regenerate the
 pinned values deliberately and say why in the pull request, do not just
 update them to make the test pass.
@@ -16,8 +15,8 @@ Reproducibility depends on:
   train_test_split(random_state=0) (see services/preprocessing.py).
 - The exact scikit-learn/pandas/numpy versions pinned in pyproject.toml.
 
-datetime.fromtimestamp() has no explicit timezone (a Phase 7 item, see
-docs/modernization-plan.md), so hour_of_day depends on whatever local
+datetime.fromtimestamp() has no explicit timezone - a known defect, kept
+until the encoders are reworked - so hour_of_day depends on whatever local
 timezone the test runs in - the score/features/training_data_size/
 prediction assertions below are unaffected (a constant shift across a
 timestamped, autocorrelated fixture changes nothing), but the expected

@@ -1,7 +1,7 @@
 """Characterization tests for learninghouse.services.preprocessing.
 
-Pins current behaviour, including two known defects the modernization plan
-records for Phase 7 (docs/modernization-plan.md) rather than fixing here:
+Pins current behaviour, including two known defects that are recorded rather
+than fixed here - both belong to the rework of the sensor encoders:
 
 - preprocessing.py:38 formats the datetime with "%Y-%m-%d %H:%M:%s". Lowercase
   %s is a glibc strftime extension for epoch seconds, not seconds-within-the-
@@ -12,7 +12,7 @@ records for Phase 7 (docs/modernization-plan.md) rather than fixing here:
   behaviour.
 
 datetime.fromtimestamp() has no explicit timezone, so it resolves against
-whatever local timezone the test runs in (also a Phase 7 item - the sun
+whatever local timezone the test runs in (part of the same rework - the sun
 encoder will need an explicit one anyway). Tests below compute their expected
 month/day/hour the same way the code does, rather than hardcoding
 timezone-specific values, so they characterize the *relationship* ("derived
@@ -121,7 +121,8 @@ class TestPrepareTrainingShuffle:
         # default shuffle=True (only random_state=0 is passed) scatters them
         # across the whole range instead - wrong for autocorrelated,
         # timestamped rows, but today's actual behaviour (see module
-        # docstring and docs/modernization-plan.md Phase 7, open decision 6).
+        # docstring; whether the split becomes chronological is an open
+        # modelling question, not a bug fix).
         test_indices = sorted(x_test.index.tolist())
         chronological_tail = list(range(len(data) - len(x_test), len(data)))
         assert test_indices != chronological_tail

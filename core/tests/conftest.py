@@ -1,12 +1,11 @@
 """Shared pytest fixtures for the characterization suite.
 
-`service_settings()` and `authservice` are process-global singletons until
-Phase 2's de-globalization work lands (see docs/modernization-plan.md). That
-means every worker process gets exactly one brains directory for its whole
-session: the environment variable below must be set before the first
-`learninghouse` import happens anywhere, which is why it runs from
-`pytest_configure` rather than a fixture, and why nothing in this module
-imports `learninghouse` at module level.
+`service_settings()` and `auth_service_cached()` are `lru_cache`s with no
+arguments, so there is one slot per process. That means every worker process
+gets exactly one brains directory for its whole session: the environment
+variable below must be set before the first `learninghouse` import happens
+anywhere, which is why it runs from `pytest_configure` rather than a fixture,
+and why nothing in this module imports `learninghouse` at module level.
 
 Under `pytest-xdist` (`-n auto` in pyproject.toml) each worker is a separate
 process with its own `pytest_configure` call, so workers do not share a
@@ -17,7 +16,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Callable, Iterator, List
 
 import pytest
 
@@ -72,8 +71,8 @@ def isolated_client() -> Iterator["TestClient"]:
     """A fresh brains directory, settings and auth service for a single test.
 
     `service_settings()` and `auth_service_cached()` are both process-wide
-    `lru_cache`s with no parameters (see docs/modernization-plan.md Phase 2).
-    The session-scoped `client` fixture above is stuck with whichever
+    `lru_cache`s with no parameters. The session-scoped `client` fixture
+    above is stuck with whichever
     directory `pytest_configure` picked for the whole worker - fine for
     read-only smoke tests, but not for anything that logs in, changes the
     admin password, or otherwise mutates the security database, since that
@@ -110,6 +109,64 @@ def isolated_client() -> Iterator["TestClient"]:
         service_settings.cache_clear()
         auth_service_cached.cache_clear()
         shutil.rmtree(config_directory, ignore_errors=True)
+
+
+@pytest.fixture()
+def configured_client() -> Iterator[Callable[..., "TestClient"]]:
+    """Build clients on fresh brains directories with a given configuration.
+
+    Same isolation as `isolated_client`, but the caller passes the keys that
+    would sit in `configuration.yaml` - which is the only way to exercise
+    settings that shape the application itself (CORS origins, the deprecated
+    API key query parameter), since those are read while the app is built.
+    """
+    import yaml
+    from fastapi.testclient import TestClient
+
+    from learninghouse.core.settings import service_settings
+    from learninghouse.service import get_application
+    from learninghouse.services.auth import auth_service_cached
+
+    directories: List[Path] = []
+    clients: List["TestClient"] = []
+    previous_config_directory = os.environ.get(_CONFIG_DIRECTORY_ENV)
+
+    def build(**configuration) -> "TestClient":
+        config_directory = Path(tempfile.mkdtemp(prefix="learninghouse-tests-"))
+        directories.append(config_directory)
+
+        if configuration:
+            with open(
+                config_directory / "configuration.yaml", "w", encoding="utf-8"
+            ) as handle:
+                yaml.safe_dump(configuration, handle)
+
+        os.environ[_CONFIG_DIRECTORY_ENV] = str(config_directory)
+        service_settings.cache_clear()
+        auth_service_cached.cache_clear()
+
+        test_client = TestClient(get_application())
+        test_client.__enter__()
+        clients.append(test_client)
+
+        return test_client
+
+    try:
+        yield build
+    finally:
+        for test_client in clients:
+            test_client.__exit__(None, None, None)
+
+        if previous_config_directory is None:
+            os.environ.pop(_CONFIG_DIRECTORY_ENV, None)
+        else:
+            os.environ[_CONFIG_DIRECTORY_ENV] = previous_config_directory
+
+        service_settings.cache_clear()
+        auth_service_cached.cache_clear()
+
+        for directory in directories:
+            shutil.rmtree(directory, ignore_errors=True)
 
 
 def login(client, password: str = DEFAULT_ADMIN_PASSWORD) -> dict:

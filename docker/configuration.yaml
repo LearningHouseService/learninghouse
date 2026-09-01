@@ -3,3 +3,9 @@
 # before the container's first start.
 host: 0.0.0.0
 port: 5000
+
+# The UI is served from this service, so it needs no CORS entry. Add one
+# only for a page on a different origin that has to call the service, for
+# example a dashboard on your Home Assistant:
+# cors_allowed_origins:
+#   - http://homeassistant.local:8123

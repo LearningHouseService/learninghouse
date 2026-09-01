@@ -8,7 +8,13 @@ own fresh SecurityDatabase (admin password "learninghouse", no API keys),
 and does not affect any other test in the session.
 """
 
-from tests.conftest import DEFAULT_ADMIN_PASSWORD, admin_headers, login, unlock
+from tests.conftest import (
+    DEFAULT_ADMIN_PASSWORD,
+    UNLOCKED_ADMIN_PASSWORD,
+    admin_headers,
+    login,
+    unlock,
+)
 
 
 class TestPostToken:
@@ -258,9 +264,9 @@ class TestRole:
 class TestInitialPasswordGate:
     """The EnforceInitialPasswordChange middleware, characterized through auth
     endpoints specifically: /api/auth/apikeys is not on its allow-list, so it
-    stays blocked until the admin password is changed - and, since Phase 2
-    fixed the routes to register unconditionally (see api/auth.py), becomes
-    reachable again in the same process without a restart.
+    stays blocked until the admin password is changed - and, since the routes
+    register unconditionally (see api/auth.py), becomes reachable again in the
+    same process without a restart.
     """
 
     def test_apikeys_is_blocked_until_password_changed(self, isolated_client):
@@ -297,3 +303,65 @@ class TestInitialPasswordGate:
         )
 
         assert isolated_client.get("/api/mode").json() == "production"
+
+
+class TestApiKeyInQueryString:
+    """`?api_key=` is deprecated - query strings end up in access logs, proxy
+    logs and browser history. The header is the only variant
+    accepted unless an installation explicitly re-enables the old one while
+    migrating its clients.
+    """
+
+    @staticmethod
+    def _create_key(client, headers) -> str:
+        return client.post(
+            "/api/auth/apikey",
+            json={"description": "app_as_user", "role": "user"},
+            headers=headers,
+        ).json()["key"]
+
+    def test_the_header_variant_still_works(
+        self, isolated_client, unlocked_admin_headers
+    ):
+        key = self._create_key(isolated_client, unlocked_admin_headers)
+
+        response = isolated_client.get(
+            "/api/auth/role", headers={"X-LEARNINGHOUSE-API-KEY": key}
+        )
+
+        assert response.status_code == 200
+        assert response.json() == "user"
+
+    def test_the_query_variant_is_rejected(
+        self, isolated_client, unlocked_admin_headers
+    ):
+        key = self._create_key(isolated_client, unlocked_admin_headers)
+
+        response = isolated_client.get(f"/api/auth/role?api_key={key}")
+
+        assert response.status_code == 403
+        assert response.json()["error"] == "APIKEY_IN_QUERY"
+
+    def test_the_query_variant_works_while_explicitly_allowed(self, configured_client):
+        client = configured_client(allow_api_key_query=True)
+        unlock(client)
+        key = self._create_key(client, admin_headers(client, UNLOCKED_ADMIN_PASSWORD))
+
+        response = client.get(f"/api/auth/role?api_key={key}")
+
+        assert response.status_code == 200
+        assert response.json() == "user"
+
+    def test_the_header_wins_over_a_stale_query_parameter(self, configured_client):
+        client = configured_client(allow_api_key_query=True)
+        unlock(client)
+        headers = admin_headers(client, UNLOCKED_ADMIN_PASSWORD)
+        key = self._create_key(client, headers)
+
+        response = client.get(
+            "/api/auth/role?api_key=not-a-key",
+            headers={"X-LEARNINGHOUSE-API-KEY": key},
+        )
+
+        assert response.status_code == 200
+        assert response.json() == "user"

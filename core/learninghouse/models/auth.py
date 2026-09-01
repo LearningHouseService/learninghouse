@@ -1,18 +1,31 @@
 from __future__ import annotations
 
 from datetime import datetime
+from hashlib import sha256
 from os import path
 from pathlib import Path
-from random import randint
 from secrets import token_hex
 from typing import Dict, List, Union
 
-from passlib.hash import sha512_crypt  # pyright: ignore[reportAttributeAccessIssue]
+from argon2 import PasswordHasher
+from argon2.exceptions import (
+    InvalidHashError,
+    VerificationError,
+    VerifyMismatchError,
+)
 from pydantic import Field
 
 from learninghouse.core.settings import service_settings
 from learninghouse.errors.auth import APIKeyExists, NoAPIKey
 from learninghouse.models.base import EnumModel, LHBaseModel
+
+password_hasher = PasswordHasher()
+
+INITIAL_ADMIN_PASSWORD = "learninghouse"
+
+API_KEY_BYTES = 16
+
+API_KEY_HASH_PREFIX = "sha256$"
 
 
 class LoginRequest(LHBaseModel):
@@ -118,8 +131,7 @@ def _security_filename() -> Path:
 class SecurityDatabase(LHBaseModel):
     admin_password: str
     api_keys: Dict[str, APIKey] = {}
-    salt: str = token_hex(8)
-    rounds: int = randint(400000, 999999)
+    salt: str = Field(default_factory=lambda: token_hex(8))
     initial_password: bool = True
 
     @classmethod
@@ -130,7 +142,7 @@ class SecurityDatabase(LHBaseModel):
         if path.exists(filename):
             database = cls.parse_file(filename, encoding="utf-8")
         else:
-            database = cls(admin_password=sha512_crypt.hash("learninghouse"))
+            database = cls(admin_password=password_hasher.hash(INITIAL_ADMIN_PASSWORD))
             database.write()
 
         return database
@@ -139,18 +151,30 @@ class SecurityDatabase(LHBaseModel):
         self.write_to_file(_security_filename(), 4)
 
     def authenticate_password(self, password: str) -> bool:
-        return sha512_crypt.verify(password, self.admin_password)
+        try:
+            password_hasher.verify(self.admin_password, password)
+        except (VerifyMismatchError, VerificationError, InvalidHashError):
+            return False
+
+        if password_hasher.check_needs_rehash(self.admin_password):
+            self._rehash_password(password)
+
+        return True
+
+    def _rehash_password(self, password: str) -> None:
+        self.admin_password = password_hasher.hash(password)
+        self.write()
 
     def update_password(self, new_password) -> None:
-        self.admin_password = sha512_crypt.hash(new_password)
+        self.admin_password = password_hasher.hash(new_password)
         self.initial_password = False
 
     def create_apikey(self, create: APIKeyRequest) -> APIKey:
         if self.find_apikey_by_description(create.description):
             raise APIKeyExists(create.description)
 
-        key = token_hex(16)
-        hashed_key = sha512_crypt.hash(key, salt=self.salt, rounds=self.rounds)
+        key = token_hex(API_KEY_BYTES)
+        hashed_key = self.hash_api_key(key)
         new_api_key = APIKey.from_api_key_request(create, hashed_key)
         self.api_keys[hashed_key] = new_api_key
 
@@ -168,14 +192,17 @@ class SecurityDatabase(LHBaseModel):
     def list_api_keys(self) -> List[APIKeyInfo]:
         return [APIKeyInfo.from_api_key(x) for x in self.api_keys.values()]
 
+    def hash_api_key(self, key: str) -> str:
+        digest = sha256(f"{self.salt}{key}".encode("utf-8")).hexdigest()
+        return f"{API_KEY_HASH_PREFIX}{digest}"
+
     def find_apikey_by_key(self, key: str) -> Union[APIKeyInfo, None]:
-        api_key_info = None
-        hashed_key = sha512_crypt.hash(key, salt=self.salt, rounds=self.rounds)
+        hashed_key = self.hash_api_key(key)
 
         if hashed_key in self.api_keys:
-            api_key_info = APIKeyInfo.from_api_key(self.api_keys[hashed_key])
+            return APIKeyInfo.from_api_key(self.api_keys[hashed_key])
 
-        return api_key_info
+        return None
 
     def find_apikey_by_description(
         self, description: str, full_api_key: bool = False

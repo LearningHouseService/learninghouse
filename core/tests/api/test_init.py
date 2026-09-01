@@ -36,7 +36,7 @@ class TestGetVersions:
             "numpy",
             "pandas",
             "jwt",
-            "passlib",
+            "argon2",
             "loguru",
         ):
             assert body[library]

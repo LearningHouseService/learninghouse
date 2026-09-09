@@ -23,7 +23,7 @@ dependencies = [
     "fastapi==0.141.1",
     "joblib==1.5.3",
     "loguru==0.7.3",
-    "numpy==2.5.2",
+    "numpy==2.5.3",
     "pandas==3.0.5",
     "pydantic==2.13.5",
     "PyJWT==2.13.0",
